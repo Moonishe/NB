@@ -4,13 +4,34 @@
 -- ============================================
 
 
+-- --- PREREQUISITE: admin_users + moderators tables ---
+
+-- Admin users table (must exist before RLS policies reference it)
+CREATE TABLE IF NOT EXISTS admin_users (
+    id SERIAL PRIMARY KEY,
+    user_id UUID UNIQUE NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
+
+-- Moderators table (must exist before RLS policies reference it)
+CREATE TABLE IF NOT EXISTS moderators (
+    id SERIAL PRIMARY KEY,
+    user_id UUID UNIQUE NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    telegram_id TEXT,
+    telegram_username TEXT,
+    assigned_by UUID,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE moderators ENABLE ROW LEVEL SECURITY;
+
 -- --- migration_invite_system.sql ---
 
 -- ============================================
 -- NeuroBench: Invite-Only Registration System
 -- ============================================
 -- Run this entire script in Supabase SQL Editor
--- (Dashboard òÆÒ SQL Editor òÆÒ New Query òÆÒ Paste òÆÒ Run)
+-- (Dashboard Ã²Ã†Ã’ SQL Editor Ã²Ã†Ã’ New Query Ã²Ã†Ã’ Paste Ã²Ã†Ã’ Run)
 
 -- 1. Invite codes table
 CREATE TABLE IF NOT EXISTS invite_codes (
@@ -122,7 +143,7 @@ CREATE TRIGGER on_auth_user_created
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- 7. RPC: Claim invite code after OTP verification
--- Uses auth.uid() for security òÀÔ only the logged-in user can claim for themselves
+-- Uses auth.uid() for security Ã²Ã€Ã” only the logged-in user can claim for themselves
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -304,7 +325,7 @@ CREATE EXTENSION IF NOT EXISTS pg_net SCHEMA extensions;
 
 -- 15. RPC: Verify Cloudflare Turnstile token server-side
 -- IMPORTANT: Replace 'YOUR_TURNSTILE_SECRET_KEY' with your actual secret key
--- The function source is NOT readable by anon users òÀÔ only database admins can see it
+-- The function source is NOT readable by anon users Ã²Ã€Ã” only database admins can see it
 CREATE OR REPLACE FUNCTION public.verify_turnstile(p_token TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -379,7 +400,7 @@ $$;
 --       (or your actual GitHub Pages domain)
 --
 -- 3. SET EDGE FUNCTION SECRETS:
---    In Supabase Dashboard òÆÒ Edge Functions òÆÒ Secrets:
+--    In Supabase Dashboard Ã²Ã†Ã’ Edge Functions Ã²Ã†Ã’ Secrets:
 --    - TELEGRAM_BOT_TOKEN = <your bot token from step 1>
 --    - SESSION_SECRET = <random 32+ char string, e.g. openssl rand -hex 32>
 --    The SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY
@@ -387,14 +408,14 @@ $$;
 --
 -- 4. DEPLOY EDGE FUNCTION:
 --    Option A (CLI): supabase functions deploy telegram-auth
---    Option B (Dashboard): Supabase òÆÒ Edge Functions òÆÒ New Function
---      òÆÒ Name: telegram-auth òÆÒ Paste code from supabase/functions/telegram-auth/index.ts
+--    Option B (Dashboard): Supabase Ã²Ã†Ã’ Edge Functions Ã²Ã†Ã’ New Function
+--      Ã²Ã†Ã’ Name: telegram-auth Ã²Ã†Ã’ Paste code from supabase/functions/telegram-auth/index.ts
 --
 -- 5. UPDATE js/config.js:
 --    Set window.TELEGRAM_BOT_USERNAME = 'your_bot_username'  (without @)
 --
 -- 6. KEEP EMAIL AUTH ENABLED:
---    Do NOT disable email auth in Supabase Dashboard òÀÔ the admin panel
+--    Do NOT disable email auth in Supabase Dashboard Ã²Ã€Ã” the admin panel
 --    still uses email+password login. The public UI just won't offer it.
 -- ============================================
 
@@ -609,7 +630,7 @@ END;
 $$;
 
 -- 5. Update get_public_profile to return role
--- (Drop and recreate if it exists ¦-¦ÂòÀİ the function may vary, so this is additive)
+-- (Drop and recreate if it exists Â¦-Â¦Ã‚Ã²Ã€Ã the function may vary, so this is additive)
 CREATE OR REPLACE FUNCTION public.get_public_profile(p_user_id UUID)
 RETURNS TABLE (
     user_id UUID,
@@ -710,7 +731,7 @@ BEGIN
            AND is_admin_code = false
            AND used_by IS NULL
            AND (expires_at IS NULL OR expires_at > now())) AS invite_active_count,
-        (SELECT COALESCE(vp.telegram_username, vp.telegram_first_name, '¦Ğ¦+¦-¦¬¦-')
+        (SELECT COALESCE(vp.telegram_username, vp.telegram_first_name, 'Â¦ÃÂ¦+Â¦-Â¦Â¬Â¦-')
          FROM profiles vp
          WHERE vp.user_id = p.verified_by) AS verified_by_name
     FROM profiles p
@@ -1094,7 +1115,7 @@ BEGIN
         p.role,
         get_invite_max(p.role) AS invite_max,
         (SELECT COUNT(*)::int FROM invite_codes WHERE created_by = p.user_id AND is_admin_code = false AND used_by IS NULL AND (expires_at IS NULL OR expires_at > now())) AS invite_active_count,
-        (SELECT COALESCE(vp.telegram_username, vp.telegram_first_name, '¦Ğ¦+¦-¦¬¦-')
+        (SELECT COALESCE(vp.telegram_username, vp.telegram_first_name, 'Â¦ÃÂ¦+Â¦-Â¦Â¬Â¦-')
          FROM profiles vp WHERE vp.user_id = p.verified_by) AS verified_by_name
     FROM profiles p
     LEFT JOIN invite_codes gen_ic ON gen_ic.id = p.generated_invite_code_id
@@ -1253,7 +1274,7 @@ BEGIN
 
     IF v_old_invite_id IS NOT NULL THEN
         IF v_old_invite_used THEN
-            RAISE EXCEPTION '¦áTÂ¦-TÀTË¦¦ ¦¬¦-¦-¦-¦¦TÂ TÃ¦¦¦¦ ¦¬TÁ¦¬¦-¦¬TÌ¦¬¦-¦-¦-¦- òÀÔ ¦¬¦¦TÀ¦¦¦¦¦¦¦-¦¦TÀ¦-TÆ¦¬TÏ ¦¬¦-¦¬TÀ¦¦TÉ¦¦¦-¦-';
+            RAISE EXCEPTION 'Â¦Ã¡TÃ‚Â¦-TÃ€TÃ‹Â¦Â¦ Â¦Â¬Â¦-Â¦-Â¦-Â¦Â¦TÃ‚ TÃƒÂ¦Â¦Â¦Â¦ Â¦Â¬TÃÂ¦Â¬Â¦-Â¦Â¬TÃŒÂ¦Â¬Â¦-Â¦-Â¦-Â¦- Ã²Ã€Ã” Â¦Â¬Â¦Â¦TÃ€Â¦Â¦Â¦Â¦Â¦Â¦Â¦-Â¦Â¦TÃ€Â¦-TÃ†Â¦Â¬TÃ Â¦Â¬Â¦-Â¦Â¬TÃ€Â¦Â¦TÃ‰Â¦Â¦Â¦-Â¦-';
         END IF;
 
         DELETE FROM invite_codes
