@@ -4,6 +4,22 @@
 -- ============================================
 
 
+-- --- PREREQUISITE: page_views table ---
+CREATE TABLE IF NOT EXISTS page_views (
+    id BIGSERIAL PRIMARY KEY,
+    visitor_hash TEXT NOT NULL,
+    page TEXT,
+    referrer TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "public_insert_page_views" ON page_views;
+CREATE POLICY "public_insert_page_views" ON page_views FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "public_read_page_views" ON page_views;
+CREATE POLICY "public_read_page_views" ON page_views FOR SELECT USING (true);
+CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_page_views_visitor_hash ON page_views(visitor_hash);
+
 -- --- PREREQUISITE: admin_users + moderators tables ---
 
 -- Admin users table (must exist before RLS policies reference it)
