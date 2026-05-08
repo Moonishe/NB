@@ -1207,6 +1207,7 @@ END;
 $$;
 
 -- 18. Update claim_invite_code to check expiry
+DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT);
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -1245,7 +1246,6 @@ BEGIN
     RETURN true;
 END;
 $$;
-
 
 -- --- migration_member_invite_regeneration.sql ---
 
@@ -1379,6 +1379,7 @@ WHERE used_by IS NOT NULL
 ON CONFLICT DO NOTHING;
 
 -- 6. Update claim_invite_code RPC for multi-use codes
+DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT);
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
