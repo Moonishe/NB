@@ -1,34 +1,33 @@
 -- ============================================
--- BUNDLE 2: LEADERBOARD � Models, Results, Ratings
+-- BUNDLE 2: LEADERBOARD — Models, Results, Ratings
 -- Run AFTER 01-core.sql
 -- ============================================
 
-
--- --- migration_normalize_schema.sql ---
-
--- ============================================
--- NeuroBench: Normalize schema — models, model_spaces, model_params, results
--- ============================================
--- Deduplicates models, extracts spaces & params per model,
--- migrates variants into normalized results table.
--- Run this in Supabase SQL Editor.
-
 -- ==========================================
--- STEP 1: Create new tables
+-- STEP 1: Create tables
 -- ==========================================
 
--- Models: global catalog, NOT tied to a prompt
-CREATE TABLE IF NOT EXISTS models_new (
+-- Prompts: test prompts catalog
+CREATE TABLE IF NOT EXISTS prompts (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE prompts ENABLE ROW LEVEL SECURITY;
+
+-- Models: global catalog
+CREATE TABLE IF NOT EXISTS models (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT now()
 );
-ALTER TABLE models_new ENABLE ROW LEVEL SECURITY;
+ALTER TABLE models ENABLE ROW LEVEL SECURITY;
 
--- Model spaces: platforms where the model is tested (macro)
+-- Model spaces: platforms where the model is tested
 CREATE TABLE IF NOT EXISTS model_spaces (
     id SERIAL PRIMARY KEY,
-    model_id INTEGER NOT NULL REFERENCES models_new(id) ON DELETE CASCADE,
+    model_id INTEGER NOT NULL REFERENCES models(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     url TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -36,17 +35,17 @@ CREATE TABLE IF NOT EXISTS model_spaces (
 );
 ALTER TABLE model_spaces ENABLE ROW LEVEL SECURITY;
 
--- Model params: parameter definitions per model (e.g. "Thinking mode", "Tools")
+-- Model params: parameter definitions per model
 CREATE TABLE IF NOT EXISTS model_params (
     id SERIAL PRIMARY KEY,
-    model_id INTEGER NOT NULL REFERENCES models_new(id) ON DELETE CASCADE,
+    model_id INTEGER NOT NULL REFERENCES models(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT now(),
     UNIQUE(model_id, name)
 );
 ALTER TABLE model_params ENABLE ROW LEVEL SECURITY;
 
--- Model param values: possible values for each parameter (e.g. "Low", "Medium", "High")
+-- Model param values: possible values for each parameter
 CREATE TABLE IF NOT EXISTS model_param_values (
     id SERIAL PRIMARY KEY,
     param_id INTEGER NOT NULL REFERENCES model_params(id) ON DELETE CASCADE,
@@ -59,7 +58,7 @@ ALTER TABLE model_param_values ENABLE ROW LEVEL SECURITY;
 -- Results: test result = model + prompt + space + scores + SVG + author
 CREATE TABLE IF NOT EXISTS results (
     id SERIAL PRIMARY KEY,
-    model_id INTEGER NOT NULL REFERENCES models_new(id) ON DELETE CASCADE,
+    model_id INTEGER NOT NULL REFERENCES models(id) ON DELETE CASCADE,
     prompt_id INTEGER NOT NULL REFERENCES prompts(id) ON DELETE CASCADE,
     model_space_id INTEGER REFERENCES model_spaces(id) ON DELETE SET NULL,
     test_date DATE,
@@ -75,7 +74,7 @@ CREATE TABLE IF NOT EXISTS results (
 );
 ALTER TABLE results ENABLE ROW LEVEL SECURITY;
 
--- Result param values: junction table linking a result to its parameter values (micro)
+-- Result param values: junction table
 CREATE TABLE IF NOT EXISTS result_param_values (
     id SERIAL PRIMARY KEY,
     result_id INTEGER NOT NULL REFERENCES results(id) ON DELETE CASCADE,
@@ -85,183 +84,69 @@ CREATE TABLE IF NOT EXISTS result_param_values (
 ALTER TABLE result_param_values ENABLE ROW LEVEL SECURITY;
 
 -- ==========================================
--- STEP 2: RLS policies for new tables
+-- STEP 2: RLS policies
 -- ==========================================
 
--- models_new: public read, admin write
-CREATE POLICY "public_read_models_new" ON models_new
-    FOR SELECT USING (true);
-CREATE POLICY "admin_all_models_new" ON models_new
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
-    );
+-- prompts: public read, admin write
+CREATE POLICY "public_read_prompts" ON prompts FOR SELECT USING (true);
+CREATE POLICY "admin_all_prompts" ON prompts FOR ALL USING (
+    EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
+);
+
+-- models: public read, admin write
+CREATE POLICY "public_read_models" ON models FOR SELECT USING (true);
+CREATE POLICY "admin_all_models" ON models FOR ALL USING (
+    EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
+);
 
 -- model_spaces: public read, admin write
-CREATE POLICY "public_read_model_spaces" ON model_spaces
-    FOR SELECT USING (true);
-CREATE POLICY "admin_all_model_spaces" ON model_spaces
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
-    );
+CREATE POLICY "public_read_model_spaces" ON model_spaces FOR SELECT USING (true);
+CREATE POLICY "admin_all_model_spaces" ON model_spaces FOR ALL USING (
+    EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
+);
 
 -- model_params: public read, admin write
-CREATE POLICY "public_read_model_params" ON model_params
-    FOR SELECT USING (true);
-CREATE POLICY "admin_all_model_params" ON model_params
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
-    );
+CREATE POLICY "public_read_model_params" ON model_params FOR SELECT USING (true);
+CREATE POLICY "admin_all_model_params" ON model_params FOR ALL USING (
+    EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
+);
 
 -- model_param_values: public read, admin write
-CREATE POLICY "public_read_model_param_values" ON model_param_values
-    FOR SELECT USING (true);
-CREATE POLICY "admin_all_model_param_values" ON model_param_values
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
-    );
+CREATE POLICY "public_read_model_param_values" ON model_param_values FOR SELECT USING (true);
+CREATE POLICY "admin_all_model_param_values" ON model_param_values FOR ALL USING (
+    EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
+);
 
 -- results: public read, admin write
-CREATE POLICY "public_read_results" ON results
-    FOR SELECT USING (true);
-CREATE POLICY "admin_all_results" ON results
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
-    );
+CREATE POLICY "public_read_results" ON results FOR SELECT USING (true);
+CREATE POLICY "admin_all_results" ON results FOR ALL USING (
+    EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
+);
 
 -- result_param_values: public read, admin write
-CREATE POLICY "public_read_result_param_values" ON result_param_values
-    FOR SELECT USING (true);
-CREATE POLICY "admin_all_result_param_values" ON result_param_values
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
-    );
+CREATE POLICY "public_read_result_param_values" ON result_param_values FOR SELECT USING (true);
+CREATE POLICY "admin_all_result_param_values" ON result_param_values FOR ALL USING (
+    EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
+);
 
 -- ==========================================
--- STEP 3: Migrate data from old models table
+-- STEP 3: Indexes
 -- ==========================================
 
--- 3a. Deduplicate models by name and insert into models_new
---     NOTE: Old model names may contain parameter info as a hack,
---     e.g. "Gemini 2.5 Pro (High Think + Tools)".
---     These need to be manually cleaned up AFTER migration.
---     The migration preserves names as-is for safety.
---     Author is NOT migrated to models — it belongs to results (test author).
-INSERT INTO models_new (name)
-SELECT DISTINCT ON (name)
-    name
-FROM models
-ORDER BY name;
-
--- 3b. Extract unique (model, space_label) combos into model_spaces
-INSERT INTO model_spaces (model_id, name)
-SELECT DISTINCT mn.id, v->>'label'
-FROM models m
-CROSS JOIN LATERAL jsonb_array_elements(
-    CASE WHEN jsonb_typeof(m.variants) = 'array' THEN m.variants ELSE '[]'::jsonb END
-) AS v
-JOIN models_new mn ON mn.name = m.name
-WHERE v->>'label' IS NOT NULL
-  AND v->>'label' != '';
-
--- 3c. Migrate each variant into a result row
---     Author moves from models to results (test author, not model author).
-INSERT INTO results (model_id, prompt_id, model_space_id, test_date, author,
-    s_visual, s_animation, s_creative, s_code, s_detail, overall, svg_content)
-SELECT
-    mn.id,
-    m.prompt_id,
-    ms.id,
-    CASE
-        WHEN v->>'date' ~ '^\d{1,2}\.\d{1,2}\.\d{2,4}$' THEN
-            make_date(
-                CASE
-                    WHEN length(split_part(v->>'date', '.', 3)) <= 2
-                        THEN 2000 + split_part(v->>'date', '.', 3)::int
-                    ELSE split_part(v->>'date', '.', 3)::int
-                END,
-                split_part(v->>'date', '.', 2)::int,
-                split_part(v->>'date', '.', 1)::int
-            )
-        WHEN v->>'date' ~ '^\d{4}-\d{2}-\d{2}$' THEN
-            (v->>'date')::date
-        ELSE NULL
-    END,
-    m.author,
-    COALESCE((v->'scores'->>0)::numeric, 0),
-    COALESCE((v->'scores'->>1)::numeric, 0),
-    COALESCE((v->'scores'->>2)::numeric, 0),
-    COALESCE((v->'scores'->>3)::numeric, 0),
-    COALESCE((v->'scores'->>4)::numeric, 0),
-    COALESCE((v->>'overall')::numeric, 0),
-    m.svg_content
-FROM models m
-CROSS JOIN LATERAL jsonb_array_elements(
-    CASE WHEN jsonb_typeof(m.variants) = 'array' THEN m.variants ELSE '[]'::jsonb END
-) AS v
-JOIN models_new mn ON mn.name = m.name
-LEFT JOIN model_spaces ms ON ms.model_id = mn.id AND ms.name = v->>'label';
+CREATE INDEX IF NOT EXISTS idx_model_spaces_model_id ON model_spaces(model_id);
+CREATE INDEX IF NOT EXISTS idx_model_params_model_id ON model_params(model_id);
+CREATE INDEX IF NOT EXISTS idx_model_param_values_param_id ON model_param_values(param_id);
+CREATE INDEX IF NOT EXISTS idx_results_model_id ON results(model_id);
+CREATE INDEX IF NOT EXISTS idx_results_prompt_id ON results(prompt_id);
+CREATE INDEX IF NOT EXISTS idx_results_model_space_id ON results(model_space_id);
+CREATE INDEX IF NOT EXISTS idx_results_overall ON results(overall DESC);
+CREATE INDEX IF NOT EXISTS idx_results_prompt_model ON results(prompt_id, model_id);
+CREATE INDEX IF NOT EXISTS idx_result_param_values_result_id ON result_param_values(result_id);
+CREATE INDEX IF NOT EXISTS idx_result_param_values_param_value_id ON result_param_values(param_value_id);
 
 -- ==========================================
--- STEP 4: Swap tables — rename old, promote new
+-- STEP 4: Result Ratings
 -- ==========================================
-
--- 4a. Drop identity from old models.id (also drops its internal sequence)
-ALTER TABLE models ALTER COLUMN id DROP IDENTITY IF EXISTS;
-
--- 4b. Rename old models table (keep as backup, no auto-increment needed)
-ALTER TABLE models RENAME TO models_old;
-
--- 4c. Rename models_new → models
-ALTER TABLE models_new RENAME TO models;
-
--- 4d. Rename the new sequence and wire it up
-ALTER SEQUENCE models_new_id_seq RENAME TO models_id_seq;
-ALTER TABLE models ALTER COLUMN id SET DEFAULT nextval('models_id_seq');
-ALTER SEQUENCE models_id_seq OWNED BY models.id;
-
--- ==========================================
--- STEP 5: Indexes for performance
--- ==========================================
-
-CREATE INDEX idx_model_spaces_model_id ON model_spaces(model_id);
-CREATE INDEX idx_model_params_model_id ON model_params(model_id);
-CREATE INDEX idx_model_param_values_param_id ON model_param_values(param_id);
-CREATE INDEX idx_results_model_id ON results(model_id);
-CREATE INDEX idx_results_prompt_id ON results(prompt_id);
-CREATE INDEX idx_results_model_space_id ON results(model_space_id);
-CREATE INDEX idx_results_overall ON results(overall DESC);
-CREATE INDEX idx_results_prompt_model ON results(prompt_id, model_id);
-CREATE INDEX idx_result_param_values_result_id ON result_param_values(result_id);
-CREATE INDEX idx_result_param_values_param_value_id ON result_param_values(param_value_id);
-
--- ==========================================
--- STEP 6: Ensure admin_users has a SELECT policy
--- ==========================================
-
-ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "admin_users_self_read" ON admin_users
-    FOR SELECT USING (user_id = auth.uid());
-
--- ==========================================
--- STEP 7: Add author column to results (if not already present)
--- ==========================================
-
-ALTER TABLE results ADD COLUMN IF NOT EXISTS author TEXT;
-
--- ==========================================
--- STEP 8: Drop author from models (moved to results)
--- ==========================================
-
-ALTER TABLE models DROP COLUMN IF EXISTS author;
-
--- ==========================================
--- STEP 9: Reload PostGREST schema cache
--- ==========================================
-
-NOTIFY pgrst, 'reload schema';
-
-
--- --- migration_result_ratings.sql ---
 
 CREATE TABLE IF NOT EXISTS result_ratings (
     id BIGSERIAL PRIMARY KEY,
@@ -277,16 +162,7 @@ CREATE TABLE IF NOT EXISTS result_ratings (
     UNIQUE(result_id, user_id)
 );
 
-ALTER TABLE result_ratings DROP COLUMN IF EXISTS score;
-ALTER TABLE result_ratings ADD COLUMN IF NOT EXISTS s_visual NUMERIC(3,1) NOT NULL DEFAULT 5 CHECK (s_visual >= 1 AND s_visual <= 10);
-ALTER TABLE result_ratings ADD COLUMN IF NOT EXISTS s_animation NUMERIC(3,1) NOT NULL DEFAULT 5 CHECK (s_animation >= 1 AND s_animation <= 10);
-ALTER TABLE result_ratings ADD COLUMN IF NOT EXISTS s_creative NUMERIC(3,1) NOT NULL DEFAULT 5 CHECK (s_creative >= 1 AND s_creative <= 10);
-ALTER TABLE result_ratings ADD COLUMN IF NOT EXISTS s_code NUMERIC(3,1) NOT NULL DEFAULT 5 CHECK (s_code >= 1 AND s_code <= 10);
-ALTER TABLE result_ratings ADD COLUMN IF NOT EXISTS s_detail NUMERIC(3,1) NOT NULL DEFAULT 5 CHECK (s_detail >= 1 AND s_detail <= 10);
-
 ALTER TABLE result_ratings ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "public_read_result_ratings" ON result_ratings;
 
 DROP POLICY IF EXISTS "own_read_result_ratings" ON result_ratings;
 CREATE POLICY "own_read_result_ratings" ON result_ratings
@@ -385,17 +261,11 @@ BEGIN
     END IF;
 
     INSERT INTO result_ratings (
-        result_id,
-        user_id,
-        s_visual,
-        s_animation,
-        s_creative,
-        s_code,
-        s_detail
+        result_id, user_id,
+        s_visual, s_animation, s_creative, s_code, s_detail
     )
     VALUES (
-        p_result_id,
-        v_user_id,
+        p_result_id, v_user_id,
         LEAST(10, GREATEST(1, ROUND(p_s_visual::numeric, 1))),
         LEAST(10, GREATEST(1, ROUND(p_s_animation::numeric, 1))),
         LEAST(10, GREATEST(1, ROUND(p_s_creative::numeric, 1))),
@@ -500,3 +370,4 @@ GRANT EXECUTE ON FUNCTION get_result_rating_stats(INTEGER[]) TO anon, authentica
 GRANT EXECUTE ON FUNCTION rate_result(INTEGER, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_result_rating_entries(INTEGER[], INTEGER) TO anon, authenticated;
 
+NOTIFY pgrst, 'reload schema';
