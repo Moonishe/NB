@@ -363,6 +363,8 @@ $$;
 
 -- Fix admin_assign_moderator and admin_remove_moderator to sync profiles.role
 
+DROP FUNCTION IF EXISTS public.admin_assign_moderator(UUID);
+DROP FUNCTION IF EXISTS public.admin_assign_moderator(UUID, BIGINT, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_assign_moderator(p_user_id UUID, p_telegram_id BIGINT DEFAULT NULL, p_telegram_username TEXT DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -406,6 +408,8 @@ $$;
 
 ALTER TABLE moderators ALTER COLUMN telegram_id DROP NOT NULL;
 
+DROP FUNCTION IF EXISTS public.admin_assign_moderator(UUID);
+DROP FUNCTION IF EXISTS public.admin_assign_moderator(UUID, BIGINT, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_assign_moderator(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
