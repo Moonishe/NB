@@ -13,78 +13,11 @@ async function trackVisit() {
     } catch {}
 }
 
-async function initUserMenu() {
-    try {
-        Api.reinit();
-        const session = await Api.getSession();
-        const authLink = document.getElementById('nav-auth-link');
-        const userMenu = document.getElementById('nav-user-menu');
-        if (!session) return;
-        if (authLink) authLink.classList.add('hidden');
-        if (userMenu) {
-            userMenu.classList.remove('hidden');
-            try {
-                const info = await Api.getUserDisplayName();
-                if (info) {
-                    const displayEl = document.getElementById('nav-user-display');
-                    if (displayEl) {
-                        const parts = [info.telegram_first_name, info.telegram_last_name].filter(Boolean);
-                        displayEl.textContent = parts.length > 0 ? parts.join(' ') : (info.telegram_username || info.display_name);
-                    }
-                    if (info.telegram_photo_url) {
-                        const photoEl = document.getElementById('nav-user-photo');
-                        const iconEl = document.getElementById('nav-user-icon');
-                        if (photoEl) {
-                            const url = info.telegram_photo_url.startsWith('/')
-                                ? 'https://t.me' + info.telegram_photo_url
-                                : info.telegram_photo_url;
-                            photoEl.src = url;
-                            photoEl.classList.remove('hidden');
-                            photoEl.onerror = () => {
-                                photoEl.classList.add('hidden');
-                                if (iconEl) iconEl.classList.remove('hidden');
-                            };
-                        }
-                        if (iconEl && photoEl) iconEl.classList.add('hidden');
-                    }
-                    if (info.is_verified && info.has_generated_invite && info.generated_code) {
-                        const inviteSec = document.getElementById('nav-user-invite');
-                        const codeEl = document.getElementById('nav-user-invite-code');
-                        if (inviteSec) inviteSec.classList.remove('hidden');
-                        if (codeEl) codeEl.textContent = info.generated_code;
-                    }
-                }
-            } catch {}
-        }
-    } catch {}
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-    await LeaderboardModule.load();
-    trackVisit();
-    initUserMenu();
-
-    const mobileBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const menuIconOpen = document.getElementById('menu-icon-open');
-    const menuIconClose = document.getElementById('menu-icon-close');
-    if (mobileBtn && mobileMenu) {
-        mobileBtn.addEventListener('click', () => {
-            const isOpen = mobileMenu.classList.contains('open');
-            mobileMenu.classList.toggle('open');
-            mobileMenu.classList.toggle('hidden');
-            menuIconOpen.classList.toggle('hidden');
-            menuIconClose.classList.toggle('hidden');
-        });
-        document.querySelectorAll('.mobile-nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.remove('open');
-                mobileMenu.classList.add('hidden');
-                menuIconOpen.classList.remove('hidden');
-                menuIconClose.classList.add('hidden');
-            });
-        });
+    if (typeof LeaderboardModule !== 'undefined') {
+        await LeaderboardModule.load();
     }
+    trackVisit();
 
     const searchInput = document.getElementById('model-search');
     const searchClear = document.getElementById('model-search-clear');
@@ -93,25 +26,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchInput.addEventListener('input', () => {
             clearTimeout(debounceTimer);
             const val = searchInput.value.trim();
-            searchClear.classList.toggle('hidden', !val);
-            debounceTimer = setTimeout(() => { LeaderboardModule.setSearch(val); }, 250);
+            if (searchClear) searchClear.classList.toggle('hidden', !val);
+            debounceTimer = setTimeout(() => { if (typeof LeaderboardModule !== 'undefined') LeaderboardModule.setSearch(val); }, 250);
         });
     }
     if (searchClear) {
         searchClear.addEventListener('click', () => {
             searchInput.value = '';
             searchClear.classList.add('hidden');
-            LeaderboardModule.setSearch('');
+            if (typeof LeaderboardModule !== 'undefined') LeaderboardModule.setSearch('');
         });
     }
 
     const retryBtn = document.getElementById('error-retry-btn');
     if (retryBtn) {
-        retryBtn.addEventListener('click', () => { LeaderboardModule.retry(); });
+        retryBtn.addEventListener('click', () => { if (typeof LeaderboardModule !== 'undefined') LeaderboardModule.retry(); });
     }
 
     try {
-        const resp = await fetch('https://api.github.com/repos/menazzu/neurobench/commits?per_page=1');
+        const resp = await fetch('https://api.github.com/repos/Moonishe/NB/commits?per_page=1');
         const data = await resp.json();
         if (data && data[0] && data[0].sha) {
             const shaEl = document.getElementById('commit-sha');
@@ -127,29 +60,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             document.querySelectorAll('.date-chevron.rotate-180').forEach(c => c.classList.remove('rotate-180'));
         }
-        if (!e.target.closest('#nav-user-menu')) {
-            const dd = document.getElementById('nav-user-dropdown');
-            if (dd) dd.classList.add('hidden');
-        }
     });
-
-    const userBtn = document.getElementById('nav-user-btn');
-    if (userBtn) {
-        userBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const dd = document.getElementById('nav-user-dropdown');
-            if (dd) dd.classList.toggle('hidden');
-        });
-    }
-
-    const logoutBtn = document.getElementById('nav-user-logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            await Api.logout();
-            const authLink = document.getElementById('nav-auth-link');
-            const userMenu = document.getElementById('nav-user-menu');
-            if (authLink) authLink.classList.remove('hidden');
-            if (userMenu) userMenu.classList.add('hidden');
-        });
-    }
 });

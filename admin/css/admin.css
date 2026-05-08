@@ -116,3 +116,56 @@ select option {
     color: #fff;
     border-color: rgba(255, 255, 255, 0.4);
 }
+
+.admin-mod-badge {
+    display: inline-block;
+    font-family: 'Geist Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: rgba(255,180,0,0.15);
+    color: rgba(255,200,60,0.9);
+    border: 1px solid rgba(255,180,0,0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 4px;
+}
+
+.admin-ach-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: rgba(255,255,255,0.75);
+    transition: all 0.2s;
+}
+.admin-ach-chip:hover {
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+}
+.admin-ach-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font-size: 10px;
+    line-height: 1;
+    background: rgba(255,60,60,0.15);
+    border: 1px solid rgba(255,60,60,0.3);
+    color: rgba(255,100,100,0.9);
+    cursor: pointer;
+    margin-left: 2px;
+    transition: all 0.2s;
+}
+.admin-ach-remove:hover {
+    background: rgba(255,60,60,0.3);
+    color: #fff;
+}

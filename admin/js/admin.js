@@ -25,7 +25,7 @@ const AdminApp = (() => {
 
     async function checkAuth() {
         if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) { showAuth(); return; }
-        Api.reinit();
+        Api.reinitAdmin();
         const session = await Api.getSession();
         if (session) {
             const admin = await Api.isAdmin();
@@ -53,7 +53,8 @@ const AdminApp = (() => {
         loadResults();
         loadStats();
         loadInvites();
-        loadProfiles();
+        const profilesReady = loadProfiles().then(() => loadModerators());
+        Promise.all([profilesReady, loadAchievementsCatalog()]).then(() => renderProfilesGrid());
     }
 
     function escapeHtml(str) {
@@ -170,13 +171,13 @@ const AdminApp = (() => {
         showModal(`
             <h3 class="font-title text-lg uppercase tracking-widest mb-6">Редактировать промпт</h3>
             <form id="prompt-edit-form" class="flex flex-col gap-4">
-                <input name="name" value="${prompt.name || ''}" placeholder="Название" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
+                <input name="name" value="${escapeHtml(prompt.name || '')}" placeholder="Название" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
                 <select name="difficulty" required class="w-full bg-surface border border-border px-4 py-3 text-sm text-white outline-none focus:border-white/50">
                     <option value="easy" ${prompt.difficulty === 'easy' ? 'selected' : ''}>Лёгкий</option>
                     <option value="medium" ${prompt.difficulty === 'medium' ? 'selected' : ''}>Средний</option>
                     <option value="hard" ${prompt.difficulty === 'hard' ? 'selected' : ''}>Сложный</option>
                 </select>
-                <textarea name="text" rows="8" required class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50 resize-y">${prompt.text}</textarea>
+                <textarea name="text" rows="8" required class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50 resize-y">${escapeHtml(prompt.text)}</textarea>
                 <div class="flex gap-3 mt-2">
                     <button type="submit" class="flex-1 bg-white text-black py-3 text-xs uppercase tracking-widest font-bold hover:bg-gray-200 transition-colors">Обновить</button>
                     <button type="button" onclick="AdminApp.closeModal()" class="flex-1 border border-border py-3 text-xs uppercase tracking-widest hover:bg-white/10 transition-colors">Отмена</button>
@@ -280,7 +281,7 @@ const AdminApp = (() => {
         showModal(`
             <h3 class="font-title text-lg uppercase tracking-widest mb-6">Редактировать модель</h3>
             <form id="model-edit-form" class="flex flex-col gap-4">
-                <input name="name" value="${model.name || ''}" placeholder="Название" required class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
+                <input name="name" value="${escapeHtml(model.name || '')}" placeholder="Название" required class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
                 <div class="flex gap-3 mt-2">
                     <button type="submit" class="flex-1 bg-white text-black py-3 text-xs uppercase tracking-widest font-bold hover:bg-gray-200 transition-colors">Обновить</button>
                     <button type="button" onclick="AdminApp.closeModal()" class="flex-1 border border-border py-3 text-xs uppercase tracking-widest hover:bg-white/10 transition-colors">Отмена</button>
@@ -313,7 +314,7 @@ const AdminApp = (() => {
                 ${spaces.length > 0 ? spaces.map(s => `
                     <div class="flex items-center gap-2 border border-border p-3 rounded-xl">
                         <input name="space_name_${s.id}" value="${escapeHtml(s.name)}" placeholder="Название" class="flex-1 bg-surface border border-border px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
-                        <input name="space_url_${s.id}" value="${s.url || ''}" placeholder="URL (опц.)" class="flex-1 bg-surface border border-border px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
+                        <input name="space_url_${s.id}" value="${escapeHtml(s.url || '')}" placeholder="URL (опц.)" class="flex-1 bg-surface border border-border px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
                         <button type="button" class="text-red-400/60 hover:text-red-400 text-xs" onclick="AdminApp.deleteModelSpaceItem(${s.id}, ${model.id})">Удал.</button>
                     </div>
                 `).join('') : '<p class="text-gray-500 text-xs">Нет пространств. Добавьте ниже.</p>'}
@@ -470,13 +471,19 @@ const AdminApp = (() => {
         promptSelect.innerHTML = '<option value="all">Все</option>';
         allPromptsData.forEach(p => {
             const diffLabel = p.difficulty === 'easy' ? 'Лёгкий' : p.difficulty === 'medium' ? 'Средний' : 'Сложный';
-            promptSelect.innerHTML += `<option value="${p.id}">[${diffLabel}] ${p.name || '#' + p.id}</option>`;
+            const option = document.createElement('option');
+            option.value = String(p.id);
+            option.textContent = `[${diffLabel}] ${p.name || '#' + p.id}`;
+            promptSelect.appendChild(option);
         });
         promptSelect.value = prevPrompt || 'all';
 
         modelSelect.innerHTML = '<option value="all">Все</option>';
         allModelsData.forEach(m => {
-            modelSelect.innerHTML += `<option value="${m.id}">${escapeHtml(m.name)}</option>`;
+            const option = document.createElement('option');
+            option.value = String(m.id);
+            option.textContent = m.name || '';
+            modelSelect.appendChild(option);
         });
         modelSelect.value = prevModel || 'all';
     }
@@ -518,8 +525,8 @@ const AdminApp = (() => {
                         ${r.author ? `<span class="text-gray-500 ml-2 text-xs">by ${escapeHtml(r.author)}</span>` : ''}
                         <span class="text-gray-500 ml-2 text-xs">${escapeHtml(promptName)}</span>
                         <span class="text-xs text-gray-500 block mt-1">
-                            id: ${r.id} | Дата: ${dateStr} | Балл: ${r.overall}${r.svg_content ? ' | SVG ✓' : ''}
-                            | ${r.s_visual}/${r.s_animation}/${r.s_creative}/${r.s_code}/${r.s_detail}
+                            id: ${escapeHtml(r.id)} | Дата: ${escapeHtml(dateStr)} | Балл: ${escapeHtml(r.overall)}${r.svg_content ? ' | SVG ✓' : ''}
+                            | ${escapeHtml(r.s_visual)}/${escapeHtml(r.s_animation)}/${escapeHtml(r.s_creative)}/${escapeHtml(r.s_code)}/${escapeHtml(r.s_detail)}
                         </span>
                     </div>
                     <div class="flex-shrink-0 flex gap-2">
@@ -549,7 +556,7 @@ const AdminApp = (() => {
         const promptsOptions = allPromptsData.map(p => {
             const diffLabel = p.difficulty === 'easy' ? 'Лёгкий' : p.difficulty === 'medium' ? 'Средний' : 'Сложный';
             const selected = p.id === promptId ? 'selected' : '';
-            return `<option value="${p.id}" ${selected}>[${diffLabel}] ${p.name || '#' + p.id}</option>`;
+            return `<option value="${p.id}" ${selected}>[${diffLabel}] ${escapeHtml(p.name || '#' + p.id)}</option>`;
         }).join('');
 
         const modelsOptions = allModelsData.map(m => {
@@ -600,7 +607,6 @@ const AdminApp = (() => {
                     </select>
                     <div id="new-model-fields" class="hidden mt-2 flex gap-2">
                         <input id="new-model-name" placeholder="Название новой модели" class="flex-1 bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
-                        <input id="new-model-author" placeholder="Автор (опц.)" class="flex-1 bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50">
                     </div>
                 </label>
                 <label class="flex flex-col gap-1">
@@ -650,7 +656,7 @@ const AdminApp = (() => {
                         <input type="file" id="svg-file-input" accept=".svg" class="text-xs text-gray-400 file:mr-2 file:py-2 file:px-3 file:border file:border-border file:bg-white/5 file:text-white file:text-xs file:uppercase file:tracking-widest file:cursor-pointer">
                         <button type="button" id="svg-paste-btn" class="text-[10px] uppercase tracking-widest border border-border px-3 py-2 bg-white/5 hover:bg-white/10 transition-colors">Вставить код</button>
                     </div>
-                    <textarea name="svg_content" id="svg-content-area" rows="4" placeholder="SVG-код или загрузите файл..." style="display:none" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50 resize-y font-mono text-xs">${svgContent}</textarea>
+                    <textarea name="svg_content" id="svg-content-area" rows="4" placeholder="SVG-код или загрузите файл..." style="display:none" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-white/50 resize-y font-mono text-xs">${escapeHtml(svgContent)}</textarea>
                 </label>
                 <div class="flex gap-3 mt-2">
                     <button type="submit" class="flex-1 bg-white text-black py-3 text-xs uppercase tracking-widest font-bold hover:bg-gray-200 transition-colors">${isEdit ? 'Обновить' : 'Сохранить'}</button>
@@ -674,8 +680,13 @@ const AdminApp = (() => {
             const spaces = allModelSpacesData.filter(s => s.model_id === parseInt(modelIdVal));
             const currentVal = spaceSelect.value;
             spaceSelect.innerHTML = '<option value="">Выберите пространство</option>';
-            spaces.forEach(s => { spaceSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`; });
-            spaceSelect.innerHTML += '<option value="__new__">+ Добавить пространство...</option>';
+            spaces.forEach(s => {
+                const option = document.createElement('option');
+                option.value = String(s.id);
+                option.textContent = s.name || '';
+                spaceSelect.appendChild(option);
+            });
+            spaceSelect.appendChild(new Option('+ Добавить пространство...', '__new__'));
             if (spaces.find(s => String(s.id) === currentVal)) spaceSelect.value = currentVal;
         }
 
@@ -776,9 +787,8 @@ const AdminApp = (() => {
 
             if (modelIdVal === '__new__') {
                 const newName = document.getElementById('new-model-name').value.trim();
-                const newAuthor = document.getElementById('new-model-author').value.trim();
                 if (!newName) { alert('Введите название модели'); return; }
-                try { const created = await Api.addModel({ name: newName, author: newAuthor || null }); modelIdVal = created[0].id; await loadModels(); }
+                try { const created = await Api.addModel({ name: newName }); modelIdVal = created[0].id; await loadModels(); }
                 catch (err) { alert('Ошибка создания модели: ' + err.message); return; }
             }
 
@@ -859,15 +869,17 @@ const AdminApp = (() => {
         const container = document.getElementById('users-list');
         if (!container) return;
         if (profilesData.length === 0) { container.innerHTML = '<p class="text-gray-500 text-xs uppercase tracking-widest">Нет пользователей</p>'; return; }
+        const modUserIds = new Set(moderatorsData.map(m => m.user_id));
         container.innerHTML = profilesData.map(p => {
             const name = p.telegram_first_name || p.telegram_last_name ? [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') : (p.telegram_username || '');
             const username = p.telegram_username ? '@' + p.telegram_username : '';
             const verified = p.is_verified ? '<span class="ml-2 text-xs text-green-400/60">Верифицирован</span>' : '<span class="ml-2 text-xs text-red-400/60">Не верифицирован</span>';
+            const modLabel = modUserIds.has(p.user_id) ? '<span class="admin-mod-badge ml-2">MOD</span>' : '';
             const inviteColor = p.has_generated_invite ? 'text-yellow-400/60' : 'text-green-400/60';
             return `
             <div class="admin-prompt-card flex justify-between items-start gap-4">
                 <div class="flex-1">
-                    <span class="text-gray-200 font-bold">${escapeHtml(name)}</span>${username ? `<span class="text-gray-400 ml-2 text-xs">${escapeHtml(username)}</span>` : ''}${verified}
+                    <span class="text-gray-200 font-bold">${escapeHtml(name)}</span>${username ? `<span class="text-gray-400 ml-2 text-xs">${escapeHtml(username)}</span>` : ''}${verified}${modLabel}
                     <span class="text-xs text-gray-500 block mt-1">Email: ${escapeHtml(p.email || '—')} | ID: ${p.user_id ? p.user_id.slice(0, 8) + '...' : '—'}</span>
                 </div>
                 <div class="flex-shrink-0 flex gap-2">
@@ -931,12 +943,306 @@ const AdminApp = (() => {
         try { await Api.adminDeleteUser(userId); await loadProfiles(); } catch (err) { alert('Ошибка: ' + err.message); }
     }
 
+    // ========== MODERATORS ==========
+
+    let moderatorsData = [];
+
+    async function loadModerators() {
+        try { moderatorsData = await Api.adminGetModerators(); } catch { moderatorsData = []; }
+        renderModeratorsList();
+        renderModeratorCandidates();
+    }
+
+    function renderModeratorsList() {
+        const container = document.getElementById('moderators-list');
+        if (!container) return;
+        if (moderatorsData.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-xs uppercase tracking-widest">Нет модераторов</p>';
+            return;
+        }
+        container.innerHTML = moderatorsData.map(m => {
+            const name = profilesData.find(p => p.user_id === m.user_id);
+            const displayName = name
+                ? [name.telegram_first_name, name.telegram_last_name].filter(Boolean).join(' ') || name.telegram_username || '—'
+                : '—';
+            const tgLabel = m.telegram_username ? `@${escapeHtml(m.telegram_username)}` : `ID: ${escapeHtml(m.telegram_id || '').slice(0, 10)}...`;
+            const assignedAt = m.created_at ? new Date(m.created_at).toLocaleDateString('ru') : '—';
+            return `
+                <div class="admin-prompt-card flex justify-between items-start gap-4">
+                    <div class="flex-1">
+                        <span class="text-gray-200 font-bold">${escapeHtml(displayName)}</span>
+                        <span class="text-yellow-400/60 ml-2 text-xs">${tgLabel}</span>
+                        <span class="text-xs text-gray-500 block mt-1">ID: ${m.user_id ? m.user_id.slice(0, 8) + '...' : '—'} | Назначен: ${assignedAt}</span>
+                    </div>
+                    <button class="text-red-400/60 hover:text-red-400 transition-colors text-xs" onclick="AdminApp.removeModerator('${m.user_id}')">Снять</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderModeratorCandidates() {
+        const container = document.getElementById('moderator-candidates');
+        if (!container) return;
+        const modUserIds = new Set(moderatorsData.map(m => m.user_id));
+        const candidates = profilesData.filter(p =>
+            p.is_verified && !modUserIds.has(p.user_id)
+        );
+        if (candidates.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-xs uppercase tracking-widest">Нет подходящих пользователей (нужен верифицированный аккаунт)</p>';
+            return;
+        }
+        container.innerHTML = candidates.map(p => {
+            const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.telegram_username || 'Без имени';
+            const tgLabel = p.telegram_username ? `@${escapeHtml(p.telegram_username)}` : '';
+            return `
+                <div class="admin-prompt-card flex justify-between items-center gap-4">
+                    <div>
+                        <span class="text-gray-200 font-bold">${escapeHtml(name)}</span>
+                        ${tgLabel ? `<span class="text-gray-400 ml-2 text-xs">${tgLabel}</span>` : ''}
+                    </div>
+                    <button class="text-yellow-400/60 hover:text-yellow-400 transition-colors text-xs" onclick="AdminApp.assignModerator('${p.user_id}')">Назначить</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function assignModerator(userId) {
+        try {
+            const r = await Api.adminAssignModerator(userId);
+            if (!r) { alert('Не удалось назначить модератором'); return; }
+            await loadModerators();
+            renderProfilesList();
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    async function removeModerator(userId) {
+        if (!confirm('Снять права модератора?')) return;
+        try {
+            const r = await Api.adminRemoveModerator(userId);
+            if (!r) { alert('Не удалось снять'); return; }
+            await loadModerators();
+            renderProfilesList();
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    // ========== PROFILES MANAGEMENT ==========
+
+    let achievementsCatalog = [];
+    let profilesSearchQuery = '';
+
+    async function loadAchievementsCatalog() {
+        try { achievementsCatalog = await Api.getAchievementsCatalog(); } catch { achievementsCatalog = []; }
+    }
+
+    const ROLE_COLORS = {
+        admin: 'bg-red-500/20 text-red-300 border-red-500/40',
+        stmoderator: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
+        moderator: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40',
+        beta: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+        alpha: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+        member: 'bg-gray-500/20 text-gray-400 border-gray-500/40'
+    };
+
+    function renderProfilesGrid() {
+        const container = document.getElementById('profiles-grid');
+        if (!container) return;
+        let filtered = profilesData;
+        if (profilesSearchQuery) {
+            const q = profilesSearchQuery.toLowerCase();
+            filtered = profilesData.filter(p => {
+                const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ').toLowerCase();
+                const uname = (p.telegram_username || '').toLowerCase();
+                const email = (p.email || '').toLowerCase();
+                return name.includes(q) || uname.includes(q) || email.includes(q) || (p.user_id || '').includes(q);
+            });
+        }
+        if (filtered.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-xs uppercase tracking-widest">Нет пользователей</p>';
+            return;
+        }
+        container.innerHTML = filtered.map(p => {
+            const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.telegram_username || 'Без имени';
+            const role = p.role || 'member';
+            const rc = ROLE_COLORS[role] || ROLE_COLORS.member;
+            const verified = p.is_verified ? '<span class="text-green-400/60 text-[9px] ml-1">✓</span>' : '<span class="text-red-400/40 text-[9px] ml-1">✗</span>';
+            return `
+            <div class="admin-prompt-card flex justify-between items-start gap-4 cursor-pointer hover:border-white/40" onclick="AdminApp.openProfileDetail('${p.user_id}')">
+                <div class="flex-1">
+                    <span class="text-gray-200 font-bold">${escapeHtml(name)}</span>${verified}
+                    <span class="ml-2 text-xs ${rc} border px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">${escapeHtml(role)}</span>
+                    ${p.telegram_username ? `<span class="text-gray-400 ml-2 text-xs">@${escapeHtml(p.telegram_username)}</span>` : ''}
+                    <span class="text-xs text-gray-500 block mt-1">ID: ${p.user_id ? p.user_id.slice(0, 8) + '...' : '—'} | Рег: ${p.created_at ? new Date(p.created_at).toLocaleDateString('ru') : '—'}</span>
+                </div>
+                <span class="text-gray-500 text-[9px] uppercase tracking-widest">открыть →</span>
+            </div>`;
+        }).join('');
+    }
+
+    async function openProfileDetail(userId) {
+        showModal('<div class="text-center py-8 text-gray-500 text-xs uppercase tracking-widest">Загрузка...</div>');
+        let detail;
+        try { detail = await Api.adminGetUserDetail(userId); } catch (err) { showModal('<p class="text-red-400 text-xs">Ошибка: ' + escapeHtml(err.message) + '</p>'); return; }
+        if (!detail || !detail.ok) { showModal('<p class="text-red-400 text-xs">Профиль не найден</p>'); return; }
+
+        const p = detail.profile;
+        const stats = detail.stats;
+        const achs = detail.achievements || [];
+        const role = p.role || 'member';
+        const allRoles = ['admin', 'stmoderator', 'moderator', 'beta', 'alpha', 'member'];
+        const roleOptions = allRoles.map(r => `<option value="${r}" ${r === role ? 'selected' : ''}>${r}</option>`).join('');
+        const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.telegram_username || 'Без имени';
+        const regDate = p.created_at ? new Date(p.created_at).toISOString().slice(0, 16) : '';
+
+        const achChips = achs.length > 0 ? achs.map(a => `
+            <span class="admin-ach-chip">
+                ${escapeHtml(a.icon_emoji || '')} ${escapeHtml(a.title)} <span class="text-gray-500 text-[8px]">${a.points}pt</span>
+                <button type="button" class="admin-ach-remove" onclick="AdminApp.revokeAch(${escapeHtml(JSON.stringify(userId || ''))}, ${escapeHtml(JSON.stringify(a.achievement_id || ''))})">×</button>
+            </span>
+        `).join('') : '<span class="text-gray-500 text-xs">Нет достижений</span>';
+
+        const grantOptions = achievementsCatalog
+            .filter(ac => !achs.some(ua => ua.achievement_id === ac.id))
+            .map(ac => `<option value="${escapeHtml(ac.id || '')}">${escapeHtml(ac.icon_emoji || '')} ${escapeHtml(ac.title)} (${escapeHtml(ac.rarity)})</option>`)
+            .join('');
+
+        showModal(`
+            <h3 class="font-title text-lg uppercase tracking-widest mb-4">${escapeHtml(name)}</h3>
+            <p class="text-xs text-gray-500 mb-6">ID: ${p.user_id ? p.user_id.slice(0, 12) + '...' : '—'}</p>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="border border-border p-4 rounded-xl">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-500 mb-2">Роль</p>
+                    <select id="pd-role" class="w-full bg-surface border border-border px-3 py-2 text-xs text-white outline-none focus:border-white/50 rounded-xl">${roleOptions}</select>
+                    <button type="button" class="mt-2 w-full text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.setRole('${userId}')">Сменить роль</button>
+                </div>
+                <div class="border border-border p-4 rounded-xl">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-500 mb-2">Верификация</p>
+                    <p class="text-sm mb-2 ${p.is_verified ? 'text-green-400' : 'text-red-400'}">${p.is_verified ? 'Верифицирован' : 'Не верифицирован'}</p>
+                    <button type="button" class="w-full text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.toggleVerified('${userId}', ${!p.is_verified})">${p.is_verified ? 'Снять верификацию' : 'Верифицировать'}</button>
+                </div>
+            </div>
+
+            <div class="border border-border p-4 rounded-xl mb-4">
+                <p class="text-[9px] uppercase tracking-widest text-gray-500 mb-2">Дата регистрации</p>
+                <div class="flex gap-2">
+                    <input id="pd-created-at" type="datetime-local" value="${regDate}" class="flex-1 bg-surface border border-border px-3 py-2 text-xs text-white outline-none focus:border-white/50 rounded-xl">
+                    <button type="button" class="text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.updateCreatedAt('${userId}')">Сохранить</button>
+                </div>
+            </div>
+
+            <div class="border border-border p-4 rounded-xl mb-4">
+                <p class="text-[9px] uppercase tracking-widest text-gray-500 mb-2">Статистика</p>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div><span class="text-white font-bold">${stats.threads_count || 0}</span><br><span class="text-gray-500">Тредов</span></div>
+                    <div><span class="text-white font-bold">${stats.posts_count || 0}</span><br><span class="text-gray-500">Постов</span></div>
+                    <div><span class="text-white font-bold">${stats.reactions_given || 0}</span><br><span class="text-gray-500">Реакций дано</span></div>
+                    <div><span class="text-white font-bold">${stats.reactions_received || 0}</span><br><span class="text-gray-500">Реакций получено</span></div>
+                    <div><span class="text-white font-bold">${stats.achievement_points || 0}</span><br><span class="text-gray-500">Очки ачивок</span></div>
+                    <div><span class="text-white font-bold">${stats.login_streak || 0}/${stats.max_streak || 0}</span><br><span class="text-gray-500">Стрик</span></div>
+                </div>
+                ${stats.is_banned ? '<p class="text-red-400 text-xs mt-2 font-bold">ЗАБЛОКИРОВАН</p>' : ''}
+                ${stats.is_muted ? '<p class="text-yellow-400 text-xs mt-2 font-bold">ЗАГЛУШЁН</p>' : ''}
+            </div>
+
+            <div class="border border-border p-4 rounded-xl mb-4">
+                <p class="text-[9px] uppercase tracking-widest text-gray-500 mb-2">Достижения (${achs.length})</p>
+                <div class="flex flex-wrap gap-1.5 mb-3">${achChips}</div>
+                ${grantOptions ? `
+                <div class="flex gap-2 mt-2">
+                    <select id="pd-grant-ach" class="flex-1 bg-surface border border-border px-3 py-2 text-xs text-white outline-none focus:border-white/50 rounded-xl">
+                        <option value="">— Выдать достижение —</option>
+                        ${grantOptions}
+                    </select>
+                    <button type="button" class="text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.grantAch('${userId}')">Выдать</button>
+                </div>` : '<p class="text-xs text-gray-500 mt-2">Все достижения уже выданы</p>'}
+            </div>
+
+            <div class="border border-border p-4 rounded-xl mb-4">
+                <p class="text-[9px] uppercase tracking-widest text-gray-500 mb-2">Инвайты</p>
+                <p class="text-xs text-gray-400 mb-2">Код: ${escapeHtml(p.generated_code || '—')} | Использований: ${p.invite_use_count || 0} | Лимит: ${p.invite_max || 1}</p>
+                <div class="flex gap-2">
+                    <button type="button" class="text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.grantInvite('${userId}', 1)">Выдать инвайт (1)</button>
+                    <button type="button" class="text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.grantInvite('${userId}', 5)">Выдать инвайт (5)</button>
+                    <button type="button" class="text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.resetInviteLimit('${userId}')">Сбросить лимит</button>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-2">
+                <button type="button" onclick="AdminApp.openProfileDetail('${userId}')" class="flex-1 border border-border py-3 text-xs uppercase tracking-widest hover:bg-white/10 transition-colors">Обновить</button>
+                <button type="button" onclick="AdminApp.closeModal()" class="flex-1 border border-border py-3 text-xs uppercase tracking-widest hover:bg-white/10 transition-colors">Закрыть</button>
+            </div>
+        `);
+    }
+
+    async function setRole(userId) {
+        const role = document.getElementById('pd-role').value;
+        if (!role) return;
+        try {
+            const r = await Api.adminSetUserRole(userId, role);
+            if (!r) { alert('Не удалось сменить роль'); return; }
+            await loadProfiles();
+            await loadModerators();
+            await openProfileDetail(userId);
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    async function toggleVerified(userId, newVal) {
+        try {
+            const r = await Api.adminUpdateUserProfile(userId, { is_verified: newVal });
+            if (!r || !r.ok) { alert('Не удалось'); return; }
+            await loadProfiles();
+            await openProfileDetail(userId);
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    async function updateCreatedAt(userId) {
+        const val = document.getElementById('pd-created-at').value;
+        if (!val) { alert('Укажите дату'); return; }
+        try {
+            const r = await Api.adminUpdateUserProfile(userId, { created_at: new Date(val).toISOString() });
+            if (!r || !r.ok) { alert('Не удалось'); return; }
+            await loadProfiles();
+            await openProfileDetail(userId);
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    async function grantAch(userId) {
+        const sel = document.getElementById('pd-grant-ach');
+        if (!sel || !sel.value) { alert('Выберите достижение'); return; }
+        try {
+            const r = await Api.adminGrantAchievement(userId, sel.value);
+            if (!r || !r.ok) { alert('Не удалось: ' + (r.reason || '')); return; }
+            await openProfileDetail(userId);
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    async function revokeAch(userId, achId) {
+        if (!confirm('Забрать достижение?')) return;
+        try {
+            const r = await Api.adminRevokeAchievement(userId, achId);
+            if (!r || !r.ok) { alert('Не удалось'); return; }
+            await openProfileDetail(userId);
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    async function grantInvite(userId, maxUses) {
+        try {
+            const r = await Api.adminGenerateInviteForUser(userId, maxUses);
+            if (!r || !r.ok) { alert('Не удалось'); return; }
+            alert('Инвайт выдан: ' + (r.code || ''));
+            await loadProfiles();
+            await loadInvites();
+            await openProfileDetail(userId);
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
     // ========== STATS ==========
 
     async function loadStats() {
         let stats; try { stats = await Api.getStats(); } catch { stats = null; }
         let commitSha = '';
-        try { const resp = await fetch('https://api.github.com/repos/menazzu/neurobench/commits?per_page=1'); const data = await resp.json(); if (data && data[0] && data[0].sha) commitSha = data[0].sha.slice(0, 7); } catch {}
+        try { const resp = await fetch('https://api.github.com/repos/Moonishe/NB/commits?per_page=1'); const data = await resp.json(); if (data && data[0] && data[0].sha) commitSha = data[0].sha.slice(0, 7); } catch {}
+
         renderStats(stats, commitSha);
     }
 
@@ -967,6 +1273,8 @@ const AdminApp = (() => {
     function init() {
         window.SUPABASE_URL = window.SUPABASE_URL || '';
         window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+
+        Api.reinitAdmin();
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1030,6 +1338,9 @@ const AdminApp = (() => {
 
         document.getElementById('modal-overlay').addEventListener('click', (e) => { if (e.target.id === 'modal-overlay') hideModal(); });
 
+        const profilesSearch = document.getElementById('profiles-search');
+        if (profilesSearch) profilesSearch.addEventListener('input', (e) => { profilesSearchQuery = e.target.value.trim(); renderProfilesGrid(); });
+
         document.getElementById('results-prompt-filter').addEventListener('change', (e) => { currentResultPromptFilter = e.target.value; renderResultsList(); });
         document.getElementById('results-model-filter').addEventListener('change', (e) => { currentResultModelFilter = e.target.value; renderResultsList(); });
 
@@ -1043,7 +1354,10 @@ const AdminApp = (() => {
         closeModal: hideModal, deleteInvite, resetInviteLimit, resetAllLimits, deleteUser,
         manageModelSpaces, deleteModelSpaceItem,
         manageModelParams, addParamValue, deleteParamValue, deleteParam,
-        showAddResultForm, editResult, deleteResult
+        showAddResultForm, editResult, deleteResult,
+        assignModerator, removeModerator,
+        openProfileDetail, setRole, toggleVerified, updateCreatedAt,
+        grantAch, revokeAch, grantInvite
     };
 })();
 

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://hbzdbigmfawgcvzeljdh.supabase.co https://api.github.com; frame-src https://oauth.telegram.org https://telegram.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shader Bench</title>
+    <script>window.__NB_TITLE__ = 'Shader Bench';</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="assets/vendor/tailwind/tailwindcss-3.4.17-cdn.js"></script>
+    <link rel="icon" type="image/png" href="logo2.png">
+    <link rel="stylesheet" href="css/style.css?v=42">
+    <script src="js/title-scramble.js?v=8" data-title="Shader Bench" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        black: '#050505',
+                        surface: '#0c0c0c',
+                        border: '#161616',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['"Geist Mono"', 'monospace'],
+                        title: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#050505] text-white antialiased overflow-x-hidden">
+    <canvas id="ascii-canvas" class="ascii-bg"></canvas>
+
+    <div id="navbar-placeholder"></div>
+    <script src="js/navbar.js?v=12"></script>
+
+    <main class="min-h-screen flex flex-col items-center justify-center text-center px-4 relative z-10 pt-32">
+        <h1 class="font-title text-4xl md:text-6xl font-bold uppercase tracking-widest mb-6">Shader Benchmark</h1>
+        <p class="font-mono text-white/30 text-sm md:text-base tracking-[0.2em] mb-4">&lt; GPU Shader Code Evaluation &gt;</p>
+        <p class="font-mono text-white/15 text-xs tracking-widest mb-12">---[ ✦ ]---</p>
+
+        <div class="max-w-xl mx-auto matte-card p-10 border border-border">
+            <div class="w-[300px] border border-white/45 px-8 py-7 text-left font-mono text-white/50 text-xs leading-relaxed tracking-widest">
+                <div class="text-center mb-6">[ C O M I N G&nbsp;&nbsp; S O O N ]</div>
+                <div>Бенчмарк генерации</div>
+                <div>GLSL/HLSL шейдеров.</div>
+                <div class="mt-5">Оценка способности LLM</div>
+                <div>генерировать визуальные</div>
+                <div>эффекты через GPU-код.</div>
+            </div>
+        </div>
+
+        <a href="index.html" class="mt-12 font-mono text-xs uppercase tracking-[0.2em] border border-white/20 px-6 py-3 hover:bg-white/10 transition-colors text-white/50 hover:text-white">← Назад</a>
+    </main>
+
+    <script type="module">
+        const canvas = document.getElementById('ascii-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, columns, rows;
+        const fontSize = window.innerWidth < 768 ? 24 : 15;
+        const chars = " .:-=+*#%@".split("");
+
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            columns = Math.ceil(width / fontSize);
+            rows = Math.ceil(height / fontSize);
+        }
+
+        let mouse = { x: -1000, y: -1000 };
+        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+        function drawASCII(time) {
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, width, height);
+            ctx.font = fontSize + 'px "Geist Mono"';
+            ctx.textAlign = 'center';
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < columns; x++) {
+                    const charX = x * fontSize;
+                    const charY = y * fontSize;
+                    const dist = Math.hypot(charX - mouse.x, charY - mouse.y);
+                    const mouseEffect = Math.max(0, 1 - dist / 400);
+                    const noise = Math.sin(x * 0.3 + time * 0.0005) * Math.cos(y * 0.3 + time * 0.0005);
+                    const brightness = Math.min(chars.length - 1, Math.floor((noise * 0.5 + 0.5 + mouseEffect * 0.7) * chars.length));
+                    ctx.fillStyle = `rgba(255, 255, 255, ${0.03 + mouseEffect * 0.12})`;
+                    ctx.fillText(chars[brightness], charX, charY);
+                }
+            }
+            requestAnimationFrame(drawASCII);
+        }
+        init();
+        window.addEventListener('resize', init);
+        requestAnimationFrame(drawASCII);
+    </script>
+</body>
+</html>

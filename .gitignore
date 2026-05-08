@@ -1,1 +1,8 @@
 *.htm
+.playwright-cli/
+.playwright-mcp/
+.windsurf/
+output/
+server.err.log
+server.out.log
+*.log

@@ -14,7 +14,7 @@
 -- 2. SET BOT DOMAIN:
 --    a. Send /setdomain to @BotFather
 --    b. Select your bot
---    c. Set domain to: menazzu.github.io
+--    c. Set domain to: moonishe.github.io
 --       (or your actual GitHub Pages domain)
 --
 -- 3. SET EDGE FUNCTION SECRETS:

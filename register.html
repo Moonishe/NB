@@ -1,168 +1,1237 @@
 <!DOCTYPE html>
+
 <html lang="ru">
+
 <head>
+
     <meta charset="UTF-8">
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://hbzdbigmfawgcvzeljdh.supabase.co https://api.github.com; frame-src https://oauth.telegram.org https://telegram.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>NeuroBench | Вход</title>
+
     <meta name="robots" content="noindex, nofollow">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+
+
+    <script src="assets/vendor/tailwind/tailwindcss-3.4.17-cdn.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
+
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <script src="assets/vendor/supabase/supabase-js-2.49.4.min.js"></script>
+
+
 
     <script>
+
         tailwind.config = {
+
             theme: {
+
                 extend: {
+
                     colors: {
+
                         black: '#050505',
+
                         surface: '#0c0c0c',
+
                         border: '#161616',
+
                     },
+
                     fontFamily: {
+
                         sans: ['Inter', 'sans-serif'],
+
                         mono: ['"Geist Mono"', 'monospace'],
+
                         title: ['Inter', 'sans-serif'],
+
                     },
+
                 }
+
             }
+
         }
+
     </script>
 
+
+
     <link rel="icon" type="image/png" href="logo2.png">
-    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="stylesheet" href="css/style.css?v=43">
+
     <style>
-        .invite-code-display { font-family: 'Geist Mono', monospace; letter-spacing: 0.3em; font-size: 1.5rem; }
-        .tg-widget-container { display: flex; justify-content: center; }
-        .tg-widget-container > div { width: 100% !important; }
-        .tg-widget-container iframe { border-radius: 9999px !important; }
-        .auth-loading-spinner {
-            border: 2px solid rgba(255,255,255,0.1);
-            border-top: 2px solid #fff;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 0.8s linear infinite;
+
+        .invite-code-display {
+
+            font-family: 'Geist Mono', monospace;
+
+            letter-spacing: 0.3em;
+
+            font-size: 1.5rem;
+
         }
+
+        .invite-code-ascii {
+
+            font: 6px/1.1 'Geist Mono', monospace;
+
+            color: rgba(255,255,255,0.72);
+
+            white-space: pre;
+
+            letter-spacing: 0.05em;
+
+            line-height: 1.2;
+
+            text-align: left;
+
+            display: inline-block;
+
+            user-select: none;
+
+        }
+
+        .invite-code-ascii .ascii-dim {
+
+            color: rgba(255,255,255,0.18);
+
+        }
+
+        .invite-code-ascii .ascii-bright {
+
+            color: rgba(255,255,255,0.78);
+
+        }
+
+        .invite-code-plain {
+
+            font: 500 13px/1 'Geist Mono', monospace;
+
+            letter-spacing: 0.28em;
+
+            color: rgba(255,255,255,0.5);
+
+            opacity: 0;
+
+            max-height: 0;
+
+            margin-top: 0;
+
+            overflow: hidden;
+
+            transition: opacity 0.3s ease 0.45s, max-height 0.3s ease 0.45s, margin-top 0.3s ease 0.45s;
+
+        }
+
+        .invite-code-ascii:hover + .invite-code-plain,
+
+        .invite-code-plain:hover {
+
+            opacity: 1;
+
+            max-height: 24px;
+
+            margin-top: 6px;
+
+        }
+
+        .tg-widget-container { display: flex; justify-content: center; align-items: center; min-height: 48px; }
+
+        .tg-widget-container > div { width: 100% !important; }
+
+        .tg-widget-container iframe { border-radius: 10px !important; }
+
+        .tg-widget-state {
+
+            width: 100%;
+
+            border: 1px dashed rgba(255,255,255,0.12);
+
+            background: rgba(255,255,255,0.025);
+
+            color: rgba(255,255,255,0.48);
+
+            border-radius: 10px;
+
+            padding: 13px 18px;
+
+            font: 10px/1.3 'Geist Mono', monospace;
+
+            letter-spacing: 0.12em;
+
+            text-align: center;
+
+            text-transform: uppercase;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 10px;
+
+        }
+
+        .tg-widget-state svg {
+
+            width: 17px;
+
+            height: 17px;
+
+            flex: 0 0 auto;
+
+            color: rgba(255,255,255,0.62);
+
+        }
+
+        .tg-local-fallback {
+
+            width: 100%;
+
+            border: 1px dashed rgba(255,255,255,0.12);
+
+            background: transparent;
+
+            color: rgba(255,255,255,0.44);
+
+            border-radius: 0;
+
+            padding: 13px 18px;
+
+            font: 10px/1.3 'Geist Mono', monospace;
+
+            letter-spacing: 0.16em;
+
+            text-align: center;
+
+            text-transform: uppercase;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 10px;
+
+        }
+
+        .auth-mode-switch {
+
+            position: relative;
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 4px;
+
+            padding: 4px;
+
+            border: 1px dashed rgba(255,255,255,0.1);
+
+            border-radius: 10px;
+
+            background: rgba(255,255,255,0.025);
+
+            overflow: hidden;
+
+        }
+
+        .auth-mode-switch::before {
+
+            content: '';
+
+            position: absolute;
+
+            top: 4px;
+
+            bottom: 4px;
+
+            left: 4px;
+
+            width: calc(50% - 4px);
+
+            border-radius: 7px;
+
+            background: rgba(255,255,255,0.09);
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            transform: translateX(var(--auth-mode-x, 0));
+
+            transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+
+        }
+
+        .auth-mode-switch[data-mode="register"]::before { --auth-mode-x: calc(100% + 4px); }
+
+        .auth-mode-btn {
+
+            position: relative;
+
+            z-index: 1;
+
+            padding: 11px 12px;
+
+            border-radius: 6px;
+
+            color: rgba(255,255,255,0.34);
+
+            font: 10px/1 'Geist Mono', monospace;
+
+            letter-spacing: 0.18em;
+
+            text-transform: uppercase;
+
+            transition: color 0.24s ease;
+
+        }
+
+        .auth-mode-btn.active { color: rgba(255,255,255,0.9); }
+
+        #invite-section {
+
+            max-height: 0;
+
+            margin-bottom: 0;
+
+            padding-top: 0;
+
+            padding-bottom: 0;
+
+            opacity: 0;
+
+            overflow: hidden;
+
+            visibility: hidden;
+
+            pointer-events: none;
+
+            transform: translateY(-8px);
+
+            border-color: rgba(255,255,255,0);
+
+            transition: max-height 0.52s cubic-bezier(0.16, 1, 0.3, 1), margin-bottom 0.52s cubic-bezier(0.16, 1, 0.3, 1), padding-top 0.52s cubic-bezier(0.16, 1, 0.3, 1), padding-bottom 0.52s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.42s ease;
+
+        }
+
+        #invite-section.invite-visible {
+
+            max-height: 180px;
+
+            margin-bottom: 1.5rem;
+
+            padding-top: 1rem;
+
+            padding-bottom: 1rem;
+
+            opacity: 1;
+
+            visibility: visible;
+
+            pointer-events: auto;
+
+            transform: translateY(0);
+
+            border-color: rgba(255,255,255,0.1);
+
+        }
+
+        #invite-section.invite-visible::before {
+
+            content: 'INVITE :: TOKEN :: ACCESS';
+
+            display: block;
+
+            margin: -2px 0 10px;
+
+            color: rgba(255,255,255,0.12);
+
+            font: 8px/1 'Geist Mono', monospace;
+
+            letter-spacing: 0.18em;
+
+            white-space: nowrap;
+
+            animation: invite-symbol-resolve 0.52s steps(8, end);
+
+        }
+
+        @keyframes invite-symbol-resolve {
+
+            0% { content: '▒▓░▒ :: ▓░▒▓ :: ░▒▓█'; opacity: 0; transform: translateX(-8px); }
+
+            45% { content: 'INV▓▒ :: TOK░▒ :: ACC▓█'; opacity: 1; }
+
+            100% { content: 'INVITE :: TOKEN :: ACCESS'; opacity: 1; transform: translateX(0); }
+
+        }
+
+        .auth-ascii-line {
+
+            margin: 18px 0 20px;
+
+            overflow: hidden;
+
+            color: rgba(255,255,255,0.16);
+
+            font: 9px/1.6 'Geist Mono', monospace;
+
+            letter-spacing: 0.16em;
+
+            white-space: nowrap;
+
+            user-select: none;
+
+        }
+
+        .auth-ascii-line span {
+
+            display: inline-block;
+
+            min-width: 200%;
+
+            animation: auth-ascii-flow 28s linear infinite;
+
+        }
+
+        @keyframes auth-ascii-flow { to { transform: translateX(-50%); } }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .auth-ascii-line span { animation: none; }
+
+            .auth-mode-switch::before { transition: none; }
+
+            .card-entrance { animation: none; }
+
+            [data-view] { transition: none; }
+
+            .invite-cursor-line { animation: none; }
+
+            .matte-card.success-glow { animation: none; }
+
+            .success-checkmark-svg path { animation: none; stroke-dashoffset: 0; }
+
+        }
+
+        .auth-loading-spinner {
+
+            border: 2px solid rgba(255,255,255,0.1);
+
+            border-top: 2px solid #fff;
+
+            border-radius: 2px;
+
+            width: 20px;
+
+            height: 20px;
+
+            animation: spin 0.8s linear infinite;
+
+        }
+
         @keyframes spin { to { transform: rotate(360deg); } }
+
+
+
+        .auth-view-stack {
+
+            position: relative;
+
+        }
+
+        /* View switch: hidden = display:none, entrance = smooth slide+fade */
+
+        [data-view].hidden { display: none; }
+
+        @keyframes card-entrance {
+
+            from { opacity: 0; transform: translateY(36px); }
+
+            to   { opacity: 1; transform: translateY(0); }
+
+        }
+
+        .card-entrance {
+
+            animation: card-entrance 0.53s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+
+        }
+
+
+
+        /* Terminal-style invite input */
+
+        .invite-input-wrap {
+
+            position: relative;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        .invite-input-prefix {
+
+            position: absolute;
+
+            left: 14px;
+
+            color: rgba(255,255,255,0.45);
+
+            font: 700 18px/1 'Geist Mono', monospace;
+
+            pointer-events: none;
+
+            user-select: none;
+
+        }
+
+        .invite-input-terminal {
+
+            width: 100%;
+
+            background: #0c0c0c;
+
+            border: 1px solid #161616;
+
+            padding: 12px 14px 12px 32px;
+
+            color: #fff;
+
+            font: 500 18px/1 'Geist Mono', monospace;
+
+            letter-spacing: 0.3em;
+
+            text-transform: uppercase;
+
+            text-align: center;
+
+            outline: none;
+
+            border-radius: 12px;
+
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+        }
+
+        .invite-input-terminal::placeholder {
+
+            color: rgba(255,255,255,0.15);
+
+            letter-spacing: 0.3em;
+
+        }
+
+        .invite-input-terminal:focus {
+
+            border-color: rgba(255,255,255,0.35);
+
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.06), 0 0 20px rgba(255,255,255,0.04);
+
+        }
+
+        @keyframes terminal-cursor-blink {
+
+            0%, 100% { opacity: 1; }
+
+            50% { opacity: 0; }
+
+        }
+
+        .invite-input-terminal:focus + .invite-cursor-line {
+
+            opacity: 1;
+
+        }
+
+        .invite-cursor-line {
+
+            position: absolute;
+
+            right: 14px;
+
+            width: 2px;
+
+            height: 22px;
+
+            background: rgba(255,255,255,0.5);
+
+            border-radius: 1px;
+
+            pointer-events: none;
+
+            opacity: 0;
+
+            animation: terminal-cursor-blink 1s step-end infinite;
+
+            transition: opacity 0.2s;
+
+        }
+
+
+
+        /* Success animation — uses transition so it doesn't override card-entrance */
+
+        .matte-card.success-glow {
+
+            border-color: rgba(74, 222, 128, 0.45);
+
+            transition: border-color 0.6s ease-out;
+
+        }
+
+        @keyframes checkmark-draw {
+
+            from { stroke-dashoffset: 24; }
+
+            to   { stroke-dashoffset: 0; }
+
+        }
+
+        .success-checkmark-svg {
+
+            width: 14px;
+
+            height: 14px;
+
+            display: inline-block;
+
+            vertical-align: middle;
+
+            margin-right: 4px;
+
+        }
+
+        .success-checkmark-svg path {
+
+            stroke-dasharray: 24;
+
+            stroke-dashoffset: 24;
+
+            animation: checkmark-draw 0.4s 0.4s ease-out forwards;
+
+        }
+
+
+
+        /* Terminal-style buttons & dashed dividers */
+
+        .btn-terminal {
+
+            width: 100%;
+
+            border: 1px dashed rgba(255,255,255,0.12);
+
+            background: transparent;
+
+            color: rgba(255,255,255,0.55);
+
+            padding: 12px 16px;
+
+            font: 500 10px/1 'Geist Mono', monospace;
+
+            letter-spacing: 0.18em;
+
+            text-transform: uppercase;
+
+            outline: none;
+
+            cursor: pointer;
+
+            transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+
+        }
+
+        .btn-terminal:disabled {
+
+            cursor: wait;
+
+            opacity: 0.45;
+
+        }
+
+        .btn-terminal:hover {
+
+            border-color: rgba(255,255,255,0.3);
+
+            color: rgba(255,255,255,0.85);
+
+            background: rgba(255,255,255,0.04);
+
+        }
+
+        .btn-terminal:active {
+
+            transform: scale(0.975);
+
+        }
+
+        .btn-terminal:focus-visible,
+
+        .auth-mode-btn:focus-visible,
+
+        .invite-input-terminal:focus-visible,
+
+        .register-shell a:focus-visible {
+
+            outline: 1px solid rgba(255,255,255,0.45);
+
+            outline-offset: 3px;
+
+        }
+
+        .btn-terminal-primary {
+
+            border-style: solid;
+
+            border-color: rgba(255,255,255,0.7);
+
+            background: rgba(255,255,255,0.9);
+
+            color: #050505;
+
+            font-weight: 600;
+
+        }
+
+        .btn-terminal-primary:hover {
+
+            background: #fff;
+
+            border-color: #fff;
+
+            color: #050505;
+
+        }
+
+        .btn-terminal-compact {
+
+            width: auto;
+
+            display: inline-block;
+
+            padding: 8px 20px;
+
+        }
+
+        .btn-terminal-dev {
+
+            border-color: rgba(246, 212, 177, 0.22);
+
+            color: rgba(246, 212, 177, 0.62);
+
+        }
+
+        .btn-terminal-dev:hover {
+
+            border-color: rgba(246, 212, 177, 0.38);
+
+            color: rgba(246, 212, 177, 0.82);
+
+            background: rgba(246, 212, 177, 0.035);
+
+        }
+
+        .divider-dashed {
+
+            border: none;
+
+            border-top: 1px dashed rgba(255,255,255,0.08);
+
+            margin: 20px 0;
+
+        }
+
+        .register-shell {
+
+            position: relative;
+
+            z-index: 1;
+
+        }
+
+        .register-shell .matte-card {
+
+            background: rgba(8,8,8,0.94);
+
+            border-color: rgba(255,255,255,0.09);
+
+            border-radius: 12px;
+
+            box-shadow: none;
+
+            transition: border-color 0.18s ease, transform 0.18s ease;
+
+        }
+
+        .register-shell .matte-card::before {
+
+            content: '';
+
+            position: absolute;
+
+            inset: 10px;
+
+            border-top: 1px solid rgba(255,255,255,0.045);
+
+            border-bottom: 1px solid rgba(255,255,255,0.035);
+
+            pointer-events: none;
+
+        }
+
+        .register-shell .matte-card:hover {
+
+            border-color: rgba(255,255,255,0.18);
+
+        }
+
+        .register-shell .text-shiny {
+
+            background: none;
+
+            -webkit-background-clip: initial;
+
+            background-clip: initial;
+
+            -webkit-text-fill-color: currentColor;
+
+            color: rgba(255,255,255,0.88);
+
+            animation: none;
+
+        }
+
+        .register-shell .text-xs {
+
+            font-size: 11.5px;
+
+            line-height: 1.48;
+
+            letter-spacing: 0.02em;
+
+        }
+
+        .register-shell .tracking-widest {
+
+            letter-spacing: 0.09em;
+
+        }
+
+        .register-shell .auth-mode-btn,
+
+        .register-shell .btn-terminal {
+
+            letter-spacing: 0.12em;
+
+        }
+
+        .auth-terminal-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 16px;
+
+            margin: -6px 0 24px;
+
+            padding-bottom: 12px;
+
+            border-bottom: 1px dashed rgba(255,255,255,0.08);
+
+            color: rgba(255,255,255,0.28);
+
+            font: 10px/1 'Geist Mono', monospace;
+
+            letter-spacing: 0.12em;
+
+            text-transform: uppercase;
+
+        }
+
+        .invite-access-label {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            margin-bottom: 10px;
+
+            color: rgba(255,255,255,0.38);
+
+            font: 11px/1.35 'Geist Mono', monospace;
+
+            letter-spacing: 0.06em;
+
+            text-transform: uppercase;
+
+        }
+
+        .invite-access-label span:last-child {
+
+            color: rgba(255,255,255,0.2);
+
+        }
+
+        .invite-input-terminal {
+
+            border-radius: 8px;
+
+            letter-spacing: 0.22em;
+
+            transition: border-color 0.18s ease, background 0.18s ease;
+
+        }
+
+        .invite-input-terminal:focus {
+
+            border-color: rgba(255,255,255,0.42);
+
+            box-shadow: none;
+
+        }
+
+        .btn-terminal:hover {
+
+            transform: scale(1.025);
+
+        }
+
     </style>
+
 </head>
+
 <body class="bg-black text-white antialiased min-h-screen flex items-center justify-center font-mono">
 
-    <div class="w-full max-w-md mx-4">
+    <canvas id="ascii-canvas"></canvas>
+
+
+
+    <div class="register-shell w-full max-w-md mx-4">
+
         <div class="text-center mb-8">
+
             <a href="index.html" class="inline-flex items-center gap-3 opacity-50 hover:opacity-100 transition-opacity">
+
                 <img src="logo.png" alt="NeuroBench" class="w-8 h-8 rounded-lg object-contain">
+
                 <span class="font-bold tracking-tighter text-lg uppercase">NeuroBench</span>
+
             </a>
+
         </div>
 
-        <!-- AUTH VIEW -->
-        <div data-view="auth" class="matte-card p-8">
-            <div class="text-center mb-8">
-                <div class="w-14 h-14 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-surface">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-white/60">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                    </svg>
-                </div>
-                <h2 class="font-title text-lg uppercase tracking-widest text-shiny mb-2">Вход через Telegram</h2>
-                <p class="text-xs opacity-30">Для регистрации и входа используется ваш Telegram аккаунт</p>
+
+
+        <div id="auth-view-stack" class="auth-view-stack">
+
+            <!-- AUTH VIEW -->
+
+            <div data-view="auth" class="matte-card p-8">
+
+            <div class="auth-terminal-header" aria-hidden="true">
+
+                <span>auth.node</span>
+
+                <span>access</span>
+
             </div>
 
-            <div id="invite-section" class="mb-6 p-4 rounded-xl border border-border bg-surface/50">
-                <label class="text-[10px] uppercase tracking-widest text-gray-400 mb-2 block">Инвайт-код <span class="opacity-50">(для новых пользователей)</span></label>
-                <input id="invite-code" type="text" placeholder="XXXXXXXX" maxlength="8"
-                    class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/50 transition-colors rounded-xl font-mono uppercase tracking-widest text-center text-lg">
-                <p class="text-[9px] opacity-20 mt-2">Если вы уже зарегистрированы, оставьте поле пустым</p>
+            <div class="text-center mb-8">
+
+                <div class="w-14 h-14 border border-white/10 rounded-xl flex items-center justify-center mx-auto mb-5 bg-surface">
+
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-white/60">
+
+                        <path d="M4 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+                        <path d="M12 19h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+
+                    </svg>
+
+                </div>
+
+                <h2 id="auth-title" class="font-title text-lg uppercase tracking-widest text-shiny mb-2" data-text="Вход через Telegram">Вход через Telegram</h2>
+
+                <p id="auth-subtitle" class="text-xs opacity-30">Войдите через ваш Telegram аккаунт</p>
+
             </div>
+
+
+
+            <div id="auth-mode-switch" class="auth-mode-switch mb-6" data-mode="login" role="tablist" aria-label="Режим авторизации">
+
+                <button id="auth-mode-login" class="auth-mode-btn active" type="button" role="tab" aria-selected="true" data-auth-mode="login">Вход</button>
+
+                <button id="auth-mode-register" class="auth-mode-btn" type="button" role="tab" aria-selected="false" data-auth-mode="register">Регистрация</button>
+
+            </div>
+
+
+
+            <div class="auth-ascii-line" aria-hidden="true">
+
+                <span>LOGIN :: TELEGRAM :: NEUROBENCH :: INVITE :: ACCESS :: LOGIN :: TELEGRAM :: NEUROBENCH :: INVITE :: ACCESS :: </span>
+
+            </div>
+
+
+
+            <div id="invite-section" class="p-4 border border-dashed border-white/10 bg-surface/30" aria-hidden="true">
+
+                <label class="invite-access-label" for="invite-code">
+
+                    <span>access.required</span>
+
+                    <span>invite token</span>
+
+                </label>
+
+                <div class="invite-input-wrap">
+
+                    <span class="invite-input-prefix">&gt;</span>
+
+                    <input id="invite-code" type="text" placeholder="XXXXXXXX" maxlength="8"
+
+                        class="invite-input-terminal">
+
+                    <span class="invite-cursor-line"></span>
+
+                </div>
+
+                <p class="text-[11px] opacity-30 mt-3">Инвайт нужен только для первого входа нового пользователя.</p>
+
+            </div>
+
+
 
             <div id="tg-widget-container" class="tg-widget-container mb-4"></div>
 
+
+
             <div id="auth-loading" class="hidden flex items-center justify-center gap-3 py-3">
+
                 <div class="auth-loading-spinner"></div>
+
                 <span class="text-[10px] uppercase tracking-widest opacity-50">Аутентификация...</span>
+
             </div>
+
+
+
+            <div id="dev-login-section" class="mt-4 hidden">
+
+                <hr class="divider-dashed">
+
+                <p class="text-[9px] uppercase tracking-widest text-yellow-400/50 text-center mb-3">Локальная разработка</p>
+
+                <button id="dev-login-btn" class="btn-terminal btn-terminal-dev">
+
+                    Dev Login (фейк-аккаунт)
+
+                </button>
+
+            </div>
+
+
 
             <p id="auth-error" class="text-red-400 text-xs text-center hidden mt-3"></p>
+
         </div>
+
+
 
         <!-- ACCOUNT VIEW -->
+
         <div data-view="account" class="hidden matte-card p-8">
-            <div class="text-center mb-6">
-                <div id="account-photo-placeholder" class="w-16 h-16 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-surface">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-white/40">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                </div>
-                <img id="account-photo" src="" alt="" class="hidden w-16 h-16 rounded-2xl mx-auto mb-4 object-cover border border-white/10"
-                    onerror="this.classList.add('hidden');document.getElementById('account-photo-placeholder').classList.remove('hidden');">
-                <span id="new-user-badge" class="hidden inline-block text-[9px] uppercase tracking-widest bg-white/10 text-green-400 px-3 py-1 rounded-full mb-2">Регистрация завершена</span>
-                <h2 id="account-name" class="font-title text-lg uppercase tracking-widest text-shiny"></h2>
-                <p id="account-username" class="text-xs opacity-30 hidden font-mono"></p>
+
+            <div class="auth-terminal-header" aria-hidden="true">
+
+                <span style="color:rgba(100,200,100,0.6)">Статус Аккаунта:</span>
+
+                <span id="account-status-label" style="color:rgba(100,200,100,0.7)">verified</span>
+
             </div>
 
-            <div id="account-verified" class="hidden mb-5">
-                <div id="account-no-invite" class="text-center">
-                    <p class="text-xs uppercase tracking-widest text-gray-400 mb-3">Вы можете пригласить одного человека</p>
-                    <button id="account-gen-invite"
-                        class="w-full border border-border py-3 text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors rounded-full mb-3">
-                        Сгенерировать инвайт-код
-                    </button>
+            <div class="text-center mb-6">
+
+                <div id="account-photo-placeholder" class="w-16 h-16 border border-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 bg-surface">
+
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-white/40">
+
+                        <path d="M4 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+                        <path d="M12 19h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+
+                    </svg>
+
                 </div>
-                <div id="account-invite-deleted" class="hidden text-center">
-                    <p class="text-xs uppercase tracking-widest text-red-400/60 mb-3">Ваш инвайт-код был удалён</p>
-                    <button id="account-regen-invite"
-                        class="w-full border border-border py-3 text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors rounded-full mb-3">
-                        Сгенерировать новый код
-                    </button>
-                </div>
-                <div id="account-has-invite" class="hidden text-center">
-                    <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Ваш инвайт-код</p>
-                    <p id="account-invite-code" class="invite-code-display text-white mb-2"></p>
-                    <p id="account-invite-uses" class="hidden text-[9px] uppercase tracking-widest text-gray-500 mb-2"></p>
-                    <button id="account-copy-code"
-                        class="text-[10px] uppercase tracking-widest border border-border px-4 py-2 bg-white/5 hover:bg-white/10 transition-colors rounded-full">
-                        Скопировать
-                    </button>
-                </div>
+
+                <img id="account-photo" src="" alt="" class="hidden w-16 h-16 rounded-xl mx-auto mb-4 object-cover border border-white/10"
+
+                    onerror="this.classList.add('hidden');document.getElementById('account-photo-placeholder').classList.remove('hidden');">
+
+                <span id="new-user-badge" class="hidden inline-block text-[9px] uppercase tracking-widest bg-white/10 text-green-400 px-3 py-1 rounded-md mb-2"><svg class="success-checkmark-svg" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 6.5-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Регистрация завершена</span>
+
+                <h2 id="account-name" class="font-title text-lg uppercase tracking-widest text-shiny"></h2>
+
+                <p id="account-username" class="text-xs opacity-30 hidden font-mono"></p>
+
             </div>
+
+
 
             <div id="account-unverified" class="hidden mb-5 text-center">
+
                 <p class="text-xs opacity-30">Аккаунт не верифицирован. Обратитесь к администратору.</p>
+
             </div>
 
-            <button id="account-logout"
-                class="w-full border border-border py-3 text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors rounded-full mt-2">
+
+
+            <hr class="divider-dashed">
+
+
+
+            <button id="account-logout" class="btn-terminal">
+
                 Выйти
+
             </button>
+
             <a href="index.html"
-                class="block w-full bg-white text-black py-3 text-[10px] uppercase tracking-widest font-bold rounded-full hover:scale-105 transition-transform text-center mt-3">
+
+                class="btn-terminal btn-terminal-primary block text-center mt-3">
+
                 На главную
+
             </a>
+
+            <a href="forum.html"
+
+                class="btn-terminal block text-center mt-2">
+
+                Форум
+
+            </a>
+
         </div>
+
+        </div>
+
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
+
+
+    <script src="js/config.js?v=5"></script>
+
+    <script src="js/api.js?v=8"></script>
+
     <script>
+
         (function() {
+
             var botUsername = window.TELEGRAM_BOT_USERNAME || '';
-            if (botUsername) {
-                var newScript = document.createElement('script');
-                newScript.async = true;
-                newScript.src = 'https://telegram.org/js/telegram-widget.js?22';
-                newScript.setAttribute('data-telegram-login', botUsername);
-                newScript.setAttribute('data-size', 'large');
-                newScript.setAttribute('data-onauth', 'onTelegramAuth(user)');
-                var container = document.getElementById('tg-widget-container');
-                container.innerHTML = '';
-                container.appendChild(newScript);
+
+            var host = window.location.hostname;
+
+            var isLocal = !host || host === 'localhost' || host === '127.0.0.1' || host === '::1';
+
+            var container = document.getElementById('tg-widget-container');
+
+            var telegramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.9 4.6 18.7 19.7c-.2 1-.8 1.2-1.6.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.4-4.9 8.9-8c.4-.4-.1-.6-.6-.2l-11 6.9-4.7-1.5c-1-.3-1-1 .2-1.5L20.7 3.4c.9-.3 1.6.2 1.2 1.2Z"/></svg>';
+
+            if (!container) return;
+
+            if (isLocal) {
+
+                container.innerHTML = '<div class="tg-local-fallback">' + telegramIcon + '<span>Telegram доступен только на домене бота</span></div>';
+
+                return;
+
             }
+
+            if (botUsername) {
+
+                var newScript = document.createElement('script');
+
+                newScript.async = true;
+
+                newScript.src = 'https://telegram.org/js/telegram-widget.js?22';
+
+                newScript.setAttribute('data-telegram-login', botUsername);
+
+                newScript.setAttribute('data-size', 'large');
+
+                newScript.setAttribute('data-onauth', 'onTelegramAuth(user)');
+
+                newScript.onerror = function() {
+
+                    container.innerHTML = '<div class="tg-widget-state">' + telegramIcon + '<span>Telegram widget не загружен</span></div>';
+
+                };
+
+                container.innerHTML = '<div class="tg-widget-state">' + telegramIcon + '<span>Загрузка Telegram</span></div>';
+
+                container.appendChild(newScript);
+
+                var checksLeft = 15;
+
+                var widgetCheck = window.setInterval(function() {
+
+                    var iframe = container.querySelector('iframe');
+
+                    var state = container.querySelector('.tg-widget-state');
+
+                    if (iframe) {
+
+                        if (state) state.remove();
+
+                        window.clearInterval(widgetCheck);
+
+                    } else if (--checksLeft <= 0) {
+
+                        if (state) state.innerHTML = telegramIcon + '<span>Telegram widget не отображается</span>';
+
+                        window.clearInterval(widgetCheck);
+
+                    }
+
+                }, 300);
+
+            } else {
+
+                container.innerHTML = '<div class="tg-widget-state">' + telegramIcon + '<span>Telegram bot не настроен</span></div>';
+
+            }
+
         })();
+
     </script>
-    <script src="js/auth.js"></script>
+
+    <script src="js/auth.js?v=46"></script>
+
+    <script src="js/ascii-bg.js?v=1"></script>
+
 </body>
+
 </html>

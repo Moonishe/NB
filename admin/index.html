@@ -2,17 +2,18 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://hbzdbigmfawgcvzeljdh.supabase.co https://api.github.com; frame-src https://oauth.telegram.org https://telegram.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
     <link rel="icon" type="image/png" href="../logo2.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeuroBench | Admin Panel</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../assets/vendor/tailwind/tailwindcss-3.4.17-cdn.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../assets/vendor/supabase/supabase-js-2.49.4.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -74,6 +75,8 @@
                 <button class="admin-nav-btn" data-section="stats">Статистика</button>
                 <button class="admin-nav-btn" data-section="invites">Инвайты</button>
                 <button class="admin-nav-btn" data-section="users">Пользователи</button>
+                <button class="admin-nav-btn" data-section="profiles">Профили</button>
+                <button class="admin-nav-btn" data-section="moderators">Модераторы</button>
             </aside>
 
             <main class="flex-1 p-8 max-w-6xl">
@@ -152,6 +155,28 @@
                     <div id="users-list" class="flex flex-col gap-3"></div>
                 </section>
 
+                <section id="section-profiles" class="admin-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Управление профилями</h2>
+                        <div class="flex gap-3 items-center">
+                            <input id="profiles-search" type="text" placeholder="Поиск по имени/username..." class="bg-surface border border-border px-4 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-white/50 rounded-xl">
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-6">Роли: admin > stmoderator > moderator > beta > alpha > member. Клик по пользователю открывает полный профиль с управлением.</p>
+                    <div id="profiles-grid" class="flex flex-col gap-3"></div>
+                </section>
+
+                <section id="section-moderators" class="admin-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Модераторы</h2>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-6">Модераторы привязаны к Telegram. Они могут: закреплять/блокировать/удалять треды и посты, заглушать и блокировать пользователей (кроме других модераторов и админов).</p>
+                    <div id="moderators-list" class="flex flex-col gap-3 mb-8"></div>
+                    <h3 class="font-title text-sm uppercase tracking-widest opacity-30 mb-4">Назначить модератора</h3>
+                    <p class="text-xs text-gray-500 mb-4">Выберите верифицированного пользователя с Telegram username:</p>
+                    <div id="moderator-candidates" class="flex flex-col gap-3"></div>
+                </section>
+
             </main>
         </div>
 
@@ -162,7 +187,7 @@
     </div>
 
     <script src="../js/config.js"></script>
-    <script src="../js/api.js"></script>
+    <script src="../js/api.js?v=11"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>
