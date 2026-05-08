@@ -1032,7 +1032,6 @@ BEGIN
 END;
 $$;
 
-DROP FUNCTION IF EXISTS public.trg_normalize_profiles_telegram_photo_url();
 CREATE OR REPLACE FUNCTION public.trg_normalize_profiles_telegram_photo_url()
 RETURNS TRIGGER
 LANGUAGE plpgsql

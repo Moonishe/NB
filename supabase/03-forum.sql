@@ -1816,7 +1816,6 @@ ON CONFLICT (id) DO UPDATE SET
     sort_order = EXCLUDED.sort_order;
 
 -- STEP 4: Update handle_new_user to set role = 'member' on registration
-DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql

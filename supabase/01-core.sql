@@ -145,7 +145,6 @@ CREATE POLICY "fn_manage_profiles" ON profiles
     FOR ALL USING (auth.role() = 'service_role' OR auth.uid() = user_id);
 
 -- 6. Trigger: auto-create profile on signup
-DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -465,7 +464,6 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_photo_url TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_telegram_id ON profiles (telegram_id) WHERE telegram_id IS NOT NULL;
 
 -- 3. Update handle_new_user trigger to support telegram data
-DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -812,7 +810,6 @@ $$;
 ALTER TABLE profiles ALTER COLUMN uid SET DEFAULT nextval('user_uid_seq');
 
 -- 5. Update trigger to include uid in INSERT (it will use the default)
-DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql

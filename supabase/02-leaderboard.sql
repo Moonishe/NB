@@ -194,7 +194,6 @@ CREATE INDEX IF NOT EXISTS idx_result_ratings_result_id ON result_ratings(result
 CREATE INDEX IF NOT EXISTS idx_result_ratings_user_id ON result_ratings(user_id);
 CREATE INDEX IF NOT EXISTS idx_result_ratings_result_created ON result_ratings(result_id, created_at);
 
-DROP FUNCTION IF EXISTS public.touch_result_rating_updated_at();
 CREATE OR REPLACE FUNCTION touch_result_rating_updated_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql
