@@ -1,4 +1,4 @@
--- ============================================
+﻿-- ============================================
 -- BUNDLE 6A: SECURITY FIXES (small patches)
 -- Run AFTER bundles 01-05
 -- ============================================
@@ -85,6 +85,7 @@ REVOKE EXECUTE ON FUNCTION public.check_telegram_auth_rate_limit(TEXT, INTEGER, 
 REVOKE EXECUTE ON FUNCTION public.check_telegram_auth_rate_limit(TEXT, INTEGER, INTEGER) FROM authenticated;
 GRANT EXECUTE ON FUNCTION public.check_telegram_auth_rate_limit(TEXT, INTEGER, INTEGER) TO service_role;
 
+DROP FUNCTION IF EXISTS public.get_auth_user_id_by_email(TEXT);
 CREATE OR REPLACE FUNCTION public.get_auth_user_id_by_email(p_email TEXT)
 RETURNS UUID
 LANGUAGE sql
@@ -111,6 +112,7 @@ NOTIFY pgrst, 'reload schema';
 -- Addresses: concurrent claim_invite_code, generate_user_invite_code, and telegram-auth invite claim
 
 -- 1. Fix claim_invite_code: add FOR UPDATE lock to prevent double-use
+DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT);
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -167,6 +169,7 @@ END;
 $$;
 
 -- 2. Fix generate_user_invite_code: serialize with advisory lock per user
+DROP FUNCTION IF EXISTS public.generate_user_invite_code();
 CREATE OR REPLACE FUNCTION public.generate_user_invite_code()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -224,6 +227,7 @@ END;
 $$;
 
 -- 3. Admin RPC for atomic invite claim (used by telegram-auth edge function)
+DROP FUNCTION IF EXISTS public.admin_claim_invite_for_user(TEXT, UUID);
 CREATE OR REPLACE FUNCTION public.admin_claim_invite_for_user(p_code TEXT, p_user_id UUID)
 RETURNS UUID
 LANGUAGE plpgsql
@@ -341,6 +345,7 @@ $$;
 -- --- fix_is_moderator.sql ---
 
 -- Fix is_moderator() to check profiles.role in addition to moderators table
+DROP FUNCTION IF EXISTS public.is_moderator();
 CREATE OR REPLACE FUNCTION public.is_moderator()
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -384,6 +389,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_remove_moderator(UUID);
 CREATE OR REPLACE FUNCTION public.admin_remove_moderator(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -439,6 +445,7 @@ NOTIFY pgrst, 'reload schema';
 
 -- --- migration_invite_delete_used_error.sql ---
 
+DROP FUNCTION IF EXISTS public.admin_delete_invite_code(UUID);
 CREATE OR REPLACE FUNCTION public.admin_delete_invite_code(p_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -469,7 +476,7 @@ BEGIN
     END IF;
 
     IF COALESCE(v_invite.use_count, 0) > 0 OR v_invite.used_by IS NOT NULL THEN
-        RAISE EXCEPTION 'Нельзя удалить использованный инвайт';
+        RAISE EXCEPTION 'РќРµР»СЊР·СЏ СѓРґР°Р»РёС‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРЅС‹Р№ РёРЅРІР°Р№С‚';
     END IF;
 
     UPDATE public.profiles
@@ -510,6 +517,7 @@ DROP POLICY IF EXISTS "deny_direct_user_action_events" ON public.user_action_eve
 CREATE POLICY "deny_direct_user_action_events" ON public.user_action_events
     FOR ALL USING (false) WITH CHECK (false);
 
+DROP FUNCTION IF EXISTS public.grant_achievement(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.grant_achievement(p_user_id UUID, p_achievement_id TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -552,6 +560,7 @@ REVOKE EXECUTE ON FUNCTION public.grant_achievement(UUID, TEXT) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.grant_achievement(UUID, TEXT) FROM anon;
 REVOKE EXECUTE ON FUNCTION public.grant_achievement(UUID, TEXT) FROM authenticated;
 
+DROP FUNCTION IF EXISTS public.check_and_grant_achievements(UUID);
 CREATE OR REPLACE FUNCTION public.check_and_grant_achievements(p_user_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -711,6 +720,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.check_reaction_achievements(INTEGER, UUID);
 CREATE OR REPLACE FUNCTION public.check_reaction_achievements(p_post_id INTEGER, p_reactor_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -763,6 +773,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.check_pin_achievement(INTEGER);
 CREATE OR REPLACE FUNCTION public.check_pin_achievement(p_thread_id INTEGER)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -888,6 +899,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.toggle_post_reaction(INTEGER, TEXT);
 CREATE OR REPLACE FUNCTION public.toggle_post_reaction(p_post_id INTEGER, p_emoji TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -969,6 +981,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_generate_invite_for_user(UUID);
 CREATE OR REPLACE FUNCTION public.admin_generate_invite_for_user(p_user_id UUID, p_max_uses INT DEFAULT 1)
 RETURNS JSONB
 LANGUAGE plpgsql

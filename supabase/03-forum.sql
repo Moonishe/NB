@@ -244,6 +244,7 @@ ON CONFLICT (slug) DO NOTHING;
 -- STEP 8: Helper function вЂ” is user moderator
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.is_moderator(UUID);
 CREATE OR REPLACE FUNCTION public.is_moderator(p_user_id UUID DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -262,6 +263,7 @@ $$;
 -- STEP 9: Helper function вЂ” is user banned/muted
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_user_restriction(UUID);
 CREATE OR REPLACE FUNCTION public.get_user_restriction(p_user_id UUID DEFAULT NULL)
 RETURNS TABLE(action_type TEXT, reason TEXT, expires_at TIMESTAMPTZ)
 LANGUAGE plpgsql
@@ -283,6 +285,7 @@ $$;
 -- STEP 10: RPC вЂ” Get forum threads (paginated, with author info)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_forum_threads(INTEGER, INTEGER, INTEGER);
 CREATE OR REPLACE FUNCTION public.get_forum_threads(
     p_category_id INTEGER DEFAULT NULL,
     p_limit INTEGER DEFAULT 20,
@@ -361,6 +364,7 @@ $$;
 -- STEP 12: RPC вЂ” Get thread posts (paginated, with author info)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_forum_thread_posts(INTEGER, INTEGER, INTEGER);
 CREATE OR REPLACE FUNCTION public.get_forum_thread_posts(
     p_thread_id INTEGER,
     p_limit INTEGER DEFAULT 25,
@@ -469,6 +473,7 @@ $$;
 -- STEP 15: RPC вЂ” Create forum post (reply)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.create_forum_post(INTEGER, TEXT);
 CREATE OR REPLACE FUNCTION public.create_forum_post(
     p_thread_id INTEGER,
     p_content TEXT
@@ -568,6 +573,7 @@ $$;
 -- STEP 18: RPC вЂ” Update profile bio
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.update_profile_bio(TEXT);
 CREATE OR REPLACE FUNCTION public.update_profile_bio(p_bio TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -635,6 +641,7 @@ $$;
 -- STEP 21: RPC вЂ” Moderator: soft-delete thread
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.mod_delete_thread(INTEGER);
 CREATE OR REPLACE FUNCTION public.mod_delete_thread(p_thread_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -656,6 +663,7 @@ $$;
 -- STEP 22: RPC вЂ” Moderator: soft-delete post
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.mod_delete_post(INTEGER);
 CREATE OR REPLACE FUNCTION public.mod_delete_post(p_post_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -739,6 +747,7 @@ $$;
 -- STEP 25: RPC вЂ” Moderator: unban user
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.mod_unban_user(UUID);
 CREATE OR REPLACE FUNCTION public.mod_unban_user(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -760,6 +769,7 @@ $$;
 -- STEP 26: RPC вЂ” Moderator: unmute user
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.mod_unmute_user(UUID);
 CREATE OR REPLACE FUNCTION public.mod_unmute_user(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -781,6 +791,7 @@ $$;
 -- STEP 27: RPC вЂ” Admin: assign moderator
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.admin_assign_moderator(UUID);
 CREATE OR REPLACE FUNCTION public.admin_assign_moderator(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -809,6 +820,7 @@ $$;
 -- STEP 28: RPC вЂ” Admin: remove moderator
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.admin_remove_moderator(UUID);
 CREATE OR REPLACE FUNCTION public.admin_remove_moderator(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -828,6 +840,7 @@ $$;
 -- STEP 29: RPC вЂ” Admin: get moderators list
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.admin_get_moderators();
 CREATE OR REPLACE FUNCTION public.admin_get_moderators()
 RETURNS TABLE(
     id INTEGER,
@@ -859,6 +872,7 @@ $$;
 -- STEP 30: RPC вЂ” Get public profile info (for viewing other users)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_public_profile(UUID);
 CREATE OR REPLACE FUNCTION public.get_public_profile(p_user_id UUID)
 RETURNS TABLE(
     user_id UUID,
@@ -898,6 +912,7 @@ $$;
 -- STEP 31: RPC вЂ” Get user mod actions history (for moderators)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_user_mod_actions(UUID);
 CREATE OR REPLACE FUNCTION public.get_user_mod_actions(p_user_id UUID)
 RETURNS TABLE(
     id INTEGER,
@@ -933,6 +948,7 @@ $$;
 -- STEP 32: Cleanup expired mod actions (call occasionally)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.cleanup_expired_mod_actions();
 CREATE OR REPLACE FUNCTION public.cleanup_expired_mod_actions()
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -1104,6 +1120,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 -- STEP 2: Toggle reaction RPC
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.toggle_post_reaction(INTEGER, TEXT);
 CREATE OR REPLACE FUNCTION public.toggle_post_reaction(p_post_id INTEGER, p_emoji TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -1300,6 +1317,7 @@ CREATE POLICY "user_update_own_notifications" ON notifications
 -- STEP 6: Notification RPCs
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_my_notifications(INTEGER);
 CREATE OR REPLACE FUNCTION public.get_my_notifications(p_limit INTEGER DEFAULT 20)
 RETURNS TABLE(
     id INTEGER,
@@ -1336,6 +1354,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_unread_count();
 CREATE OR REPLACE FUNCTION public.get_unread_count()
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -1351,6 +1370,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.mark_notifications_read();
 CREATE OR REPLACE FUNCTION public.mark_notifications_read()
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -1370,6 +1390,7 @@ $$;
 -- STEP 7: Update create_forum_post to send reply notifications
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.create_forum_post(INTEGER, TEXT);
 CREATE OR REPLACE FUNCTION public.create_forum_post(
     p_thread_id INTEGER,
     p_content TEXT
@@ -1429,6 +1450,7 @@ $$;
 -- STEP 8: RPC вЂ” Resolve usernames to user_ids (for @mentions)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.resolve_usernames(TEXT);
 CREATE OR REPLACE FUNCTION public.resolve_usernames(p_usernames TEXT[])
 RETURNS TABLE(
     username TEXT,
@@ -1652,6 +1674,7 @@ NOTIFY pgrst, 'reload schema';
 -- ==========================================
 
 -- STEP 1: Update toggle_post_reaction to support admin_like
+DROP FUNCTION IF EXISTS public.toggle_post_reaction(INTEGER, TEXT);
 CREATE OR REPLACE FUNCTION public.toggle_post_reaction(p_post_id INTEGER, p_emoji TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -1718,6 +1741,7 @@ END;
 $$;
 
 -- STEP 2: Update check_reaction_achievements to handle admin_like
+DROP FUNCTION IF EXISTS public.check_reaction_achievements(INTEGER, UUID);
 CREATE OR REPLACE FUNCTION public.check_reaction_achievements(p_post_id INTEGER, p_reactor_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -1792,6 +1816,7 @@ ON CONFLICT (id) DO UPDATE SET
     sort_order = EXCLUDED.sort_order;
 
 -- STEP 4: Update handle_new_user to set role = 'member' on registration
+DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql

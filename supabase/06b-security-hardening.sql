@@ -210,6 +210,7 @@ $$;
 
 -- Showcase updates stay possible only through a trusted RPC that verifies every
 -- requested achievement belongs to the current user.
+DROP FUNCTION IF EXISTS public.set_showcased_achievements(TEXT);
 CREATE OR REPLACE FUNCTION public.set_showcased_achievements(p_achievement_ids TEXT[])
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -268,6 +269,7 @@ REVOKE EXECUTE ON FUNCTION public.set_showcased_achievements(TEXT[]) FROM anon;
 GRANT EXECUTE ON FUNCTION public.set_showcased_achievements(TEXT[]) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.set_showcased_achievements(TEXT[]) TO service_role;
 
+DROP FUNCTION IF EXISTS public.check_and_grant_achievements(UUID);
 CREATE OR REPLACE FUNCTION public.check_and_grant_achievements(p_user_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -522,6 +524,7 @@ CREATE POLICY "service_manage_profiles" ON public.profiles
     WITH CHECK (true);
 
 -- Canonical role quota helper used by invite generation.
+DROP FUNCTION IF EXISTS public.get_invite_max(TEXT);
 CREATE OR REPLACE FUNCTION public.get_invite_max(p_role TEXT)
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -681,6 +684,7 @@ REVOKE EXECUTE ON FUNCTION public._claim_invite_code_for_user(TEXT, UUID) FROM a
 REVOKE EXECUTE ON FUNCTION public._claim_invite_code_for_user(TEXT, UUID) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public._claim_invite_code_for_user(TEXT, UUID) FROM service_role;
 
+DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT);
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -740,6 +744,7 @@ GRANT EXECUTE ON FUNCTION public.admin_claim_invite_for_user(TEXT, UUID) TO serv
 -- Canonical invite generation logic
 -- ============================================================
 
+DROP FUNCTION IF EXISTS public.generate_user_invite_code();
 CREATE OR REPLACE FUNCTION public.generate_user_invite_code()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -968,6 +973,7 @@ GRANT EXECUTE ON FUNCTION public.admin_generate_invite_for_user(UUID, INT) TO au
 GRANT EXECUTE ON FUNCTION public.admin_generate_invite_for_user(UUID, INT) TO service_role;
 
 -- Preserve bio updates through the sanctioned RPC instead of broad table writes.
+DROP FUNCTION IF EXISTS public.update_profile_bio(TEXT);
 CREATE OR REPLACE FUNCTION public.update_profile_bio(p_bio TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -1000,6 +1006,7 @@ GRANT EXECUTE ON FUNCTION public.update_profile_bio(TEXT) TO service_role;
 -- DB-level profile photo hardening
 -- ============================================================
 
+DROP FUNCTION IF EXISTS public.normalize_telegram_photo_url(TEXT);
 CREATE OR REPLACE FUNCTION public.normalize_telegram_photo_url(p_value TEXT)
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -1025,6 +1032,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.trg_normalize_profiles_telegram_photo_url();
 CREATE OR REPLACE FUNCTION public.trg_normalize_profiles_telegram_photo_url()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -1974,6 +1982,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_remove_moderator(UUID);
 CREATE OR REPLACE FUNCTION public.admin_remove_moderator(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -2047,6 +2056,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_result_rating_stats(INTEGER);
 CREATE OR REPLACE FUNCTION public.get_result_rating_stats(p_result_ids INTEGER[])
 RETURNS TABLE (
     result_id INTEGER,
@@ -2335,6 +2345,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_delete_invite_code(UUID);
 CREATE OR REPLACE FUNCTION public.admin_delete_invite_code(p_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -2366,6 +2377,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_get_invite_codes();
 CREATE OR REPLACE FUNCTION public.admin_get_invite_codes()
 RETURNS SETOF public.invite_codes
 LANGUAGE plpgsql
@@ -2460,6 +2472,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_get_user_detail(UUID);
 CREATE OR REPLACE FUNCTION public.admin_get_user_detail(p_user_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -2602,6 +2615,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_grant_achievement(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_grant_achievement(p_user_id UUID, p_achievement_id TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -2643,6 +2657,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_revoke_achievement(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_revoke_achievement(p_user_id UUID, p_achievement_id TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -2669,6 +2684,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_my_notifications(INTEGER);
 CREATE OR REPLACE FUNCTION public.get_my_notifications(p_limit INTEGER DEFAULT 20)
 RETURNS TABLE(
     id INTEGER,
@@ -2711,6 +2727,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_unread_count();
 CREATE OR REPLACE FUNCTION public.get_unread_count()
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -2734,6 +2751,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.mark_notifications_read();
 CREATE OR REPLACE FUNCTION public.mark_notifications_read()
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -2772,6 +2790,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.resolve_usernames(TEXT);
 CREATE OR REPLACE FUNCTION public.resolve_usernames(p_usernames TEXT[])
 RETURNS TABLE(
     username TEXT,
@@ -3014,6 +3033,7 @@ $$;
 -- Admin content/catalog write hardening
 -- ============================================================
 
+DROP FUNCTION IF EXISTS public.is_admin();
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -3038,6 +3058,7 @@ REVOKE EXECUTE ON FUNCTION public.is_admin() FROM anon;
 GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.is_admin() TO service_role;
 
+DROP FUNCTION IF EXISTS public.normalize_https_url(TEXT);
 CREATE OR REPLACE FUNCTION public.normalize_https_url(p_value TEXT)
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -3064,6 +3085,7 @@ REVOKE EXECUTE ON FUNCTION public.normalize_https_url(TEXT) FROM anon;
 REVOKE EXECUTE ON FUNCTION public.normalize_https_url(TEXT) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public.normalize_https_url(TEXT) FROM service_role;
 
+DROP FUNCTION IF EXISTS public.is_safe_svg_content(TEXT);
 CREATE OR REPLACE FUNCTION public.is_safe_svg_content(p_svg TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -3122,6 +3144,7 @@ REVOKE EXECUTE ON FUNCTION public.is_safe_svg_content(TEXT) FROM anon;
 REVOKE EXECUTE ON FUNCTION public.is_safe_svg_content(TEXT) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public.is_safe_svg_content(TEXT) FROM service_role;
 
+DROP FUNCTION IF EXISTS public.admin_content_target_table(TEXT);
 CREATE OR REPLACE FUNCTION public.admin_content_target_table(p_table_name TEXT)
 RETURNS REGCLASS
 LANGUAGE plpgsql
@@ -3155,6 +3178,7 @@ REVOKE EXECUTE ON FUNCTION public.admin_content_target_table(TEXT) FROM anon;
 REVOKE EXECUTE ON FUNCTION public.admin_content_target_table(TEXT) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public.admin_content_target_table(TEXT) FROM service_role;
 
+DROP FUNCTION IF EXISTS public.admin_prepare_content_payload(TEXT, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_prepare_content_payload(p_table_name TEXT, p_payload JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -3236,6 +3260,7 @@ REVOKE EXECUTE ON FUNCTION public.admin_prepare_content_payload(TEXT, JSONB) FRO
 REVOKE EXECUTE ON FUNCTION public.admin_prepare_content_payload(TEXT, JSONB) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public.admin_prepare_content_payload(TEXT, JSONB) FROM service_role;
 
+DROP FUNCTION IF EXISTS public.admin_validate_result_payload(INTEGER, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_validate_result_payload(p_result_id INTEGER, p_payload JSONB)
 RETURNS VOID
 LANGUAGE plpgsql
@@ -3294,6 +3319,7 @@ REVOKE EXECUTE ON FUNCTION public.admin_validate_result_payload(INTEGER, JSONB) 
 REVOKE EXECUTE ON FUNCTION public.admin_validate_result_payload(INTEGER, JSONB) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public.admin_validate_result_payload(INTEGER, JSONB) FROM service_role;
 
+DROP FUNCTION IF EXISTS public.admin_insert_content_row(TEXT, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_insert_content_row(p_table_name TEXT, p_payload JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -3354,6 +3380,7 @@ REVOKE EXECUTE ON FUNCTION public.admin_insert_content_row(TEXT, JSONB) FROM ano
 REVOKE EXECUTE ON FUNCTION public.admin_insert_content_row(TEXT, JSONB) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public.admin_insert_content_row(TEXT, JSONB) FROM service_role;
 
+DROP FUNCTION IF EXISTS public.admin_update_content_row(TEXT, INTEGER, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_update_content_row(p_table_name TEXT, p_id INTEGER, p_payload JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -3416,6 +3443,7 @@ REVOKE EXECUTE ON FUNCTION public.admin_update_content_row(TEXT, INTEGER, JSONB)
 REVOKE EXECUTE ON FUNCTION public.admin_update_content_row(TEXT, INTEGER, JSONB) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public.admin_update_content_row(TEXT, INTEGER, JSONB) FROM service_role;
 
+DROP FUNCTION IF EXISTS public.admin_delete_content_row(TEXT, INTEGER);
 CREATE OR REPLACE FUNCTION public.admin_delete_content_row(p_table_name TEXT, p_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -3655,6 +3683,7 @@ DROP POLICY IF EXISTS "service_manage_result_param_values" ON public;
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_add_prompt(JSONB);
 CREATE OR REPLACE FUNCTION public.admin_add_prompt(p_prompt JSONB)
 RETURNS SETOF public.prompts
 LANGUAGE sql
@@ -3664,6 +3693,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.prompts, public.admin_insert_content_row('prompts', p_prompt))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_update_prompt(INTEGER, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_update_prompt(p_id INTEGER, p_prompt JSONB)
 RETURNS SETOF public.prompts
 LANGUAGE sql
@@ -3673,6 +3703,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.prompts, public.admin_update_content_row('prompts', p_id, p_prompt))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_delete_prompt(INTEGER);
 CREATE OR REPLACE FUNCTION public.admin_delete_prompt(p_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -3682,6 +3713,7 @@ AS $$
     SELECT public.admin_delete_content_row('prompts', p_id);
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_add_model(JSONB);
 CREATE OR REPLACE FUNCTION public.admin_add_model(p_model JSONB)
 RETURNS SETOF public.models
 LANGUAGE sql
@@ -3691,6 +3723,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.models, public.admin_insert_content_row('models', p_model))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_update_model(INTEGER, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_update_model(p_id INTEGER, p_model JSONB)
 RETURNS SETOF public.models
 LANGUAGE sql
@@ -3700,6 +3733,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.models, public.admin_update_content_row('models', p_id, p_model))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_delete_model(INTEGER);
 CREATE OR REPLACE FUNCTION public.admin_delete_model(p_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -3709,6 +3743,7 @@ AS $$
     SELECT public.admin_delete_content_row('models', p_id);
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_add_model_space(JSONB);
 CREATE OR REPLACE FUNCTION public.admin_add_model_space(p_space JSONB)
 RETURNS SETOF public.model_spaces
 LANGUAGE sql
@@ -3718,6 +3753,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.model_spaces, public.admin_insert_content_row('model_spaces', p_space))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_update_model_space(INTEGER, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_update_model_space(p_id INTEGER, p_space JSONB)
 RETURNS SETOF public.model_spaces
 LANGUAGE sql
@@ -3727,6 +3763,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.model_spaces, public.admin_update_content_row('model_spaces', p_id, p_space))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_delete_model_space(INTEGER);
 CREATE OR REPLACE FUNCTION public.admin_delete_model_space(p_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -3736,6 +3773,7 @@ AS $$
     SELECT public.admin_delete_content_row('model_spaces', p_id);
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_add_model_param(JSONB);
 CREATE OR REPLACE FUNCTION public.admin_add_model_param(p_param JSONB)
 RETURNS SETOF public.model_params
 LANGUAGE sql
@@ -3745,6 +3783,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.model_params, public.admin_insert_content_row('model_params', p_param))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_update_model_param(INTEGER, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_update_model_param(p_id INTEGER, p_param JSONB)
 RETURNS SETOF public.model_params
 LANGUAGE sql
@@ -3754,6 +3793,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.model_params, public.admin_update_content_row('model_params', p_id, p_param))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_delete_model_param(INTEGER);
 CREATE OR REPLACE FUNCTION public.admin_delete_model_param(p_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -3763,6 +3803,7 @@ AS $$
     SELECT public.admin_delete_content_row('model_params', p_id);
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_add_model_param_value(JSONB);
 CREATE OR REPLACE FUNCTION public.admin_add_model_param_value(p_param_value JSONB)
 RETURNS SETOF public.model_param_values
 LANGUAGE sql
@@ -3772,6 +3813,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.model_param_values, public.admin_insert_content_row('model_param_values', p_param_value))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_update_model_param_value(INTEGER, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_update_model_param_value(p_id INTEGER, p_param_value JSONB)
 RETURNS SETOF public.model_param_values
 LANGUAGE sql
@@ -3781,6 +3823,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.model_param_values, public.admin_update_content_row('model_param_values', p_id, p_param_value))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_delete_model_param_value(INTEGER);
 CREATE OR REPLACE FUNCTION public.admin_delete_model_param_value(p_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -3790,6 +3833,7 @@ AS $$
     SELECT public.admin_delete_content_row('model_param_values', p_id);
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_add_result(JSONB);
 CREATE OR REPLACE FUNCTION public.admin_add_result(p_result JSONB)
 RETURNS SETOF public.results
 LANGUAGE sql
@@ -3799,6 +3843,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.results, public.admin_insert_content_row('results', p_result))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_update_result(INTEGER, JSONB);
 CREATE OR REPLACE FUNCTION public.admin_update_result(p_id INTEGER, p_result JSONB)
 RETURNS SETOF public.results
 LANGUAGE sql
@@ -3808,6 +3853,7 @@ AS $$
     SELECT (jsonb_populate_record(NULL::public.results, public.admin_update_content_row('results', p_id, p_result))).*;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_delete_result(INTEGER);
 CREATE OR REPLACE FUNCTION public.admin_delete_result(p_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE sql

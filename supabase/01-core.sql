@@ -145,6 +145,7 @@ CREATE POLICY "fn_manage_profiles" ON profiles
     FOR ALL USING (auth.role() = 'service_role' OR auth.uid() = user_id);
 
 -- 6. Trigger: auto-create profile on signup
+DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -170,6 +171,7 @@ CREATE TRIGGER on_auth_user_created
 
 -- 7. RPC: Claim invite code after OTP verification
 -- Uses auth.uid() for security ГІГЂГ” only the logged-in user can claim for themselves
+DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT);
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -218,6 +220,7 @@ END;
 $$;
 
 -- 8. RPC: User generates their one-time invite code
+DROP FUNCTION IF EXISTS public.generate_user_invite_code();
 CREATE OR REPLACE FUNCTION public.generate_user_invite_code()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -252,6 +255,7 @@ END;
 $$;
 
 -- 9. RPC: Admin generates invite code (unlimited)
+DROP FUNCTION IF EXISTS public.admin_generate_invite_code();
 CREATE OR REPLACE FUNCTION public.admin_generate_invite_code()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -275,6 +279,7 @@ END;
 $$;
 
 -- 10. RPC: Get current user's invite status
+DROP FUNCTION IF EXISTS public.get_user_invite_status();
 CREATE OR REPLACE FUNCTION public.get_user_invite_status()
 RETURNS TABLE (
     is_verified BOOLEAN,
@@ -301,6 +306,7 @@ END;
 $$;
 
 -- 11. RPC: Admin list all invite codes
+DROP FUNCTION IF EXISTS public.admin_get_invite_codes();
 CREATE OR REPLACE FUNCTION public.admin_get_invite_codes()
 RETURNS SETOF invite_codes
 LANGUAGE plpgsql
@@ -316,6 +322,7 @@ END;
 $$;
 
 -- 12. RPC: Admin delete unused invite code
+DROP FUNCTION IF EXISTS public.admin_delete_invite_code(UUID);
 CREATE OR REPLACE FUNCTION public.admin_delete_invite_code(p_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -332,6 +339,7 @@ END;
 $$;
 
 -- 13. RPC: Admin list all profiles
+DROP FUNCTION IF EXISTS public.admin_get_profiles();
 CREATE OR REPLACE FUNCTION public.admin_get_profiles()
 RETURNS SETOF profiles
 LANGUAGE plpgsql
@@ -352,6 +360,7 @@ CREATE EXTENSION IF NOT EXISTS pg_net SCHEMA extensions;
 -- 15. RPC: Verify Cloudflare Turnstile token server-side
 -- IMPORTANT: Replace 'YOUR_TURNSTILE_SECRET_KEY' with your actual secret key
 -- The function source is NOT readable by anon users ГІГЂГ” only database admins can see it
+DROP FUNCTION IF EXISTS public.verify_turnstile(TEXT);
 CREATE OR REPLACE FUNCTION public.verify_turnstile(p_token TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -456,6 +465,7 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS telegram_photo_url TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_telegram_id ON profiles (telegram_id) WHERE telegram_id IS NOT NULL;
 
 -- 3. Update handle_new_user trigger to support telegram data
+DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -518,6 +528,7 @@ END;
 $$;
 
 -- 5. RPC: Admin reset invite limit for a single user
+DROP FUNCTION IF EXISTS public.admin_reset_user_invite_limit(UUID);
 CREATE OR REPLACE FUNCTION public.admin_reset_user_invite_limit(p_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -538,6 +549,7 @@ END;
 $$;
 
 -- 6. RPC: Admin reset invite limits for all users
+DROP FUNCTION IF EXISTS public.admin_reset_all_invite_limits();
 CREATE OR REPLACE FUNCTION public.admin_reset_all_invite_limits()
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -610,6 +622,7 @@ CREATE POLICY "admin_manage_st_moderators" ON st_moderators
     );
 
 -- 4. RPC: Admin sets user role
+DROP FUNCTION IF EXISTS public.admin_set_user_role(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_set_user_role(p_user_id UUID, p_role TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -799,6 +812,7 @@ $$;
 ALTER TABLE profiles ALTER COLUMN uid SET DEFAULT nextval('user_uid_seq');
 
 -- 5. Update trigger to include uid in INSERT (it will use the default)
+DROP FUNCTION IF EXISTS public.handle_new_user();
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -1020,6 +1034,7 @@ $$;
 CREATE INDEX IF NOT EXISTS idx_profiles_uid ON profiles(uid);
 
 -- 11. Update bio limit to 120 chars
+DROP FUNCTION IF EXISTS public.update_profile_bio(TEXT);
 CREATE OR REPLACE FUNCTION public.update_profile_bio(p_bio TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -1036,6 +1051,7 @@ END;
 $$;
 
 -- 12. Invite quota per role: member=1, beta=3, alpha=10, moderator+=unlimited
+DROP FUNCTION IF EXISTS public.get_invite_max(TEXT);
 CREATE OR REPLACE FUNCTION public.get_invite_max(p_role TEXT)
 RETURNS INTEGER
 LANGUAGE plpgsql IMMUTABLE
@@ -1053,6 +1069,7 @@ END;
 $$;
 
 -- 13. Rewrite generate_user_invite_code: multiple invites, delete oldest unused if at limit
+DROP FUNCTION IF EXISTS public.generate_user_invite_code();
 CREATE OR REPLACE FUNCTION public.generate_user_invite_code()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -1168,6 +1185,7 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES auth.u
 ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
 
 -- 17. Update generate_user_invite_code to set 5-minute TTL
+DROP FUNCTION IF EXISTS public.generate_user_invite_code();
 CREATE OR REPLACE FUNCTION public.generate_user_invite_code()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -1276,6 +1294,7 @@ $$;
 
 -- --- migration_member_invite_regeneration.sql ---
 
+DROP FUNCTION IF EXISTS public.generate_user_invite_code();
 CREATE OR REPLACE FUNCTION public.generate_user_invite_code()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -1463,6 +1482,7 @@ END;
 $$;
 
 -- 7. Update admin_delete_invite_code: allow deleting, reset owner's has_generated_invite
+DROP FUNCTION IF EXISTS public.admin_delete_invite_code(UUID);
 CREATE OR REPLACE FUNCTION public.admin_delete_invite_code(p_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -1523,6 +1543,7 @@ CREATE POLICY "read_own_codes" ON invite_codes
     );
 
 -- 11. RPC: Admin get invite code uses (for detailed view)
+DROP FUNCTION IF EXISTS public.admin_get_invite_code_uses(UUID);
 CREATE OR REPLACE FUNCTION public.admin_get_invite_code_uses(p_code_id UUID)
 RETURNS SETOF invite_code_uses
 LANGUAGE plpgsql

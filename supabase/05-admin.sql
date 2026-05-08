@@ -1,5 +1,5 @@
--- ============================================
--- BUNDLE 5: ADMIN TOOLS � Invite TTL, Profile Management
+﻿-- ============================================
+-- BUNDLE 5: ADMIN TOOLS — Invite TTL, Profile Management
 -- Run AFTER 01-core.sql
 -- ============================================
 
@@ -128,6 +128,7 @@ GRANT EXECUTE ON FUNCTION public.admin_generate_invite_code(INTEGER, INTEGER) TO
 -- STEP 1: Admin revoke achievement
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.admin_revoke_achievement(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_revoke_achievement(p_user_id UUID, p_achievement_id TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -150,6 +151,7 @@ $$;
 -- STEP 2: Admin grant achievement (bypasses supply limits)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.admin_grant_achievement(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.admin_grant_achievement(p_user_id UUID, p_achievement_id TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -255,6 +257,7 @@ $$;
 -- STEP 4: Admin generate invite for specific user
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.admin_generate_invite_for_user(UUID);
 CREATE OR REPLACE FUNCTION public.admin_generate_invite_for_user(p_user_id UUID, p_max_uses INT DEFAULT 1)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -289,6 +292,7 @@ $$;
 -- STEP 5: Admin get user detail (full profile + achievements + stats)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.admin_get_user_detail(UUID);
 CREATE OR REPLACE FUNCTION public.admin_get_user_detail(p_user_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
