@@ -1,4 +1,4 @@
--- ============================================
+﻿-- ============================================
 -- BUNDLE 6B: CANONICAL SECURITY HARDENING
 -- Run LAST, after 06a
 -- ============================================
@@ -199,6 +199,7 @@ BEGIN
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_user_achievements" ON public;
         CREATE POLICY "service_manage_user_achievements" ON public.user_achievements
             FOR ALL TO service_role
             USING (true)
@@ -1111,6 +1112,7 @@ BEGIN
         DROP POLICY IF EXISTS "mod_admin_delete_forum_threads" ON public.forum_threads;
         DROP POLICY IF EXISTS "service_manage_forum_threads" ON public.forum_threads;
 
+DROP POLICY IF EXISTS "public_read_forum_threads" ON public;
         CREATE POLICY "public_read_forum_threads" ON public.forum_threads
             FOR SELECT
             USING (
@@ -1127,6 +1129,7 @@ BEGIN
                 )
             );
 
+DROP POLICY IF EXISTS "service_manage_forum_threads" ON public;
         CREATE POLICY "service_manage_forum_threads" ON public.forum_threads
             FOR ALL TO service_role
             USING (true)
@@ -1149,6 +1152,7 @@ BEGIN
         DROP POLICY IF EXISTS "mod_admin_delete_forum_posts" ON public.forum_posts;
         DROP POLICY IF EXISTS "service_manage_forum_posts" ON public.forum_posts;
 
+DROP POLICY IF EXISTS "public_read_forum_posts" ON public;
         CREATE POLICY "public_read_forum_posts" ON public.forum_posts
             FOR SELECT
             USING (
@@ -1165,6 +1169,7 @@ BEGIN
                 )
             );
 
+DROP POLICY IF EXISTS "service_manage_forum_posts" ON public;
         CREATE POLICY "service_manage_forum_posts" ON public.forum_posts
             FOR ALL TO service_role
             USING (true)
@@ -1193,10 +1198,12 @@ BEGIN
         DROP POLICY IF EXISTS "user_manage_own_reactions" ON public.post_reactions;
         DROP POLICY IF EXISTS "service_manage_post_reactions" ON public.post_reactions;
 
+DROP POLICY IF EXISTS "public_read_post_reactions" ON public;
         CREATE POLICY "public_read_post_reactions" ON public.post_reactions
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_post_reactions" ON public;
         CREATE POLICY "service_manage_post_reactions" ON public.post_reactions
             FOR ALL TO service_role
             USING (true)
@@ -3462,10 +3469,12 @@ BEGIN
         DROP POLICY IF EXISTS "admin_manage_prompts" ON public.prompts;
         DROP POLICY IF EXISTS "service_manage_prompts" ON public.prompts;
 
+DROP POLICY IF EXISTS "public_read_prompts" ON public;
         CREATE POLICY "public_read_prompts" ON public.prompts
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_prompts" ON public;
         CREATE POLICY "service_manage_prompts" ON public.prompts
             FOR ALL TO service_role
             USING (true)
@@ -3488,10 +3497,12 @@ BEGIN
         DROP POLICY IF EXISTS "admin_all_models_new" ON public.models;
         DROP POLICY IF EXISTS "service_manage_models" ON public.models;
 
+DROP POLICY IF EXISTS "public_read_models" ON public;
         CREATE POLICY "public_read_models" ON public.models
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_models" ON public;
         CREATE POLICY "service_manage_models" ON public.models
             FOR ALL TO service_role
             USING (true)
@@ -3519,10 +3530,12 @@ BEGIN
         DROP POLICY IF EXISTS "admin_all_model_spaces" ON public.model_spaces;
         DROP POLICY IF EXISTS "service_manage_model_spaces" ON public.model_spaces;
 
+DROP POLICY IF EXISTS "public_read_model_spaces" ON public;
         CREATE POLICY "public_read_model_spaces" ON public.model_spaces
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_model_spaces" ON public;
         CREATE POLICY "service_manage_model_spaces" ON public.model_spaces
             FOR ALL TO service_role
             USING (true)
@@ -3543,10 +3556,12 @@ BEGIN
         DROP POLICY IF EXISTS "admin_all_model_params" ON public.model_params;
         DROP POLICY IF EXISTS "service_manage_model_params" ON public.model_params;
 
+DROP POLICY IF EXISTS "public_read_model_params" ON public;
         CREATE POLICY "public_read_model_params" ON public.model_params
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_model_params" ON public;
         CREATE POLICY "service_manage_model_params" ON public.model_params
             FOR ALL TO service_role
             USING (true)
@@ -3567,10 +3582,12 @@ BEGIN
         DROP POLICY IF EXISTS "admin_all_model_param_values" ON public.model_param_values;
         DROP POLICY IF EXISTS "service_manage_model_param_values" ON public.model_param_values;
 
+DROP POLICY IF EXISTS "public_read_model_param_values" ON public;
         CREATE POLICY "public_read_model_param_values" ON public.model_param_values
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_model_param_values" ON public;
         CREATE POLICY "service_manage_model_param_values" ON public.model_param_values
             FOR ALL TO service_role
             USING (true)
@@ -3598,10 +3615,12 @@ BEGIN
         DROP POLICY IF EXISTS "admin_all_results" ON public.results;
         DROP POLICY IF EXISTS "service_manage_results" ON public.results;
 
+DROP POLICY IF EXISTS "public_read_results" ON public;
         CREATE POLICY "public_read_results" ON public.results
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_results" ON public;
         CREATE POLICY "service_manage_results" ON public.results
             FOR ALL TO service_role
             USING (true)
@@ -3622,10 +3641,12 @@ BEGIN
         DROP POLICY IF EXISTS "admin_all_result_param_values" ON public.result_param_values;
         DROP POLICY IF EXISTS "service_manage_result_param_values" ON public.result_param_values;
 
+DROP POLICY IF EXISTS "public_read_result_param_values" ON public;
         CREATE POLICY "public_read_result_param_values" ON public.result_param_values
             FOR SELECT
             USING (true);
 
+DROP POLICY IF EXISTS "service_manage_result_param_values" ON public;
         CREATE POLICY "service_manage_result_param_values" ON public.result_param_values
             FOR ALL TO service_role
             USING (true)

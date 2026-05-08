@@ -62,26 +62,31 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
 -- 4. RLS: invite_codes
 -- Registration page needs to check if a code is valid (unused)
+DROP POLICY IF EXISTS "read_unused_codes" ON invite_codes;
 CREATE POLICY "read_unused_codes" ON invite_codes
     FOR SELECT USING (used_by IS NULL);
 
 -- Users can read codes they created or used
+DROP POLICY IF EXISTS "read_own_codes" ON invite_codes;
 CREATE POLICY "read_own_codes" ON invite_codes
     FOR SELECT USING (created_by = auth.uid() OR used_by = auth.uid());
 
 -- Admins can read all codes
+DROP POLICY IF EXISTS "admin_read_codes" ON invite_codes;
 CREATE POLICY "admin_read_codes" ON invite_codes
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
 
 -- Admins can insert codes
+DROP POLICY IF EXISTS "admin_insert_codes" ON invite_codes;
 CREATE POLICY "admin_insert_codes" ON invite_codes
     FOR INSERT WITH CHECK (
         EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
 
 -- Verified users can insert one invite code for themselves (RLS double-check)
+DROP POLICY IF EXISTS "user_insert_own_invite" ON invite_codes;
 CREATE POLICY "user_insert_own_invite" ON invite_codes
     FOR INSERT WITH CHECK (
         created_by = auth.uid()
@@ -94,10 +99,12 @@ CREATE POLICY "user_insert_own_invite" ON invite_codes
     );
 
 -- Admins can update/delete codes
+DROP POLICY IF EXISTS "admin_update_codes" ON invite_codes;
 CREATE POLICY "admin_update_codes" ON invite_codes
     FOR UPDATE USING (
         EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
+DROP POLICY IF EXISTS "admin_delete_codes" ON invite_codes;
 CREATE POLICY "admin_delete_codes" ON invite_codes
     FOR DELETE USING (
         EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
@@ -105,16 +112,19 @@ CREATE POLICY "admin_delete_codes" ON invite_codes
 
 -- 5. RLS: profiles
 -- Users can read their own profile
+DROP POLICY IF EXISTS "read_own_profile" ON profiles;
 CREATE POLICY "read_own_profile" ON profiles
     FOR SELECT USING (user_id = auth.uid());
 
 -- Admins can read all profiles
+DROP POLICY IF EXISTS "admin_read_profiles" ON profiles;
 CREATE POLICY "admin_read_profiles" ON profiles
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
 
 -- Only SECURITY DEFINER functions (service-level) can insert/update profiles
+DROP POLICY IF EXISTS "fn_manage_profiles" ON profiles;
 CREATE POLICY "fn_manage_profiles" ON profiles
     FOR ALL USING (auth.role() = 'service_role' OR auth.uid() = user_id);
 
@@ -1208,6 +1218,7 @@ $$;
 
 -- 18. Update claim_invite_code to check expiry
 DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT);
+DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT, TEXT);
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -1380,6 +1391,7 @@ ON CONFLICT DO NOTHING;
 
 -- 6. Update claim_invite_code RPC for multi-use codes
 DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT);
+DROP FUNCTION IF EXISTS public.claim_invite_code(TEXT, TEXT);
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql

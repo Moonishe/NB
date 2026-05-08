@@ -1,5 +1,5 @@
--- ============================================
--- BUNDLE 3: FORUM & SOCIAL � Posts, Reactions, Notifications
+﻿-- ============================================
+-- BUNDLE 3: FORUM & SOCIAL — Posts, Reactions, Notifications
 -- Run AFTER 01-core.sql
 -- ============================================
 
@@ -101,20 +101,24 @@ ALTER TABLE user_mod_actions ENABLE ROW LEVEL SECURITY;
 -- ==========================================
 
 -- forum_categories: public read, admin write
+DROP POLICY IF EXISTS "public_read_forum_categories" ON forum_categories;
 CREATE POLICY "public_read_forum_categories" ON forum_categories
     FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_all_forum_categories" ON forum_categories;
 CREATE POLICY "admin_all_forum_categories" ON forum_categories
     FOR ALL USING (
         EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
 
 -- forum_threads: public read non-deleted, verified users create, author+mod update, mod delete
+DROP POLICY IF EXISTS "public_read_forum_threads" ON forum_threads;
 CREATE POLICY "public_read_forum_threads" ON forum_threads
     FOR SELECT USING (
         is_deleted = false
         OR EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
         OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
+DROP POLICY IF EXISTS "verified_insert_forum_threads" ON forum_threads;
 CREATE POLICY "verified_insert_forum_threads" ON forum_threads
     FOR INSERT WITH CHECK (
         author_id = auth.uid()
@@ -127,12 +131,14 @@ CREATE POLICY "verified_insert_forum_threads" ON forum_threads
             AND (expires_at IS NULL OR expires_at > now())
         )
     );
+DROP POLICY IF EXISTS "author_mod_update_forum_threads" ON forum_threads;
 CREATE POLICY "author_mod_update_forum_threads" ON forum_threads
     FOR UPDATE USING (
         author_id = auth.uid()
         OR EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
         OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
+DROP POLICY IF EXISTS "mod_admin_delete_forum_threads" ON forum_threads;
 CREATE POLICY "mod_admin_delete_forum_threads" ON forum_threads
     FOR DELETE USING (
         EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
@@ -140,12 +146,14 @@ CREATE POLICY "mod_admin_delete_forum_threads" ON forum_threads
     );
 
 -- forum_posts: similar pattern
+DROP POLICY IF EXISTS "public_read_forum_posts" ON forum_posts;
 CREATE POLICY "public_read_forum_posts" ON forum_posts
     FOR SELECT USING (
         is_deleted = false
         OR EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
         OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
+DROP POLICY IF EXISTS "verified_insert_forum_posts" ON forum_posts;
 CREATE POLICY "verified_insert_forum_posts" ON forum_posts
     FOR INSERT WITH CHECK (
         author_id = auth.uid()
@@ -162,12 +170,14 @@ CREATE POLICY "verified_insert_forum_posts" ON forum_posts
             WHERE id = thread_id AND is_locked = false AND is_deleted = false
         )
     );
+DROP POLICY IF EXISTS "author_mod_update_forum_posts" ON forum_posts;
 CREATE POLICY "author_mod_update_forum_posts" ON forum_posts
     FOR UPDATE USING (
         author_id = auth.uid()
         OR EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
         OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
+DROP POLICY IF EXISTS "mod_admin_delete_forum_posts" ON forum_posts;
 CREATE POLICY "mod_admin_delete_forum_posts" ON forum_posts
     FOR DELETE USING (
         EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
@@ -175,26 +185,31 @@ CREATE POLICY "mod_admin_delete_forum_posts" ON forum_posts
     );
 
 -- moderators: public read (for badges), admin manage
+DROP POLICY IF EXISTS "public_read_moderators" ON moderators;
 CREATE POLICY "public_read_moderators" ON moderators
     FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_manage_moderators" ON moderators;
 CREATE POLICY "admin_manage_moderators" ON moderators
     FOR ALL USING (
         EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
 
 -- user_mod_actions: users read own, mods/admins read all and insert/update
+DROP POLICY IF EXISTS "user_read_own_mod_actions" ON user_mod_actions;
 CREATE POLICY "user_read_own_mod_actions" ON user_mod_actions
     FOR SELECT USING (
         user_id = auth.uid()
         OR EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
         OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
     );
+DROP POLICY IF EXISTS "mod_insert_mod_actions" ON user_mod_actions;
 CREATE POLICY "mod_insert_mod_actions" ON user_mod_actions
     FOR INSERT WITH CHECK (
         created_by = auth.uid()
         AND (EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
              OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid()))
     );
+DROP POLICY IF EXISTS "mod_update_mod_actions" ON user_mod_actions;
 CREATE POLICY "mod_update_mod_actions" ON user_mod_actions
     FOR UPDATE USING (
         EXISTS (SELECT 1 FROM moderators WHERE user_id = auth.uid())
@@ -220,13 +235,13 @@ CREATE INDEX idx_mod_actions_user_active ON user_mod_actions(user_id, action_typ
 -- ==========================================
 
 INSERT INTO forum_categories (name, slug, description, sort_order) VALUES
-    ('Обсуждение', 'discussion', 'Общее обсуждение проекта NeuroBench', 0),
-    ('ИИ и генерация', 'ai-generation', 'Обсуждение ИИ моделей, генерации и бенчмарков', 1),
-    ('Оффтоп', 'offtopic', 'Общение на свободные темы', 2)
+    ('РћР±СЃСѓР¶РґРµРЅРёРµ', 'discussion', 'РћР±С‰РµРµ РѕР±СЃСѓР¶РґРµРЅРёРµ РїСЂРѕРµРєС‚Р° NeuroBench', 0),
+    ('РР Рё РіРµРЅРµСЂР°С†РёСЏ', 'ai-generation', 'РћР±СЃСѓР¶РґРµРЅРёРµ РР РјРѕРґРµР»РµР№, РіРµРЅРµСЂР°С†РёРё Рё Р±РµРЅС‡РјР°СЂРєРѕРІ', 1),
+    ('РћС„С„С‚РѕРї', 'offtopic', 'РћР±С‰РµРЅРёРµ РЅР° СЃРІРѕР±РѕРґРЅС‹Рµ С‚РµРјС‹', 2)
 ON CONFLICT (slug) DO NOTHING;
 
 -- ==========================================
--- STEP 8: Helper function — is user moderator
+-- STEP 8: Helper function вЂ” is user moderator
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.is_moderator(p_user_id UUID DEFAULT NULL)
@@ -244,7 +259,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 9: Helper function — is user banned/muted
+-- STEP 9: Helper function вЂ” is user banned/muted
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_user_restriction(p_user_id UUID DEFAULT NULL)
@@ -265,7 +280,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 10: RPC — Get forum threads (paginated, with author info)
+-- STEP 10: RPC вЂ” Get forum threads (paginated, with author info)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_forum_threads(
@@ -321,7 +336,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 11: RPC — Get forum threads count
+-- STEP 11: RPC вЂ” Get forum threads count
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_forum_threads_count(
@@ -343,7 +358,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 12: RPC — Get thread posts (paginated, with author info)
+-- STEP 12: RPC вЂ” Get thread posts (paginated, with author info)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_forum_thread_posts(
@@ -389,7 +404,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 13: RPC — Get thread posts count
+-- STEP 13: RPC вЂ” Get thread posts count
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_forum_thread_posts_count(
@@ -410,7 +425,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 14: RPC — Create forum thread
+-- STEP 14: RPC вЂ” Create forum thread
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.create_forum_thread(
@@ -451,7 +466,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 15: RPC — Create forum post (reply)
+-- STEP 15: RPC вЂ” Create forum post (reply)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.create_forum_post(
@@ -498,7 +513,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 16: RPC — Update own post
+-- STEP 16: RPC вЂ” Update own post
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.update_forum_post(
@@ -522,7 +537,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 17: RPC — Update own thread (title/content only)
+-- STEP 17: RPC вЂ” Update own thread (title/content only)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.update_forum_thread(
@@ -550,7 +565,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 18: RPC — Update profile bio
+-- STEP 18: RPC вЂ” Update profile bio
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.update_profile_bio(p_bio TEXT)
@@ -569,7 +584,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 19: RPC — Moderator: pin/unpin thread
+-- STEP 19: RPC вЂ” Moderator: pin/unpin thread
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.mod_pin_thread(
@@ -593,7 +608,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 20: RPC — Moderator: lock/unlock thread
+-- STEP 20: RPC вЂ” Moderator: lock/unlock thread
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.mod_lock_thread(
@@ -617,7 +632,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 21: RPC — Moderator: soft-delete thread
+-- STEP 21: RPC вЂ” Moderator: soft-delete thread
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.mod_delete_thread(p_thread_id INTEGER)
@@ -638,7 +653,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 22: RPC — Moderator: soft-delete post
+-- STEP 22: RPC вЂ” Moderator: soft-delete post
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.mod_delete_post(p_post_id INTEGER)
@@ -665,7 +680,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 23: RPC — Moderator: ban user
+-- STEP 23: RPC вЂ” Moderator: ban user
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.mod_ban_user(
@@ -693,7 +708,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 24: RPC — Moderator: mute user
+-- STEP 24: RPC вЂ” Moderator: mute user
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.mod_mute_user(
@@ -721,7 +736,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 25: RPC — Moderator: unban user
+-- STEP 25: RPC вЂ” Moderator: unban user
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.mod_unban_user(p_user_id UUID)
@@ -742,7 +757,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 26: RPC — Moderator: unmute user
+-- STEP 26: RPC вЂ” Moderator: unmute user
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.mod_unmute_user(p_user_id UUID)
@@ -763,7 +778,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 27: RPC — Admin: assign moderator
+-- STEP 27: RPC вЂ” Admin: assign moderator
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.admin_assign_moderator(p_user_id UUID)
@@ -791,7 +806,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 28: RPC — Admin: remove moderator
+-- STEP 28: RPC вЂ” Admin: remove moderator
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.admin_remove_moderator(p_user_id UUID)
@@ -810,7 +825,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 29: RPC — Admin: get moderators list
+-- STEP 29: RPC вЂ” Admin: get moderators list
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.admin_get_moderators()
@@ -841,7 +856,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 30: RPC — Get public profile info (for viewing other users)
+-- STEP 30: RPC вЂ” Get public profile info (for viewing other users)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_public_profile(p_user_id UUID)
@@ -880,7 +895,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 31: RPC — Get user mod actions history (for moderators)
+-- STEP 31: RPC вЂ” Get user mod actions history (for moderators)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_user_mod_actions(p_user_id UUID)
@@ -1011,7 +1026,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 34: Fix admin_get_profiles — reload schema cache so SETOF profiles includes telegram_id
+-- STEP 34: Fix admin_get_profiles вЂ” reload schema cache so SETOF profiles includes telegram_id
 -- ==========================================
 
 -- Restore original simple definition (SETOF profiles returns ALL columns automatically)
@@ -1041,7 +1056,7 @@ NOTIFY pgrst, 'reload schema';
 -- --- migration_social_v2.sql ---
 
 -- ============================================
--- NeuroBench: Social Features V2 — Reactions, Notifications, Activity, @Mentions
+-- NeuroBench: Social Features V2 вЂ” Reactions, Notifications, Activity, @Mentions
 -- ============================================
 -- Run AFTER all previous migrations (migration_uid_system.sql, migration_roles.sql, etc.)
 -- ============================================
@@ -1411,7 +1426,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 8: RPC — Resolve usernames to user_ids (for @mentions)
+-- STEP 8: RPC вЂ” Resolve usernames to user_ids (for @mentions)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.resolve_usernames(p_usernames TEXT[])
@@ -1433,7 +1448,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 9: RPC — Final public profile shape
+-- STEP 9: RPC вЂ” Final public profile shape
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_public_profile(UUID);
@@ -1482,7 +1497,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 10: RPC — Create mention notifications
+-- STEP 10: RPC вЂ” Create mention notifications
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.create_mention_notifications(
@@ -1518,7 +1533,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 11: RPC — Get user recent activity (for profile)
+-- STEP 11: RPC вЂ” Get user recent activity (for profile)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_user_recent_activity(
@@ -1588,7 +1603,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 12: RPC — Get user threads (for profile tabs)
+-- STEP 12: RPC вЂ” Get user threads (for profile tabs)
 -- ==========================================
 
 CREATE OR REPLACE FUNCTION public.get_user_threads(
@@ -1632,7 +1647,7 @@ NOTIFY pgrst, 'reload schema';
 -- ============================================
 -- NeuroBench: Admin Like Reaction + Default Role
 -- ============================================
--- 1. Add 'admin_like' emoji — only admin/stmoderator can place it
+-- 1. Add 'admin_like' emoji вЂ” only admin/stmoderator can place it
 -- 2. Ensure new users get role = 'member' on registration
 -- ==========================================
 
@@ -1763,8 +1778,8 @@ $$;
 -- STEP 3: Add 'admin_endorsement' achievement to catalog
 INSERT INTO achievements (id, title, description, category, rarity, points, icon_emoji, max_supply, is_secret, sort_order)
 VALUES (
-    'admin_endorsement', 'Одобрение админа', 'Получить admin_like на посте',
-    'unique', 'unique', 50, '👑', NULL, FALSE, 28
+    'admin_endorsement', 'РћРґРѕР±СЂРµРЅРёРµ Р°РґРјРёРЅР°', 'РџРѕР»СѓС‡РёС‚СЊ admin_like РЅР° РїРѕСЃС‚Рµ',
+    'unique', 'unique', 50, 'рџ‘‘', NULL, FALSE, 28
 )
 ON CONFLICT (id) DO UPDATE SET
     title = EXCLUDED.title,

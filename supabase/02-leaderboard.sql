@@ -1,5 +1,5 @@
--- ============================================
--- BUNDLE 2: LEADERBOARD — Models, Results, Ratings
+﻿-- ============================================
+-- BUNDLE 2: LEADERBOARD вЂ” Models, Results, Ratings
 -- Run AFTER 01-core.sql
 -- ============================================
 
@@ -88,43 +88,57 @@ ALTER TABLE result_param_values ENABLE ROW LEVEL SECURITY;
 -- ==========================================
 
 -- prompts: public read, admin write
+DROP POLICY IF EXISTS "public_read_prompts" ON prompts;
 CREATE POLICY "public_read_prompts" ON prompts FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_all_prompts" ON prompts;
 CREATE POLICY "admin_all_prompts" ON prompts FOR ALL USING (
     EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
 );
 
 -- models: public read, admin write
+DROP POLICY IF EXISTS "public_read_models" ON models;
 CREATE POLICY "public_read_models" ON models FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_all_models" ON models;
 CREATE POLICY "admin_all_models" ON models FOR ALL USING (
     EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
 );
 
 -- model_spaces: public read, admin write
+DROP POLICY IF EXISTS "public_read_model_spaces" ON model_spaces;
 CREATE POLICY "public_read_model_spaces" ON model_spaces FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_all_model_spaces" ON model_spaces;
 CREATE POLICY "admin_all_model_spaces" ON model_spaces FOR ALL USING (
     EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
 );
 
 -- model_params: public read, admin write
+DROP POLICY IF EXISTS "public_read_model_params" ON model_params;
 CREATE POLICY "public_read_model_params" ON model_params FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_all_model_params" ON model_params;
 CREATE POLICY "admin_all_model_params" ON model_params FOR ALL USING (
     EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
 );
 
 -- model_param_values: public read, admin write
+DROP POLICY IF EXISTS "public_read_model_param_values" ON model_param_values;
 CREATE POLICY "public_read_model_param_values" ON model_param_values FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_all_model_param_values" ON model_param_values;
 CREATE POLICY "admin_all_model_param_values" ON model_param_values FOR ALL USING (
     EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
 );
 
 -- results: public read, admin write
+DROP POLICY IF EXISTS "public_read_results" ON results;
 CREATE POLICY "public_read_results" ON results FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_all_results" ON results;
 CREATE POLICY "admin_all_results" ON results FOR ALL USING (
     EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
 );
 
 -- result_param_values: public read, admin write
+DROP POLICY IF EXISTS "public_read_result_param_values" ON result_param_values;
 CREATE POLICY "public_read_result_param_values" ON result_param_values FOR SELECT USING (true);
+DROP POLICY IF EXISTS "admin_all_result_param_values" ON result_param_values;
 CREATE POLICY "admin_all_result_param_values" ON result_param_values FOR ALL USING (
     EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid())
 );
