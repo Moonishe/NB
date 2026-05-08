@@ -220,15 +220,15 @@ CREATE POLICY "mod_update_mod_actions" ON user_mod_actions
 -- STEP 6: Indexes for performance
 -- ==========================================
 
-CREATE INDEX idx_forum_threads_category ON forum_threads(category_id) WHERE is_deleted = false;
-CREATE INDEX idx_forum_threads_author ON forum_threads(author_id);
-CREATE INDEX idx_forum_threads_pinned_created ON forum_threads(is_pinned DESC, created_at DESC) WHERE is_deleted = false;
-CREATE INDEX idx_forum_threads_last_post ON forum_threads(last_post_at DESC NULLS LAST) WHERE is_deleted = false AND is_pinned = false;
-CREATE INDEX idx_forum_posts_thread_created ON forum_posts(thread_id, created_at ASC) WHERE is_deleted = false;
-CREATE INDEX idx_forum_posts_author ON forum_posts(author_id);
-CREATE INDEX idx_moderators_user ON moderators(user_id);
-CREATE INDEX idx_moderators_telegram_id ON moderators(telegram_id);
-CREATE INDEX idx_mod_actions_user_active ON user_mod_actions(user_id, action_type, is_active) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_forum_threads_category ON forum_threads(category_id) WHERE is_deleted = false;
+CREATE INDEX IF NOT EXISTS idx_forum_threads_author ON forum_threads(author_id);
+CREATE INDEX IF NOT EXISTS idx_forum_threads_pinned_created ON forum_threads(is_pinned DESC, created_at DESC) WHERE is_deleted = false;
+CREATE INDEX IF NOT EXISTS idx_forum_threads_last_post ON forum_threads(last_post_at DESC NULLS LAST) WHERE is_deleted = false AND is_pinned = false;
+CREATE INDEX IF NOT EXISTS idx_forum_posts_thread_created ON forum_posts(thread_id, created_at ASC) WHERE is_deleted = false;
+CREATE INDEX IF NOT EXISTS idx_forum_posts_author ON forum_posts(author_id);
+CREATE INDEX IF NOT EXISTS idx_moderators_user ON moderators(user_id);
+CREATE INDEX IF NOT EXISTS idx_moderators_telegram_id ON moderators(telegram_id);
+CREATE INDEX IF NOT EXISTS idx_mod_actions_user_active ON user_mod_actions(user_id, action_type, is_active) WHERE is_active = true;
 
 -- ==========================================
 -- STEP 7: Default forum categories
