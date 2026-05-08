@@ -1,4 +1,4 @@
--- ============================================
+﻿-- ============================================
 -- BUNDLE 1: CORE - Auth, Users, Roles, Invites
 -- Run this FIRST
 -- ============================================
@@ -31,7 +31,7 @@ ALTER TABLE moderators ENABLE ROW LEVEL SECURITY;
 -- NeuroBench: Invite-Only Registration System
 -- ============================================
 -- Run this entire script in Supabase SQL Editor
--- (Dashboard òÆÒ SQL Editor òÆÒ New Query òÆÒ Paste òÆÒ Run)
+-- (Dashboard ГІГ†Г’ SQL Editor ГІГ†Г’ New Query ГІГ†Г’ Paste ГІГ†Г’ Run)
 
 -- 1. Invite codes table
 CREATE TABLE IF NOT EXISTS invite_codes (
@@ -143,7 +143,7 @@ CREATE TRIGGER on_auth_user_created
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- 7. RPC: Claim invite code after OTP verification
--- Uses auth.uid() for security òÀÔ only the logged-in user can claim for themselves
+-- Uses auth.uid() for security ГІГЂГ” only the logged-in user can claim for themselves
 CREATE OR REPLACE FUNCTION public.claim_invite_code(p_code TEXT DEFAULT NULL)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -325,7 +325,7 @@ CREATE EXTENSION IF NOT EXISTS pg_net SCHEMA extensions;
 
 -- 15. RPC: Verify Cloudflare Turnstile token server-side
 -- IMPORTANT: Replace 'YOUR_TURNSTILE_SECRET_KEY' with your actual secret key
--- The function source is NOT readable by anon users òÀÔ only database admins can see it
+-- The function source is NOT readable by anon users ГІГЂГ” only database admins can see it
 CREATE OR REPLACE FUNCTION public.verify_turnstile(p_token TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -400,7 +400,7 @@ $$;
 --       (or your actual GitHub Pages domain)
 --
 -- 3. SET EDGE FUNCTION SECRETS:
---    In Supabase Dashboard òÆÒ Edge Functions òÆÒ Secrets:
+--    In Supabase Dashboard ГІГ†Г’ Edge Functions ГІГ†Г’ Secrets:
 --    - TELEGRAM_BOT_TOKEN = <your bot token from step 1>
 --    - SESSION_SECRET = <random 32+ char string, e.g. openssl rand -hex 32>
 --    The SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY
@@ -408,14 +408,14 @@ $$;
 --
 -- 4. DEPLOY EDGE FUNCTION:
 --    Option A (CLI): supabase functions deploy telegram-auth
---    Option B (Dashboard): Supabase òÆÒ Edge Functions òÆÒ New Function
---      òÆÒ Name: telegram-auth òÆÒ Paste code from supabase/functions/telegram-auth/index.ts
+--    Option B (Dashboard): Supabase ГІГ†Г’ Edge Functions ГІГ†Г’ New Function
+--      ГІГ†Г’ Name: telegram-auth ГІГ†Г’ Paste code from supabase/functions/telegram-auth/index.ts
 --
 -- 5. UPDATE js/config.js:
 --    Set window.TELEGRAM_BOT_USERNAME = 'your_bot_username'  (without @)
 --
 -- 6. KEEP EMAIL AUTH ENABLED:
---    Do NOT disable email auth in Supabase Dashboard òÀÔ the admin panel
+--    Do NOT disable email auth in Supabase Dashboard ГІГЂГ” the admin panel
 --    still uses email+password login. The public UI just won't offer it.
 -- ============================================
 
@@ -457,6 +457,8 @@ $$;
 
 -- 4. RPC: Get user display info (for nav menu)
 -- Returns telegram username or email for display
+DROP FUNCTION IF EXISTS public.get_user_display_name();
+DROP FUNCTION IF EXISTS public.get_user_display_name(UUID);
 CREATE OR REPLACE FUNCTION public.get_user_display_name()
 RETURNS TABLE (
     display_name TEXT,
@@ -630,7 +632,8 @@ END;
 $$;
 
 -- 5. Update get_public_profile to return role
--- (Drop and recreate if it exists ¦-¦ÂòÀÝ the function may vary, so this is additive)
+DROP FUNCTION IF EXISTS public.get_public_profile(UUID);
+-- (Drop and recreate if it exists В¦-В¦Г‚ГІГЂГќ the function may vary, so this is additive)
 CREATE OR REPLACE FUNCTION public.get_public_profile(p_user_id UUID)
 RETURNS TABLE (
     user_id UUID,
@@ -676,6 +679,8 @@ ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
 
 DROP FUNCTION IF EXISTS public.get_user_display_name();
 
+DROP FUNCTION IF EXISTS public.get_user_display_name();
+DROP FUNCTION IF EXISTS public.get_user_display_name(UUID);
 CREATE OR REPLACE FUNCTION public.get_user_display_name()
 RETURNS TABLE (
     user_id UUID,
@@ -731,7 +736,7 @@ BEGIN
            AND is_admin_code = false
            AND used_by IS NULL
            AND (expires_at IS NULL OR expires_at > now())) AS invite_active_count,
-        (SELECT COALESCE(vp.telegram_username, vp.telegram_first_name, '¦Ð¦+¦-¦¬¦-')
+        (SELECT COALESCE(vp.telegram_username, vp.telegram_first_name, 'В¦ГђВ¦+В¦-В¦В¬В¦-')
          FROM profiles vp
          WHERE vp.user_id = p.verified_by) AS verified_by_name
     FROM profiles p
@@ -794,6 +799,7 @@ END;
 $$;
 
 -- 6. Update get_public_profile to return uid
+DROP FUNCTION IF EXISTS public.get_public_profile(UUID);
 CREATE OR REPLACE FUNCTION public.get_public_profile(p_user_id UUID)
 RETURNS TABLE (
     user_id UUID,
@@ -836,6 +842,8 @@ END;
 $$;
 
 -- 7. Update get_user_display_name to return uid
+DROP FUNCTION IF EXISTS public.get_user_display_name();
+DROP FUNCTION IF EXISTS public.get_user_display_name(UUID);
 CREATE OR REPLACE FUNCTION public.get_user_display_name(p_user_id UUID)
 RETURNS TABLE (
     user_id UUID,
@@ -881,6 +889,7 @@ END;
 $$;
 
 -- 8. Update get_forum_threads to return author_uid
+DROP FUNCTION IF EXISTS public.get_forum_threads(INTEGER, INTEGER, TEXT);
 CREATE OR REPLACE FUNCTION public.get_forum_threads(
     p_category_id INTEGER DEFAULT NULL,
     p_limit INTEGER DEFAULT 20,
@@ -936,6 +945,7 @@ END;
 $$;
 
 -- 9. Update get_forum_thread_posts to return author_uid
+DROP FUNCTION IF EXISTS public.get_forum_thread_posts(INTEGER, INTEGER, INTEGER);
 CREATE OR REPLACE FUNCTION public.get_forum_thread_posts(
     p_thread_id INTEGER,
     p_limit INTEGER DEFAULT 25,
@@ -1072,6 +1082,8 @@ END;
 $$;
 
 -- 14. Update get_user_display_name to return invite quota info
+DROP FUNCTION IF EXISTS public.get_user_display_name();
+DROP FUNCTION IF EXISTS public.get_user_display_name(UUID);
 CREATE OR REPLACE FUNCTION public.get_user_display_name(p_user_id UUID)
 RETURNS TABLE (
     user_id UUID,
@@ -1115,7 +1127,7 @@ BEGIN
         p.role,
         get_invite_max(p.role) AS invite_max,
         (SELECT COUNT(*)::int FROM invite_codes WHERE created_by = p.user_id AND is_admin_code = false AND used_by IS NULL AND (expires_at IS NULL OR expires_at > now())) AS invite_active_count,
-        (SELECT COALESCE(vp.telegram_username, vp.telegram_first_name, '¦Ð¦+¦-¦¬¦-')
+        (SELECT COALESCE(vp.telegram_username, vp.telegram_first_name, 'В¦ГђВ¦+В¦-В¦В¬В¦-')
          FROM profiles vp WHERE vp.user_id = p.verified_by) AS verified_by_name
     FROM profiles p
     LEFT JOIN invite_codes gen_ic ON gen_ic.id = p.generated_invite_code_id
@@ -1274,7 +1286,7 @@ BEGIN
 
     IF v_old_invite_id IS NOT NULL THEN
         IF v_old_invite_used THEN
-            RAISE EXCEPTION '¦áTÂ¦-TÀTË¦¦ ¦¬¦-¦-¦-¦¦TÂ TÃ¦¦¦¦ ¦¬TÁ¦¬¦-¦¬TÌ¦¬¦-¦-¦-¦- òÀÔ ¦¬¦¦TÀ¦¦¦¦¦¦¦-¦¦TÀ¦-TÆ¦¬TÏ ¦¬¦-¦¬TÀ¦¦TÉ¦¦¦-¦-';
+            RAISE EXCEPTION 'В¦ГЎTГ‚В¦-TГЂTГ‹В¦В¦ В¦В¬В¦-В¦-В¦-В¦В¦TГ‚ TГѓВ¦В¦В¦В¦ В¦В¬TГЃВ¦В¬В¦-В¦В¬TГЊВ¦В¬В¦-В¦-В¦-В¦- ГІГЂГ” В¦В¬В¦В¦TГЂВ¦В¦В¦В¦В¦В¦В¦-В¦В¦TГЂВ¦-TГ†В¦В¬TГЏ В¦В¬В¦-В¦В¬TГЂВ¦В¦TГ‰В¦В¦В¦-В¦-';
         END IF;
 
         DELETE FROM invite_codes
@@ -1443,6 +1455,9 @@ END;
 $$;
 
 -- 8. Update admin_generate_invite_code: accept max_uses parameter
+DROP FUNCTION IF EXISTS public.admin_generate_invite_code();
+DROP FUNCTION IF EXISTS public.admin_generate_invite_code(INTEGER);
+DROP FUNCTION IF EXISTS public.admin_generate_invite_code(INTEGER, INTEGER);
 CREATE OR REPLACE FUNCTION public.admin_generate_invite_code(p_max_uses INTEGER DEFAULT 10)
 RETURNS TEXT
 LANGUAGE plpgsql
