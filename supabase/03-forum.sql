@@ -1799,21 +1799,6 @@ BEGIN
 END;
 $$;
 
--- STEP 3: Add 'admin_endorsement' achievement to catalog
-INSERT INTO achievements (id, title, description, category, rarity, points, icon_emoji, max_supply, is_secret, sort_order)
-VALUES (
-    'admin_endorsement', 'РћРґРѕР±СЂРµРЅРёРµ Р°РґРјРёРЅР°', 'РџРѕР»СѓС‡РёС‚СЊ admin_like РЅР° РїРѕСЃС‚Рµ',
-    'unique', 'unique', 50, 'рџ‘‘', NULL, FALSE, 28
-)
-ON CONFLICT (id) DO UPDATE SET
-    title = EXCLUDED.title,
-    description = EXCLUDED.description,
-    category = EXCLUDED.category,
-    rarity = EXCLUDED.rarity,
-    points = EXCLUDED.points,
-    icon_emoji = EXCLUDED.icon_emoji,
-    is_secret = EXCLUDED.is_secret,
-    sort_order = EXCLUDED.sort_order;
 
 -- STEP 4: Update handle_new_user to set role = 'member' on registration
 CREATE OR REPLACE FUNCTION public.handle_new_user()

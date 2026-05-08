@@ -119,6 +119,22 @@ ON CONFLICT (id) DO UPDATE SET
     is_secret = EXCLUDED.is_secret,
     sort_order = EXCLUDED.sort_order;
 
+INSERT INTO achievements (id, title, description, category, rarity, points, icon_emoji, max_supply, is_secret, sort_order)
+VALUES (
+    'admin_endorsement', 'Admin endorsement', 'Received an admin_like reaction from an admin or senior moderator',
+    'unique', 'unique', 50, 'A+', NULL, FALSE, 28
+)
+ON CONFLICT (id) DO UPDATE SET
+    title = EXCLUDED.title,
+    description = EXCLUDED.description,
+    category = EXCLUDED.category,
+    rarity = EXCLUDED.rarity,
+    points = EXCLUDED.points,
+    icon_emoji = EXCLUDED.icon_emoji,
+    max_supply = EXCLUDED.max_supply,
+    is_secret = EXCLUDED.is_secret,
+    sort_order = EXCLUDED.sort_order;
+
 -- ==========================================
 -- STEP 4: RPC вЂ” Grant achievement (idempotent)
 -- ==========================================
