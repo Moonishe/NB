@@ -1091,7 +1091,7 @@ const Api = (() => {
     async function adminGetBans() {
         const client = getClient();
         if (!client) return [];
-        const { data, error } = await client.from('user_mod_actions').select('user_id,action_type,reason,created_at,expires_at,is_active').eq('action_type', 'ban').eq('is_active', true).order('created_at', { ascending: false });
+        const { data, error } = await client.rpc('admin_get_bans').catch(() => client.from('user_mod_actions').select('user_id,action_type,reason,created_at,expires_at,is_active').eq('action_type', 'ban').eq('is_active', true).order('created_at', { ascending: false }));
         if (error) return [];
         return data || [];
     }
@@ -1099,7 +1099,7 @@ const Api = (() => {
     async function adminGetAnnouncements() {
         const client = getClient();
         if (!client) return [];
-        const { data, error } = await client.from('announcements').select('*').order('created_at', { ascending: false });
+        const { data, error } = await client.rpc('admin_get_announcements').catch(() => client.from('announcements').select('*').order('created_at', { ascending: false }));
         if (error) return [];
         return data || [];
     }
@@ -1107,23 +1107,34 @@ const Api = (() => {
     async function adminCreateAnnouncement(title, body) {
         const client = getClient();
         if (!client) throw new Error('Supabase not configured');
-        const { data, error } = await client.from('announcements').insert({ title, body }).select().single();
-        if (error) throw new Error(error.message);
+        const { data, error } = await client.rpc('admin_create_announcement', { p_title: title, p_body: body }).catch(async () => {
+            const { data: d2, error: e2 } = await client.from('announcements').insert({ title, body }).select().single();
+            if (e2) throw e2;
+            return d2;
+        });
+        if (error) throw error;
         return data;
     }
 
     async function adminDeleteAnnouncement(id) {
         const client = getClient();
         if (!client) throw new Error('Supabase not configured');
-        const { error } = await client.from('announcements').delete().eq('id', id);
-        if (error) throw new Error(error.message);
+        const { error } = await client.rpc('admin_delete_announcement', { p_id: id }).catch(async () => {
+            const { error: e2 } = await client.from('announcements').delete().eq('id', id);
+            if (e2) throw e2;
+        });
+        if (error) throw error;
     }
 
     async function adminCreateAchievement(ach) {
         const client = getClient();
         if (!client) throw new Error('Supabase not configured');
-        const { data, error } = await client.from('achievements').insert(ach).select().single();
-        if (error) throw new Error(error.message);
+        const { data, error } = await client.rpc('admin_create_achievement', { p_data: ach }).catch(async () => {
+            const { data: d2, error: e2 } = await client.from('achievements').insert(ach).select().single();
+            if (e2) throw e2;
+            return d2;
+        });
+        if (error) throw error;
         return data;
     }
 
