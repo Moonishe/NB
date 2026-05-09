@@ -1205,8 +1205,8 @@ function renderTurnstile() {
         }
     }
 }
-renderTurnstile();
-window.onTurnstileLoad = renderTurnstile;
+window._renderTurnstile = renderTurnstile;
+if (window._turnstileReady) renderTurnstile();
 
 const devBtn = document.getElementById('dev-login-btn');
 

@@ -49,7 +49,8 @@ const AdminApp = (() => {
             }
         }
     }
-    window.onTurnstileLoad = renderTurnstile;
+    window._renderTurnstile = renderTurnstile;
+    if (window._turnstileReady) renderTurnstile();
 
     function showAuth(errMsg) {
         document.getElementById('auth-screen').classList.remove('hidden');
