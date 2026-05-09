@@ -1191,12 +1191,22 @@ const AuthApp = (() => {
 
 window.onTelegramAuth = handleTelegramAuth;
 
-const turnstileWrap = document.getElementById('turnstile-wrap');
-if (turnstileWrap && window.TURNSTILE_SITE_KEY) {
-turnstileWrap.classList.remove('hidden');
-const widget = turnstileWrap.querySelector('.cf-turnstile');
-if (widget) widget.setAttribute('data-sitekey', window.TURNSTILE_SITE_KEY);
+function renderTurnstile() {
+    const wrap = document.getElementById('turnstile-wrap');
+    if (wrap && window.TURNSTILE_SITE_KEY && window.turnstile) {
+        wrap.classList.remove('hidden');
+        const container = wrap.querySelector('.cf-turnstile');
+        if (container && !container.hasChildNodes()) {
+            turnstile.render(container, {
+                sitekey: window.TURNSTILE_SITE_KEY,
+                callback: onTurnstile,
+                'expired-callback': onTurnstileExpired,
+            });
+        }
+    }
 }
+renderTurnstile();
+window.onTurnstileLoad = renderTurnstile;
 
 const devBtn = document.getElementById('dev-login-btn');
 

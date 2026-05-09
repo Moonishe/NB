@@ -35,6 +35,22 @@ const AdminApp = (() => {
         } else { showAuth(); }
     }
 
+    function renderTurnstile() {
+        const wrap = document.getElementById('turnstile-wrap');
+        if (wrap && window.TURNSTILE_SITE_KEY && window.turnstile) {
+            wrap.classList.remove('hidden');
+            const container = wrap.querySelector('.cf-turnstile');
+            if (container && !container.hasChildNodes()) {
+                turnstile.render(container, {
+                    sitekey: window.TURNSTILE_SITE_KEY,
+                    callback: onTurnstile,
+                    'expired-callback': onTurnstileExpired,
+                });
+            }
+        }
+    }
+    window.onTurnstileLoad = renderTurnstile;
+
     function showAuth(errMsg) {
         document.getElementById('auth-screen').classList.remove('hidden');
         document.getElementById('admin-screen').classList.add('hidden');
@@ -43,12 +59,7 @@ const AdminApp = (() => {
             errEl.textContent = errMsg;
             errEl.classList.remove('hidden');
         }
-        const turnstileWrap = document.getElementById('turnstile-wrap');
-        if (turnstileWrap && window.TURNSTILE_SITE_KEY) {
-            turnstileWrap.classList.remove('hidden');
-            const widget = turnstileWrap.querySelector('.cf-turnstile');
-            if (widget) widget.setAttribute('data-sitekey', window.TURNSTILE_SITE_KEY);
-        }
+        renderTurnstile();
     }
 
     function onTurnstile(token) {
