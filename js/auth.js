@@ -429,7 +429,7 @@ const AuthApp = (() => {
 
         // Don't lock dimensions — it causes layout jumps when chars change width
 
-        const chars = 'ABCDEFGHKNOPRSTUVXYZ023456789#@%&░▒▓';
+        const chars = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯabcdefghknoprstuvxyz023456789#@%&░▒▓'; // FIX: добавлена кириллица — без неё кирилл. буквы заменялись на цифры/символы (ПРОФИЛ4)
 
         const keep = /[\s.\-:,/@()]/;
 
@@ -565,8 +565,9 @@ const AuthApp = (() => {
                 '#account-username',
 
                 '#account-logout',
-
-                '[data-view="account"] a'
+                // FIX: убраны '[data-view="account"] a' — захватывал ссылки типа "Профиль"
+                // и анимировал их текст, что давало артефакты вроде "ПРОФИЛ4"
+                '#account-profile-link'
 
             ]);
 
