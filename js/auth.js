@@ -1189,16 +1189,24 @@ const AuthApp = (() => {
         Api.reinit();
 
 
+window.onTelegramAuth = handleTelegramAuth;
 
-        window.onTelegramAuth = handleTelegramAuth;
+const turnstileWrap = document.getElementById('turnstile-wrap');
+if (turnstileWrap && window.TURNSTILE_SITE_KEY) {
+turnstileWrap.classList.remove('hidden');
+const widget = turnstileWrap.querySelector('.cf-turnstile');
+if (widget) widget.setAttribute('data-sitekey', window.TURNSTILE_SITE_KEY);
+}
 
+const devBtn = document.getElementById('dev-login-btn');
 
+if (devBtn) {
 
-        const devBtn = document.getElementById('dev-login-btn');
+if (isLocalhost()) {
 
-        if (devBtn) {
+showEl('dev-login-section');
 
-            if (isLocalhost()) {
+devBtn.addEventListener('click', activateDevLogin);
 
                 showEl('dev-login-section');
 

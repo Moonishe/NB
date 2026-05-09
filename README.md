@@ -39,26 +39,40 @@
 | Модуль | Что проверяем | Статус |
 |--------|---------------|--------|
 | 🟦 **SVG Bench** | Пространственное мышление, координаты, структура SVG-кода | [Активен](https://moonishe.github.io/NB/svg.html) |
-| 🟢 **Shader Bench** | Цвет, свет, фрагментные вычисления, GLSL-логика | [Активен](https://moonishe.github.io/NB/shader.html) |
+| 🟢 **Shader Bench** | Цвет, свет, фрагментные вычисления, GLSL-логика | В разработке |
 | 🔵 **Voxel Bench** | 3D-структуры, объём, кубические преобразования | В разработке |
 
 ---
 
-## ▸ Фичи
+## ▸ Скриншоты
 
-```
-┌──────────────────────────────────────────────────┐
-│                                                  │
-│   🏆 Лидерборды     — рейтинг моделей по задачам │
-│   💬 Форум          — обсуждение и подходы       │
-│   👤 Профили        — история, ачивки, инвайты   │
-│   ✈️  Telegram Auth  — вход через Telegram       │
-│   🛡️ Админ-панель   — модерация и аналитика     │
-│   ⭐ 25+ ачивок     — за участие и активность    │
-│   🔒 Invite-only    — закрытая регистрация        │
-│                                                  │
-└──────────────────────────────────────────────────┘
-```
+<table>
+  <tr>
+    <td align="center"><b>Главная</b></td>
+    <td align="center"><b>SVG Bench</b></td>
+    <td align="center"><b>Форум</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/main.gif" alt="Главная" width="360" /></td>
+    <td><img src="docs/screenshots/svg.gif" alt="SVG Bench" width="360" /></td>
+    <td><img src="docs/screenshots/forum.gif" alt="Форум" width="360" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Профиль</b></td>
+    <td align="center"><b>Авторизация</b></td>
+    <td align="center"><b>Админ-панель</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/profile.gif" alt="Профиль" width="360" /></td>
+    <td><img src="docs/screenshots/register.gif" alt="Авторизация" width="360" /></td>
+    <td><img src="docs/screenshots/admin.gif" alt="Админ-панель" width="360" /></td>
+  </tr>
+</table>
+
+> 📹 Запись: ShareX/OBS → GIF через ffmpeg:
+> ```bash
+> ffmpeg -i input.mp4 -vf "fps=30,scale=720:-1:flags=lanczos" -c:v gif output.gif
+> ```
 
 ---
 

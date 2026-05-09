@@ -426,13 +426,14 @@ const Api = (() => {
         return !!data;
     }
 
-    async function telegramAuth(authData, inviteCode) {
+    async function telegramAuth(authData, inviteCode, turnstileToken) {
         const supabaseUrl = window.SUPABASE_URL;
         const anonKey = window.SUPABASE_ANON_KEY;
         if (!supabaseUrl || !anonKey) throw new Error('Supabase not configured');
 
         const body = { auth_data: authData };
         if (inviteCode) body.invite_code = inviteCode;
+        if (turnstileToken) body.turnstile_token = turnstileToken;
 
         let response;
         try {

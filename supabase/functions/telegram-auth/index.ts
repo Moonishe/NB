@@ -189,11 +189,28 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { auth_data, invite_code } = await req.json()
+    const { auth_data, invite_code, turnstile_token } = await req.json()
     const authData = normalizeTelegramAuthData(auth_data)
 
     if (!authData) {
       return jsonResponse({ error: 'Missing auth data' }, 400)
+    }
+
+    if (turnstile_token && typeof turnstile_token === 'string') {
+      const turnstileSecret = Deno.env.get('TURNSTILE_SECRET_KEY')
+      if (turnstileSecret) {
+        const formData = new URLSearchParams()
+        formData.set('secret', turnstileSecret)
+        formData.set('response', turnstile_token)
+        const cfRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          body: formData,
+        })
+        const cfData = await cfRes.json()
+        if (!cfData.success) {
+          return jsonResponse({ error: 'Captcha verification failed' }, 400)
+        }
+      }
     }
 
     const authDate = Number(authData.auth_date)

@@ -8,6 +8,7 @@ const AdminApp = (() => {
     let allResultsData = [];
     let invitesData = [];
     let profilesData = [];
+    let turnstileToken = '';
     let currentInviteFilter = 'all';
     let currentResultPromptFilter = 'all';
     let currentResultModelFilter = 'all';
@@ -42,6 +43,20 @@ const AdminApp = (() => {
             errEl.textContent = errMsg;
             errEl.classList.remove('hidden');
         }
+        const turnstileWrap = document.getElementById('turnstile-wrap');
+        if (turnstileWrap && window.TURNSTILE_SITE_KEY) {
+            turnstileWrap.classList.remove('hidden');
+            const widget = turnstileWrap.querySelector('.cf-turnstile');
+            if (widget) widget.setAttribute('data-sitekey', window.TURNSTILE_SITE_KEY);
+        }
+    }
+
+    function onTurnstile(token) {
+        turnstileToken = token;
+    }
+
+    function onTurnstileExpired() {
+        turnstileToken = '';
     }
 
     let currentLogFilter = 'all';
@@ -1673,6 +1688,11 @@ const AdminApp = (() => {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             const errEl = document.getElementById('login-error');
+            if (window.TURNSTILE_SITE_KEY && !turnstileToken) {
+                errEl.textContent = 'Пройдите проверку капчи';
+                errEl.classList.remove('hidden');
+                return;
+            }
             try {
                 const result = await Api.login(email, password);
                 errEl.classList.add('hidden');
