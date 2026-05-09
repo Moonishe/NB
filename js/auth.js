@@ -24,7 +24,15 @@ const AuthApp = (() => {
 
         if (info.telegram_username) return info.telegram_username;
 
-        return info.display_name || 'User';
+        if (info.display_name) {
+
+            const cleanDn = info.display_name.replace(_DANGEROUS_RE, '').replace(/\s+/g, ' ').trim();
+
+            if (cleanDn.length > 0) return cleanDn;
+
+        }
+
+        return 'User';
 
     }
 

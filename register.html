@@ -26,6 +26,7 @@
 
     <script src="assets/vendor/supabase/supabase-js-2.49.4.min.js"></script>
     <script src="assets/vendor/dompurify/purify-3.2.5.min.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 
 
@@ -1230,6 +1231,10 @@
             </div>
 
 
+
+            <div id="turnstile-wrap" class="flex justify-center mb-4 hidden">
+                <div class="cf-turnstile" data-sitekey="" data-callback="AuthApp.onTurnstile" data-expired-callback="AuthApp.onTurnstileExpired"></div>
+            </div>
 
             <div id="tg-widget-container" class="tg-widget-container mb-4">
 
