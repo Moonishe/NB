@@ -235,13 +235,13 @@ CREATE INDEX IF NOT EXISTS idx_mod_actions_user_active ON user_mod_actions(user_
 -- ==========================================
 
 INSERT INTO forum_categories (name, slug, description, sort_order) VALUES
-    ('РћР±СЃСѓР¶РґРµРЅРёРµ', 'discussion', 'РћР±С‰РµРµ РѕР±СЃСѓР¶РґРµРЅРёРµ РїСЂРѕРµРєС‚Р° NeuroBench', 0),
-    ('РР Рё РіРµРЅРµСЂР°С†РёСЏ', 'ai-generation', 'РћР±СЃСѓР¶РґРµРЅРёРµ РР РјРѕРґРµР»РµР№, РіРµРЅРµСЂР°С†РёРё Рё Р±РµРЅС‡РјР°СЂРєРѕРІ', 1),
-    ('РћС„С„С‚РѕРї', 'offtopic', 'РћР±С‰РµРЅРёРµ РЅР° СЃРІРѕР±РѕРґРЅС‹Рµ С‚РµРјС‹', 2)
+    ('Обсуждение', 'discussion', 'Общее обсуждение проекта NeuroBench', 0),
+    ('ИИ и генерация', 'ai-generation', 'Обсуждение ИИ моделей, генерации и бенчмарков', 1),
+    ('Оффтоп', 'offtopic', 'Общение на свободные темы', 2)
 ON CONFLICT (slug) DO NOTHING;
 
 -- ==========================================
--- STEP 8: Helper function вЂ” is user moderator
+-- STEP 8: Helper function — is user moderator
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.is_moderator(UUID);
@@ -260,7 +260,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 9: Helper function вЂ” is user banned/muted
+-- STEP 9: Helper function — is user banned/muted
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_user_restriction(UUID);
@@ -282,7 +282,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 10: RPC вЂ” Get forum threads (paginated, with author info)
+-- STEP 10: RPC — Get forum threads (paginated, with author info)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_forum_threads(INTEGER, INTEGER, INTEGER);
@@ -339,9 +339,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 11: RPC вЂ” Get forum threads count
+-- STEP 11: RPC — Get forum threads count
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_forum_threads_count(INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_forum_threads_count(
     p_category_id INTEGER DEFAULT NULL
 )
@@ -361,7 +362,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 12: RPC вЂ” Get thread posts (paginated, with author info)
+-- STEP 12: RPC — Get thread posts (paginated, with author info)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_forum_thread_posts(INTEGER, INTEGER, INTEGER);
@@ -408,9 +409,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 13: RPC вЂ” Get thread posts count
+-- STEP 13: RPC — Get thread posts count
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_forum_thread_posts_count(INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_forum_thread_posts_count(
     p_thread_id INTEGER
 )
@@ -429,9 +431,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 14: RPC вЂ” Create forum thread
+-- STEP 14: RPC — Create forum thread
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.create_forum_thread(INTEGER, TEXT, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.create_forum_thread(
     p_category_id INTEGER,
     p_title TEXT,
@@ -470,7 +473,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 15: RPC вЂ” Create forum post (reply)
+-- STEP 15: RPC — Create forum post (reply)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.create_forum_post(INTEGER, TEXT);
@@ -518,9 +521,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 16: RPC вЂ” Update own post
+-- STEP 16: RPC — Update own post
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.update_forum_post(INTEGER, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.update_forum_post(
     p_post_id INTEGER,
     p_content TEXT
@@ -542,9 +546,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 17: RPC вЂ” Update own thread (title/content only)
+-- STEP 17: RPC — Update own thread (title/content only)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.update_forum_thread(INTEGER, TEXT, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.update_forum_thread(
     p_thread_id INTEGER,
     p_title TEXT,
@@ -570,7 +575,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 18: RPC вЂ” Update profile bio
+-- STEP 18: RPC — Update profile bio
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.update_profile_bio(TEXT);
@@ -590,8 +595,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 19: RPC вЂ” Moderator: pin/unpin thread
+-- STEP 19: RPC — Moderator: pin/unpin thread
 -- ==========================================
+
+DROP FUNCTION IF EXISTS public.mod_pin_thread(INTEGER, BOOLEAN) CASCADE;
 
 CREATE OR REPLACE FUNCTION public.mod_pin_thread(
     p_thread_id INTEGER,
@@ -614,8 +621,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 20: RPC вЂ” Moderator: lock/unlock thread
+-- STEP 20: RPC — Moderator: lock/unlock thread
 -- ==========================================
+
+DROP FUNCTION IF EXISTS public.mod_lock_thread(INTEGER, BOOLEAN) CASCADE;
 
 CREATE OR REPLACE FUNCTION public.mod_lock_thread(
     p_thread_id INTEGER,
@@ -638,7 +647,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 21: RPC вЂ” Moderator: soft-delete thread
+-- STEP 21: RPC — Moderator: soft-delete thread
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.mod_delete_thread(INTEGER);
@@ -660,7 +669,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 22: RPC вЂ” Moderator: soft-delete post
+-- STEP 22: RPC — Moderator: soft-delete post
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.mod_delete_post(INTEGER);
@@ -688,9 +697,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 23: RPC вЂ” Moderator: ban user
+-- STEP 23: RPC — Moderator: ban user
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.mod_ban_user(UUID, TEXT, TIMESTAMPTZ) CASCADE;
 CREATE OR REPLACE FUNCTION public.mod_ban_user(
     p_user_id UUID,
     p_reason TEXT,
@@ -716,9 +726,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 24: RPC вЂ” Moderator: mute user
+-- STEP 24: RPC — Moderator: mute user
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.mod_mute_user(UUID, TEXT, TIMESTAMPTZ) CASCADE;
 CREATE OR REPLACE FUNCTION public.mod_mute_user(
     p_user_id UUID,
     p_reason TEXT,
@@ -744,7 +755,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 25: RPC вЂ” Moderator: unban user
+-- STEP 25: RPC — Moderator: unban user
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.mod_unban_user(UUID);
@@ -766,7 +777,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 26: RPC вЂ” Moderator: unmute user
+-- STEP 26: RPC — Moderator: unmute user
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.mod_unmute_user(UUID);
@@ -788,7 +799,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 27: RPC вЂ” Admin: assign moderator
+-- STEP 27: RPC — Admin: assign moderator
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.admin_assign_moderator(UUID);
@@ -817,7 +828,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 28: RPC вЂ” Admin: remove moderator
+-- STEP 28: RPC — Admin: remove moderator
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.admin_remove_moderator(UUID);
@@ -837,7 +848,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 29: RPC вЂ” Admin: get moderators list
+-- STEP 29: RPC — Admin: get moderators list
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.admin_get_moderators();
@@ -869,7 +880,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 30: RPC вЂ” Get public profile info (for viewing other users)
+-- STEP 30: RPC — Get public profile info (for viewing other users)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_public_profile(UUID);
@@ -909,7 +920,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 31: RPC вЂ” Get user mod actions history (for moderators)
+-- STEP 31: RPC — Get user mod actions history (for moderators)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_user_mod_actions(UUID);
@@ -1042,7 +1053,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 34: Fix admin_get_profiles вЂ” reload schema cache so SETOF profiles includes telegram_id
+-- STEP 34: Fix admin_get_profiles — reload schema cache so SETOF profiles includes telegram_id
 -- ==========================================
 
 -- Restore original simple definition (SETOF profiles returns ALL columns automatically)
@@ -1072,7 +1083,7 @@ NOTIFY pgrst, 'reload schema';
 -- --- migration_social_v2.sql ---
 
 -- ============================================
--- NeuroBench: Social Features V2 вЂ” Reactions, Notifications, Activity, @Mentions
+-- NeuroBench: Social Features V2 — Reactions, Notifications, Activity, @Mentions
 -- ============================================
 -- Run AFTER all previous migrations (migration_uid_system.sql, migration_roles.sql, etc.)
 -- ============================================
@@ -1085,10 +1096,15 @@ CREATE TABLE IF NOT EXISTS post_reactions (
     id SERIAL PRIMARY KEY,
     post_id INTEGER NOT NULL REFERENCES forum_posts(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES profiles(user_id) ON DELETE CASCADE,
-    emoji TEXT NOT NULL CHECK (emoji IN ('like','dislike','fire','puke','brain','emotion')),
+    emoji TEXT NOT NULL CHECK (emoji IN ('like','dislike','fire','puke','brain','emotion','admin_like')),
     created_at TIMESTAMPTZ DEFAULT now(),
     UNIQUE(post_id, user_id, emoji)
 );
+
+ALTER TABLE post_reactions DROP CONSTRAINT IF EXISTS post_reactions_emoji_check;
+ALTER TABLE post_reactions
+    ADD CONSTRAINT post_reactions_emoji_check
+    CHECK (emoji IN ('like','dislike','fire','puke','brain','emotion','admin_like'));
 
 CREATE INDEX IF NOT EXISTS idx_post_reactions_post ON post_reactions(post_id);
 CREATE INDEX IF NOT EXISTS idx_post_reactions_user ON post_reactions(user_id);
@@ -1447,7 +1463,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 8: RPC вЂ” Resolve usernames to user_ids (for @mentions)
+-- STEP 8: RPC — Resolve usernames to user_ids (for @mentions)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.resolve_usernames(TEXT);
@@ -1470,7 +1486,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 9: RPC вЂ” Final public profile shape
+-- STEP 9: RPC — Final public profile shape
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_public_profile(UUID);
@@ -1519,9 +1535,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 10: RPC вЂ” Create mention notifications
+-- STEP 10: RPC — Create mention notifications
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.create_mention_notifications(INTEGER, INTEGER, UUID[]) CASCADE;
 CREATE OR REPLACE FUNCTION public.create_mention_notifications(
     p_post_id INTEGER,
     p_thread_id INTEGER,
@@ -1555,9 +1572,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 11: RPC вЂ” Get user recent activity (for profile)
+-- STEP 11: RPC — Get user recent activity (for profile)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_user_recent_activity(UUID, INTEGER, INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_user_recent_activity(
     p_user_id UUID,
     p_limit INTEGER DEFAULT 10,
@@ -1625,9 +1643,10 @@ END;
 $$;
 
 -- ==========================================
--- STEP 12: RPC вЂ” Get user threads (for profile tabs)
+-- STEP 12: RPC — Get user threads (for profile tabs)
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.get_user_threads(UUID, INTEGER, INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_user_threads(
     p_user_id UUID,
     p_limit INTEGER DEFAULT 20,
@@ -1669,7 +1688,7 @@ NOTIFY pgrst, 'reload schema';
 -- ============================================
 -- NeuroBench: Admin Like Reaction + Default Role
 -- ============================================
--- 1. Add 'admin_like' emoji вЂ” only admin/stmoderator can place it
+-- 1. Add 'admin_like' emoji — only admin/stmoderator can place it
 -- 2. Ensure new users get role = 'member' on registration
 -- ==========================================
 
@@ -1755,7 +1774,7 @@ DECLARE
     v_puke_count INT;
     v_admin_like_count INT;
     v_reactor_role TEXT;
-    v_result JSONB;
+    v_result BOOLEAN;
     v_granted TEXT[] := '{}';
 BEGIN
     SELECT author_id INTO v_post_author FROM forum_posts WHERE id = p_post_id;

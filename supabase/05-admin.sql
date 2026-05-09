@@ -188,6 +188,7 @@ $$;
 -- STEP 3: Admin update user profile
 -- ==========================================
 
+DROP FUNCTION IF EXISTS public.admin_update_user_profile(UUID, BOOLEAN, TIMESTAMPTZ, TEXT, TEXT, TEXT, TEXT, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_update_user_profile(
     p_user_id       UUID,
     p_is_verified   BOOLEAN DEFAULT NULL,
@@ -266,7 +267,7 @@ SET search_path = public
 AS $$
 DECLARE
     v_code TEXT;
-    v_invite_id INT;
+    v_invite_id UUID;
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid()) THEN
         RETURN jsonb_build_object('ok', false, 'reason', 'not_admin');

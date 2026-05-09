@@ -190,7 +190,7 @@ const ForumModule = (() => {
 
 
 
-        // @mentions вЂ” link to profile if resolved
+        // @mentions — link to profile if resolved
 
 
 
@@ -262,19 +262,19 @@ const ForumModule = (() => {
 
 
 
-        if (diff < 60) return 'С‚РѕР»СЊРєРѕ С‡С‚Рѕ';
+        if (diff < 60) return 'только что';
 
 
 
-        if (diff < 3600) return Math.floor(diff / 60) + ' РјРёРЅ. РЅР°Р·Р°Рґ';
+        if (diff < 3600) return Math.floor(diff / 60) + ' мин. назад';
 
 
 
-        if (diff < 86400) return Math.floor(diff / 3600) + ' С‡. РЅР°Р·Р°Рґ';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' ч. назад';
 
 
 
-        if (diff < 2592000) return Math.floor(diff / 86400) + ' РґРЅ. РЅР°Р·Р°Рґ';
+        if (diff < 2592000) return Math.floor(diff / 86400) + ' дн. назад';
 
 
 
@@ -378,7 +378,7 @@ const ForumModule = (() => {
 
 
 
-        const name = parts.length > 0 ? parts.join(' ') : (cleanText(info.author_username, 50) || 'РђРЅРѕРЅРёРј');
+        const name = parts.length > 0 ? parts.join(' ') : (cleanText(info.author_username, 50) || 'Аноним');
 
 
 
@@ -712,7 +712,7 @@ const ForumModule = (() => {
 
 
 
-        main.innerHTML = '<div class="forum-loading">Р—Р°РіСЂСѓР·РєР°...</div>';
+        main.innerHTML = '<div class="forum-loading">Загрузка...</div>';
 
 
 
@@ -752,7 +752,7 @@ const ForumModule = (() => {
 
 
 
-            const catName = currentCategory ? (categories.find(c => c.id === currentCategory)?.name || '') : 'Р’СЃРµ РєР°С‚РµРіРѕСЂРёРё';
+            const catName = currentCategory ? (categories.find(c => c.id === currentCategory)?.name || '') : 'Все категории';
 
 
 
@@ -780,7 +780,7 @@ const ForumModule = (() => {
 
 
 
-                    paginationHtml += `<button class="forum-page-btn" data-page="${currentPage - 1}">&larr; РќР°Р·Р°Рґ</button>`;
+                    paginationHtml += `<button class="forum-page-btn" data-page="${currentPage - 1}">&larr; Назад</button>`;
 
 
 
@@ -788,7 +788,7 @@ const ForumModule = (() => {
 
 
 
-                paginationHtml += `<span class="forum-page-info">РЎС‚СЂ. ${currentPage + 1} / ${totalPages}</span>`;
+                paginationHtml += `<span class="forum-page-info">Стр. ${currentPage + 1} / ${totalPages}</span>`;
 
 
 
@@ -796,7 +796,7 @@ const ForumModule = (() => {
 
 
 
-                    paginationHtml += `<button class="forum-page-btn" data-page="${currentPage + 1}">Р”Р°Р»РµРµ &rarr;</button>`;
+                    paginationHtml += `<button class="forum-page-btn" data-page="${currentPage + 1}">Далее &rarr;</button>`;
 
 
 
@@ -817,22 +817,22 @@ const ForumModule = (() => {
 
 
             const newThreadBtn = canPost()
-                ? `<a href="#new" class="forum-new-thread-btn">+ РќРѕРІС‹Р№ С‚СЂРµРґ</a>`
+                ? `<a href="#new" class="forum-new-thread-btn">+ Новый тред</a>`
                 : '';
 
             const pinnedThreads = threads.filter(t => t.is_pinned);
             const regularThreads = threads.filter(t => !t.is_pinned);
             const categoriesCount = categories.length || 0;
-            const boardTitle = currentCategory ? catName : 'Р’СЃРµ РѕР±СЃСѓР¶РґРµРЅРёСЏ';
-            const boardLabel = currentCategory ? 'РљР°С‚РµРіРѕСЂРёСЏ' : 'Р›РµРЅС‚Р° С„РѕСЂСѓРјР°';
+            const boardTitle = currentCategory ? catName : 'Все обсуждения';
+            const boardLabel = currentCategory ? 'Категория' : 'Лента форума';
 
             const renderThreadCard = (t) => {
                 const author = getUserDisplay(t);
                 const lastPostInfo = t.last_post_at
-                    ? `<span class="forum-last-post">РџРѕСЃР»РµРґРЅРёР№: ${formatRelativeTime(t.last_post_at)}</span>`
-                    : '<span class="forum-last-post">Р‘РµР· РѕС‚РІРµС‚РѕРІ</span>';
-                const pinIcon = t.is_pinned ? '<span class="forum-pin-icon" title="Р—Р°РєСЂРµРїР»С‘РЅ">&#x1F4CC;</span>' : '';
-                const lockIcon = t.is_locked ? '<span class="forum-lock-icon" title="Р—Р°РєСЂС‹С‚">&#x1F512;</span>' : '';
+                    ? `<span class="forum-last-post">Последний: ${formatRelativeTime(t.last_post_at)}</span>`
+                    : '<span class="forum-last-post">Без ответов</span>';
+                const pinIcon = t.is_pinned ? '<span class="forum-pin-icon" title="Закреплён">&#x1F4CC;</span>' : '';
+                const lockIcon = t.is_locked ? '<span class="forum-lock-icon" title="Закрыт">&#x1F512;</span>' : '';
                 const contentPreview = cleanText(t.content, t.is_pinned ? 220 : 150);
                 const title = cleanText(t.title, 200);
                 const safeTitle = escapeHtml(title);
@@ -840,10 +840,10 @@ const ForumModule = (() => {
                 const cardClass = t.is_pinned ? 'forum-thread-pinned' : 'forum-thread-regular';
 
                 return `
-                    <div class="forum-thread-card ${cardClass}" data-thread-id="${t.id}" role="link" tabindex="0" aria-label="РћС‚РєСЂС‹С‚СЊ С‚СЂРµРґ: ${safeTitle}">
+                    <div class="forum-thread-card ${cardClass}" data-thread-id="${t.id}" role="link" tabindex="0" aria-label="Открыть тред: ${safeTitle}">
                         <div class="forum-thread-card-top">
                             <div class="forum-thread-meta">
-                                <span class="forum-thread-category">${escapeHtml(cleanText(t.category_name, 30) || 'Р‘РµР· РєР°С‚РµРіРѕСЂРёРё')}</span>
+                                <span class="forum-thread-category">${escapeHtml(cleanText(t.category_name, 30) || 'Без категории')}</span>
                                 <span class="forum-thread-time">${formatRelativeTime(t.created_at)}</span>
                             </div>
                             <div class="forum-thread-status">${pinIcon}${lockIcon}</div>
@@ -858,7 +858,7 @@ const ForumModule = (() => {
                                 <div class="forum-thread-author-meta">${author.profileLink} ${author.roleBadge} ${author.modBadge} ${author.uidBadge}</div>
                             </div>
                             <div class="forum-thread-stats">
-                                <span class="forum-thread-stat-chip">${postsCount} РѕС‚РІРµС‚РѕРІ</span>
+                                <span class="forum-thread-stat-chip">${postsCount} ответов</span>
                                 ${lastPostInfo}
                             </div>
                         </div>
@@ -869,7 +869,7 @@ const ForumModule = (() => {
             const pinnedHtml = pinnedThreads.length
                 ? `
                     <div class="forum-section-head">
-                        <span class="forum-board-label">Р—Р°РєСЂРµРїР»РµРЅРѕ</span>
+                        <span class="forum-board-label">Закреплено</span>
                         <span class="forum-board-count">${pinnedThreads.length}</span>
                     </div>
                     <div class="forum-pinned-grid">
@@ -881,7 +881,7 @@ const ForumModule = (() => {
             const regularHtml = regularThreads.length
                 ? `
                     <div class="forum-section-head">
-                        <span class="forum-board-label">РЎРІРµР¶РёРµ С‚СЂРµРґС‹</span>
+                        <span class="forum-board-label">Свежие треды</span>
                         <span class="forum-board-count">${regularThreads.length}</span>
                     </div>
                     <div class="forum-regular-list">
@@ -895,23 +895,23 @@ const ForumModule = (() => {
                     <section class="forum-hero" aria-labelledby="forum-title">
                         <div class="forum-hero-copy">
                             <div class="forum-kicker">NeuroBench community</div>
-                            <h1 id="forum-title" class="forum-hero-title">Р¤РѕСЂСѓРј</h1>
-                            <p class="forum-subtitle">РћР±СЃСѓР¶РґРµРЅРёСЏ РјРѕРґРµР»РµР№, РіРµРЅРµСЂР°С†РёР№, Р±РµРЅС‡РјР°СЂРєРѕРІ Рё СЌРєСЃРїРµСЂРёРјРµРЅС‚РѕРІ СЃРѕРѕР±С‰РµСЃС‚РІР°.</p>
+                            <h1 id="forum-title" class="forum-hero-title">Форум</h1>
+                            <p class="forum-subtitle">Обсуждения моделей, генераций, бенчмарков и экспериментов сообщества.</p>
                         </div>
                         <div class="forum-hero-side">
-                            <div class="forum-hero-stat"><span>${total}</span><small>С‚СЂРµРґРѕРІ</small></div>
-                            <div class="forum-hero-stat"><span>${categoriesCount}</span><small>РєР°С‚РµРіРѕСЂРёР№</small></div>
+                            <div class="forum-hero-stat"><span>${total}</span><small>тредов</small></div>
+                            <div class="forum-hero-stat"><span>${categoriesCount}</span><small>категорий</small></div>
                             ${newThreadBtn}
                         </div>
                     </section>
 
-                    <div class="forum-category-rail" aria-label="РљР°С‚РµРіРѕСЂРёРё С„РѕСЂСѓРјР°">
-                        <button class="forum-cat-btn ${!currentCategory ? 'active' : ''}" data-cat="">Р’СЃРµ</button>
+                    <div class="forum-category-rail" aria-label="Категории форума">
+                        <button class="forum-cat-btn ${!currentCategory ? 'active' : ''}" data-cat="">Все</button>
                         ${categories.map(c => `<button class="forum-cat-btn ${currentCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${escapeHtml(c.name)}</button>`).join('')}
                     </div>
 
-                    ${userInfo && userInfo.is_banned ? '<div class="forum-restriction forum-ban-notice">Р’С‹ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅС‹. РЎРѕР·РґР°РЅРёРµ С‚СЂРµРґРѕРІ Рё РїРѕСЃС‚РѕРІ РЅРµРґРѕСЃС‚СѓРїРЅРѕ.</div>' : ''}
-                    ${userInfo && userInfo.is_muted && !userInfo.is_banned ? '<div class="forum-restriction forum-mute-notice">Р’С‹ Р·Р°РіР»СѓС€РµРЅС‹. РЎРѕР·РґР°РЅРёРµ С‚СЂРµРґРѕРІ Рё РїРѕСЃС‚РѕРІ РЅРµРґРѕСЃС‚СѓРїРЅРѕ.</div>' : ''}
+                    ${userInfo && userInfo.is_banned ? '<div class="forum-restriction forum-ban-notice">Вы заблокированы. Создание тредов и постов недоступно.</div>' : ''}
+                    ${userInfo && userInfo.is_muted && !userInfo.is_banned ? '<div class="forum-restriction forum-mute-notice">Вы заглушены. Создание тредов и постов недоступно.</div>' : ''}
 
                     <section class="forum-board" aria-label="${escapeHtml(boardTitle)}">
                         <div class="forum-board-head">
@@ -919,9 +919,9 @@ const ForumModule = (() => {
                                 <div class="forum-board-label">${boardLabel}</div>
                                 <div class="forum-board-title">${escapeHtml(boardTitle)}</div>
                             </div>
-                            <div class="forum-board-count">${total} С‚СЂРµРґРѕРІ</div>
+                            <div class="forum-board-count">${total} тредов</div>
                         </div>
-                        ${threads.length === 0 ? '<div class="forum-empty forum-empty-board">РџРѕРєР° РЅРµС‚ С‚СЂРµРґРѕРІ</div>' : `${pinnedHtml}${regularHtml}`}
+                        ${threads.length === 0 ? '<div class="forum-empty forum-empty-board">Пока нет тредов</div>' : `${pinnedHtml}${regularHtml}`}
                     </section>
 
                     ${paginationHtml}
@@ -942,7 +942,7 @@ const ForumModule = (() => {
 
 
 
-            main.innerHTML = `<div class="forum-error">РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё: ${escapeHtml(err.message)}</div>`;
+            main.innerHTML = `<div class="forum-error">Ошибка загрузки: ${escapeHtml(err.message)}</div>`;
 
 
 
@@ -1208,7 +1208,7 @@ const ForumModule = (() => {
 
 
 
-        main.innerHTML = '<div class="forum-loading">Р—Р°РіСЂСѓР·РєР°...</div>';
+        main.innerHTML = '<div class="forum-loading">Загрузка...</div>';
 
 
 
@@ -1228,7 +1228,7 @@ const ForumModule = (() => {
 
 
 
-                main.innerHTML = '<div class="forum-empty">РўСЂРµРґ РЅРµ РЅР°Р№РґРµРЅ</div>';
+                main.innerHTML = '<div class="forum-empty">Тред не найден</div>';
 
 
 
@@ -1344,11 +1344,11 @@ const ForumModule = (() => {
 
 
 
-                    ? cleanText([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username, 50) || 'РђРЅРѕРЅРёРј'
+                    ? cleanText([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username, 50) || 'Аноним'
 
 
 
-                    : 'РЈРґР°Р»С‘РЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ',
+                    : 'Удалённый пользователь',
 
 
 
@@ -1380,11 +1380,11 @@ const ForumModule = (() => {
 
 
 
-                    ? `<a href="${authorHref}" class="forum-username">${escapeHtml(authorInfo ? cleanText([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username, 50) || 'РђРЅРѕРЅРёРј' : 'РЈРґР°Р»С‘РЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ')}</a>`
+                    ? `<a href="${authorHref}" class="forum-username">${escapeHtml(authorInfo ? cleanText([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username, 50) || 'Аноним' : 'Удалённый пользователь')}</a>`
 
 
 
-                    : '<span class="forum-username">РЈРґР°Р»С‘РЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ</span>'
+                    : '<span class="forum-username">Удалённый пользователь</span>'
 
 
 
@@ -1400,7 +1400,7 @@ const ForumModule = (() => {
 
 
 
-                ? `<button class="forum-mod-action" id="btn-pin">${thread.is_pinned ? 'РћС‚РєСЂРµРїРёС‚СЊ' : 'Р—Р°РєСЂРµРїРёС‚СЊ'}</button>`
+                ? `<button class="forum-mod-action" id="btn-pin">${thread.is_pinned ? 'Открепить' : 'Закрепить'}</button>`
 
 
 
@@ -1412,7 +1412,7 @@ const ForumModule = (() => {
 
 
 
-                ? `<button class="forum-mod-action" id="btn-lock">${thread.is_locked ? 'Р Р°Р·Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ' : 'Р—Р°Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ'}</button>`
+                ? `<button class="forum-mod-action" id="btn-lock">${thread.is_locked ? 'Разблокировать' : 'Заблокировать'}</button>`
 
 
 
@@ -1424,7 +1424,7 @@ const ForumModule = (() => {
 
 
 
-                ? `<button class="forum-mod-action forum-mod-delete" id="btn-delete-thread">РЈРґР°Р»РёС‚СЊ С‚СЂРµРґ</button>`
+                ? `<button class="forum-mod-action forum-mod-delete" id="btn-delete-thread">Удалить тред</button>`
 
 
 
@@ -1436,7 +1436,7 @@ const ForumModule = (() => {
 
 
 
-                ? `<button class="forum-mod-action" id="btn-edit-thread">Р РµРґ.</button>`
+                ? `<button class="forum-mod-action" id="btn-edit-thread">Ред.</button>`
 
 
 
@@ -1456,7 +1456,7 @@ const ForumModule = (() => {
 
 
 
-                    <span class="forum-mod-label">РњРѕРґРµСЂР°С†РёСЏ:</span>
+                    <span class="forum-mod-label">Модерация:</span>
 
 
 
@@ -1480,7 +1480,7 @@ const ForumModule = (() => {
 
 
 
-                ? '<div class="forum-locked-notice">РўСЂРµРґ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ. РќРѕРІС‹Рµ РѕС‚РІРµС‚С‹ РЅРµРІРѕР·РјРѕР¶РЅС‹.</div>'
+                ? '<div class="forum-locked-notice">Тред заблокирован. Новые ответы невозможны.</div>'
 
 
 
@@ -1504,7 +1504,7 @@ const ForumModule = (() => {
 
 
 
-                        <textarea id="reply-content" placeholder="Р’Р°С€ РѕС‚РІРµС‚..." rows="4" maxlength="10000" class="forum-textarea"></textarea>
+                        <textarea id="reply-content" placeholder="Ваш ответ..." rows="4" maxlength="10000" class="forum-textarea"></textarea>
 
 
 
@@ -1516,7 +1516,7 @@ const ForumModule = (() => {
 
 
 
-                            <button id="btn-reply" class="forum-submit-btn">РћС‚РІРµС‚РёС‚СЊ</button>
+                            <button id="btn-reply" class="forum-submit-btn">Ответить</button>
 
 
 
@@ -1536,7 +1536,7 @@ const ForumModule = (() => {
 
 
 
-                    ? '<div class="forum-login-prompt"><a href="register.html">Р’РѕР№РґРёС‚Рµ</a> С‡С‚РѕР±С‹ РѕС‚РІРµС‡Р°С‚СЊ РІ С‚СЂРµРґР°С…</div>'
+                    ? '<div class="forum-login-prompt"><a href="register.html">Войдите</a> чтобы отвечать в тредах</div>'
 
 
 
@@ -1544,7 +1544,7 @@ const ForumModule = (() => {
 
 
 
-                        ? `<div class="forum-restriction">${userInfo.is_banned ? 'Р’С‹ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅС‹' : 'Р’С‹ Р·Р°РіР»СѓС€РµРЅС‹'}. РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёР№ РЅРµРґРѕСЃС‚СѓРїРЅР°.</div>`
+                        ? `<div class="forum-restriction">${userInfo.is_banned ? 'Вы заблокированы' : 'Вы заглушены'}. Отправка сообщений недоступна.</div>`
 
 
 
@@ -1580,7 +1580,7 @@ const ForumModule = (() => {
 
 
 
-                    paginationHtml += `<button class="forum-page-btn" data-post-page="${postPage - 1}">&larr; РќР°Р·Р°Рґ</button>`;
+                    paginationHtml += `<button class="forum-page-btn" data-post-page="${postPage - 1}">&larr; Назад</button>`;
 
 
 
@@ -1588,7 +1588,7 @@ const ForumModule = (() => {
 
 
 
-                paginationHtml += `<span class="forum-page-info">РЎС‚СЂ. ${postPage + 1} / ${totalPages}</span>`;
+                paginationHtml += `<span class="forum-page-info">Стр. ${postPage + 1} / ${totalPages}</span>`;
 
 
 
@@ -1596,7 +1596,7 @@ const ForumModule = (() => {
 
 
 
-                    paginationHtml += `<button class="forum-page-btn" data-post-page="${postPage + 1}">Р”Р°Р»РµРµ &rarr;</button>`;
+                    paginationHtml += `<button class="forum-page-btn" data-post-page="${postPage + 1}">Далее &rarr;</button>`;
 
 
 
@@ -1624,7 +1624,7 @@ const ForumModule = (() => {
 
 
 
-                    <a href="#/">Р¤РѕСЂСѓРј</a>
+                    <a href="#/">Форум</a>
 
 
 
@@ -1684,11 +1684,11 @@ const ForumModule = (() => {
 
 
 
-                                ${thread.is_pinned ? '<span class="forum-pin-icon" title="Р—Р°РєСЂРµРїР»С‘РЅ">&#x1F4CC;</span>' : ''}
+                                ${thread.is_pinned ? '<span class="forum-pin-icon" title="Закреплён">&#x1F4CC;</span>' : ''}
 
 
 
-                                ${thread.is_locked ? '<span class="forum-lock-icon" title="Р—Р°РєСЂС‹С‚">&#x1F512;</span>' : ''}
+                                ${thread.is_locked ? '<span class="forum-lock-icon" title="Закрыт">&#x1F512;</span>' : ''}
 
 
 
@@ -1764,7 +1764,7 @@ const ForumModule = (() => {
 
 
 
-            main.innerHTML = `<div class="forum-error">РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё: ${escapeHtml(err.message)}</div>`;
+            main.innerHTML = `<div class="forum-error">Ошибка загрузки: ${escapeHtml(err.message)}</div>`;
 
 
 
@@ -1801,7 +1801,7 @@ const ForumModule = (() => {
 
 
 
-        const quoteBtn = userInfo ? `<button class="forum-quote-btn" data-post-id="${postId}" title="Р¦РёС‚РёСЂРѕРІР°С‚СЊ">&#10077;</button>` : '';
+        const quoteBtn = userInfo ? `<button class="forum-quote-btn" data-post-id="${postId}" title="Цитировать">&#10077;</button>` : '';
 
 
 
@@ -1837,15 +1837,15 @@ const ForumModule = (() => {
 
 
 
-        const editedLabel = p.edited_at ? `<span class="forum-edited-label">(СЂРµРґ. ${formatRelativeTime(p.edited_at)})</span>` : '';
+        const editedLabel = p.edited_at ? `<span class="forum-edited-label">(ред. ${formatRelativeTime(p.edited_at)})</span>` : '';
 
 
 
-        const editBtn = isAuthor ? `<button class="forum-post-action-btn" data-action="edit" data-post-id="${p.id}">Р РµРґ.</button>` : '';
+        const editBtn = isAuthor ? `<button class="forum-post-action-btn" data-action="edit" data-post-id="${p.id}">Ред.</button>` : '';
 
 
 
-        const deleteBtn = isMod ? `<button class="forum-post-action-btn forum-mod-delete-sm" data-action="delete-post" data-post-id="${p.id}">РЈРґР°Р».</button>` : '';
+        const deleteBtn = isMod ? `<button class="forum-post-action-btn forum-mod-delete-sm" data-action="delete-post" data-post-id="${p.id}">Удал.</button>` : '';
 
 
 
@@ -1853,7 +1853,7 @@ const ForumModule = (() => {
 
 
 
-            ? `<button class="forum-post-action-btn" data-action="mod-user" data-user-id="${p.author_id}">РњРѕРґ.</button>`
+            ? `<button class="forum-post-action-btn" data-action="mod-user" data-user-id="${p.author_id}">Мод.</button>`
 
 
 
@@ -2009,7 +2009,7 @@ const ForumModule = (() => {
 
 
 
-                replyBtn.textContent = 'РћС‚РїСЂР°РІРєР°...';
+                replyBtn.textContent = 'Отправка...';
 
 
 
@@ -2093,7 +2093,7 @@ const ForumModule = (() => {
 
 
 
-                    alert('РћС€РёР±РєР°: ' + (err.message || 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РїСЂР°РІРёС‚СЊ'));
+                    alert('Ошибка: ' + (err.message || 'Не удалось отправить'));
 
 
 
@@ -2101,7 +2101,7 @@ const ForumModule = (() => {
 
 
 
-                    replyBtn.textContent = 'РћС‚РІРµС‚РёС‚СЊ';
+                    replyBtn.textContent = 'Ответить';
 
 
 
@@ -2145,7 +2145,7 @@ const ForumModule = (() => {
 
 
 
-                } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+                } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -2185,7 +2185,7 @@ const ForumModule = (() => {
 
 
 
-                } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+                } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -2213,7 +2213,7 @@ const ForumModule = (() => {
 
 
 
-                if (!confirm('РЈРґР°Р»РёС‚СЊ С‚СЂРµРґ?')) return;
+                if (!confirm('Удалить тред?')) return;
 
 
 
@@ -2229,7 +2229,7 @@ const ForumModule = (() => {
 
 
 
-                } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+                } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -2701,7 +2701,7 @@ const ForumModule = (() => {
 
 
 
-        const name = [profile.telegram_first_name, profile.telegram_last_name].filter(Boolean).join(' ') || profile.telegram_username || 'РђРЅРѕРЅРёРј';
+        const name = [profile.telegram_first_name, profile.telegram_last_name].filter(Boolean).join(' ') || profile.telegram_username || 'Аноним';
 
 
 
@@ -2777,11 +2777,11 @@ const ForumModule = (() => {
 
 
 
-                <span>${profile.threads_count || 0} С‚СЂРµРґРѕРІ</span>
+                <span>${profile.threads_count || 0} тредов</span>
 
 
 
-                <span>${profile.posts_count || 0} РїРѕСЃС‚РѕРІ</span>
+                <span>${profile.posts_count || 0} постов</span>
 
 
 
@@ -2789,7 +2789,7 @@ const ForumModule = (() => {
 
 
 
-            <a href="profile.html?id=${userId}" class="forum-popover-link">РћС‚РєСЂС‹С‚СЊ РїСЂРѕС„РёР»СЊ</a>
+            <a href="profile.html?id=${userId}" class="forum-popover-link">Открыть профиль</a>
 
 
 
@@ -2917,7 +2917,7 @@ const ForumModule = (() => {
 
 
 
-            <h3 class="font-title text-lg uppercase tracking-widest mb-4">Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ РїРѕСЃС‚</h3>
+            <h3 class="font-title text-lg uppercase tracking-widest mb-4">Редактировать пост</h3>
 
 
 
@@ -2929,11 +2929,11 @@ const ForumModule = (() => {
 
 
 
-                <button id="btn-save-edit-post" class="forum-submit-btn">РЎРѕС…СЂР°РЅРёС‚СЊ</button>
+                <button id="btn-save-edit-post" class="forum-submit-btn">Сохранить</button>
 
 
 
-                <button id="btn-cancel-modal" class="forum-cancel-btn">РћС‚РјРµРЅР°</button>
+                <button id="btn-cancel-modal" class="forum-cancel-btn">Отмена</button>
 
 
 
@@ -2981,7 +2981,7 @@ const ForumModule = (() => {
 
 
 
-            } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+            } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -3033,11 +3033,11 @@ const ForumModule = (() => {
 
 
 
-            <h3 class="font-title text-lg uppercase tracking-widest mb-4">Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ С‚СЂРµРґ</h3>
+            <h3 class="font-title text-lg uppercase tracking-widest mb-4">Редактировать тред</h3>
 
 
 
-            <input id="edit-thread-title" value="${escapeHtml(thread.title)}" maxlength="200" placeholder="Р—Р°РіРѕР»РѕРІРѕРє" class="forum-input">
+            <input id="edit-thread-title" value="${escapeHtml(thread.title)}" maxlength="200" placeholder="Заголовок" class="forum-input">
 
 
 
@@ -3049,11 +3049,11 @@ const ForumModule = (() => {
 
 
 
-                <button id="btn-save-edit-thread" class="forum-submit-btn">РЎРѕС…СЂР°РЅРёС‚СЊ</button>
+                <button id="btn-save-edit-thread" class="forum-submit-btn">Сохранить</button>
 
 
 
-                <button id="btn-cancel-modal" class="forum-cancel-btn">РћС‚РјРµРЅР°</button>
+                <button id="btn-cancel-modal" class="forum-cancel-btn">Отмена</button>
 
 
 
@@ -3105,7 +3105,7 @@ const ForumModule = (() => {
 
 
 
-            } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+            } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -3137,7 +3137,7 @@ const ForumModule = (() => {
 
 
 
-        if (!confirm('РЈРґР°Р»РёС‚СЊ РїРѕСЃС‚?')) return;
+        if (!confirm('Удалить пост?')) return;
 
 
 
@@ -3153,7 +3153,7 @@ const ForumModule = (() => {
 
 
 
-        } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+        } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -3197,7 +3197,7 @@ const ForumModule = (() => {
 
 
 
-            <h3 class="font-title text-lg uppercase tracking-widest mb-4">РњРѕРґРµСЂР°С†РёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ</h3>
+            <h3 class="font-title text-lg uppercase tracking-widest mb-4">Модерация пользователя</h3>
 
 
 
@@ -3205,11 +3205,11 @@ const ForumModule = (() => {
 
 
 
-                <p class="forum-mod-user-label">Р—Р°РіР»СѓС€РёС‚СЊ (Р·Р°РїСЂРµС‚РёС‚СЊ РѕС‚РїСЂР°РІРєСѓ СЃРѕРѕР±С‰РµРЅРёР№)</p>
+                <p class="forum-mod-user-label">Заглушить (запретить отправку сообщений)</p>
 
 
 
-                <input id="mod-mute-reason" placeholder="РџСЂРёС‡РёРЅР° (РѕРїС†.)" class="forum-input">
+                <input id="mod-mute-reason" placeholder="Причина (опц.)" class="forum-input">
 
 
 
@@ -3221,27 +3221,27 @@ const ForumModule = (() => {
 
 
 
-                        <option value="1h">1 С‡Р°СЃ</option>
+                        <option value="1h">1 час</option>
 
 
 
-                        <option value="6h">6 С‡Р°СЃРѕРІ</option>
+                        <option value="6h">6 часов</option>
 
 
 
-                        <option value="1d" selected>1 РґРµРЅСЊ</option>
+                        <option value="1d" selected>1 день</option>
 
 
 
-                        <option value="7d">7 РґРЅРµР№</option>
+                        <option value="7d">7 дней</option>
 
 
 
-                        <option value="30d">30 РґРЅРµР№</option>
+                        <option value="30d">30 дней</option>
 
 
 
-                        <option value="perm">РќР°РІСЃРµРіРґР°</option>
+                        <option value="perm">Навсегда</option>
 
 
 
@@ -3249,7 +3249,7 @@ const ForumModule = (() => {
 
 
 
-                    <button id="btn-mute-user" class="forum-mod-btn forum-mod-mute">Р—Р°РіР»СѓС€РёС‚СЊ</button>
+                    <button id="btn-mute-user" class="forum-mod-btn forum-mod-mute">Заглушить</button>
 
 
 
@@ -3265,11 +3265,11 @@ const ForumModule = (() => {
 
 
 
-                <p class="forum-mod-user-label">Р—Р°Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ (РїРѕР»РЅС‹Р№ Р±Р°РЅ)</p>
+                <p class="forum-mod-user-label">Заблокировать (полный бан)</p>
 
 
 
-                <input id="mod-ban-reason" placeholder="РџСЂРёС‡РёРЅР° (РѕРїС†.)" class="forum-input">
+                <input id="mod-ban-reason" placeholder="Причина (опц.)" class="forum-input">
 
 
 
@@ -3281,19 +3281,19 @@ const ForumModule = (() => {
 
 
 
-                        <option value="1d">1 РґРµРЅСЊ</option>
+                        <option value="1d">1 день</option>
 
 
 
-                        <option value="7d" selected>7 РґРЅРµР№</option>
+                        <option value="7d" selected>7 дней</option>
 
 
 
-                        <option value="30d">30 РґРЅРµР№</option>
+                        <option value="30d">30 дней</option>
 
 
 
-                        <option value="perm">РќР°РІСЃРµРіРґР°</option>
+                        <option value="perm">Навсегда</option>
 
 
 
@@ -3301,7 +3301,7 @@ const ForumModule = (() => {
 
 
 
-                    <button id="btn-ban-user" class="forum-mod-btn forum-mod-ban">Р—Р°Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ</button>
+                    <button id="btn-ban-user" class="forum-mod-btn forum-mod-ban">Заблокировать</button>
 
 
 
@@ -3317,7 +3317,7 @@ const ForumModule = (() => {
 
 
 
-                <p class="forum-mod-user-label">РЎРЅСЏС‚СЊ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ</p>
+                <p class="forum-mod-user-label">Снять ограничения</p>
 
 
 
@@ -3325,11 +3325,11 @@ const ForumModule = (() => {
 
 
 
-                    <button id="btn-unmute-user" class="forum-mod-btn forum-mod-unmute">РЎРЅСЏС‚СЊ РјСѓС‚</button>
+                    <button id="btn-unmute-user" class="forum-mod-btn forum-mod-unmute">Снять мут</button>
 
 
 
-                    <button id="btn-unban-user" class="forum-mod-btn forum-mod-unban">РЎРЅСЏС‚СЊ Р±Р°РЅ</button>
+                    <button id="btn-unban-user" class="forum-mod-btn forum-mod-unban">Снять бан</button>
 
 
 
@@ -3345,7 +3345,7 @@ const ForumModule = (() => {
 
 
 
-                <button id="btn-cancel-modal" class="forum-cancel-btn">Р—Р°РєСЂС‹С‚СЊ</button>
+                <button id="btn-cancel-modal" class="forum-cancel-btn">Закрыть</button>
 
 
 
@@ -3413,11 +3413,11 @@ const ForumModule = (() => {
 
 
 
-                if (!r) { alert('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіР»СѓС€РёС‚СЊ'); return; }
+                if (!r) { alert('Не удалось заглушить'); return; }
 
 
 
-                alert('РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ Р·Р°РіР»СѓС€РµРЅ');
+                alert('Пользователь заглушен');
 
 
 
@@ -3425,7 +3425,7 @@ const ForumModule = (() => {
 
 
 
-            } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+            } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -3449,7 +3449,7 @@ const ForumModule = (() => {
 
 
 
-            if (!confirm('Р—Р°Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ?')) return;
+            if (!confirm('Заблокировать пользователя?')) return;
 
 
 
@@ -3461,11 +3461,11 @@ const ForumModule = (() => {
 
 
 
-                if (!r) { alert('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ'); return; }
+                if (!r) { alert('Не удалось заблокировать'); return; }
 
 
 
-                alert('РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ');
+                alert('Пользователь заблокирован');
 
 
 
@@ -3473,7 +3473,7 @@ const ForumModule = (() => {
 
 
 
-            } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+            } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -3497,7 +3497,7 @@ const ForumModule = (() => {
 
 
 
-                alert('РњСѓС‚ СЃРЅСЏС‚');
+                alert('Мут снят');
 
 
 
@@ -3505,7 +3505,7 @@ const ForumModule = (() => {
 
 
 
-            } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+            } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -3529,7 +3529,7 @@ const ForumModule = (() => {
 
 
 
-                alert('Р‘Р°РЅ СЃРЅСЏС‚');
+                alert('Бан снят');
 
 
 
@@ -3537,7 +3537,7 @@ const ForumModule = (() => {
 
 
 
-            } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+            } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -3593,11 +3593,11 @@ const ForumModule = (() => {
 
 
 
-                <div class="forum-breadcrumb"><a href="#/">Р¤РѕСЂСѓРј</a> &rsaquo; РќРѕРІС‹Р№ С‚СЂРµРґ</div>
+                <div class="forum-breadcrumb"><a href="#/">Форум</a> &rsaquo; Новый тред</div>
 
 
 
-                <div class="forum-empty">${!userInfo ? '<a href="register.html">Р’РѕР№РґРёС‚Рµ</a> С‡С‚РѕР±С‹ СЃРѕР·РґР°РІР°С‚СЊ С‚СЂРµРґС‹' : 'РЈ РІР°СЃ РЅРµС‚ РїСЂР°РІ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ С‚СЂРµРґРѕРІ'}</div>
+                <div class="forum-empty">${!userInfo ? '<a href="register.html">Войдите</a> чтобы создавать треды' : 'У вас нет прав для создания тредов'}</div>
 
 
 
@@ -3621,7 +3621,7 @@ const ForumModule = (() => {
 
 
 
-            <div class="forum-breadcrumb"><a href="#/">Р¤РѕСЂСѓРј</a> &rsaquo; РќРѕРІС‹Р№ С‚СЂРµРґ</div>
+            <div class="forum-breadcrumb"><a href="#/">Форум</a> &rsaquo; Новый тред</div>
 
 
 
@@ -3629,7 +3629,7 @@ const ForumModule = (() => {
 
 
 
-                <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">РќРѕРІС‹Р№ С‚СЂРµРґ</h2>
+                <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">Новый тред</h2>
 
 
 
@@ -3637,7 +3637,7 @@ const ForumModule = (() => {
 
 
 
-                    РљР°С‚РµРіРѕСЂРёСЏ
+                    Категория
 
 
 
@@ -3661,11 +3661,11 @@ const ForumModule = (() => {
 
 
 
-                    Р—Р°РіРѕР»РѕРІРѕРє <span class="forum-char-hint"><span id="title-char-count">0</span>/200</span>
+                    Заголовок <span class="forum-char-hint"><span id="title-char-count">0</span>/200</span>
 
 
 
-                    <input id="new-thread-title" maxlength="200" placeholder="РўРµРјР° РѕР±СЃСѓР¶РґРµРЅРёСЏ" class="forum-input">
+                    <input id="new-thread-title" maxlength="200" placeholder="Тема обсуждения" class="forum-input">
 
 
 
@@ -3677,11 +3677,11 @@ const ForumModule = (() => {
 
 
 
-                    РЎРѕРґРµСЂР¶Р°РЅРёРµ <span class="forum-char-hint"><span id="content-char-count">0</span>/10000</span>
+                    Содержание <span class="forum-char-hint"><span id="content-char-count">0</span>/10000</span>
 
 
 
-                    <textarea id="new-thread-content" rows="8" maxlength="10000" placeholder="РћРїРёС€РёС‚Рµ С‚РµРјСѓ..." class="forum-textarea"></textarea>
+                    <textarea id="new-thread-content" rows="8" maxlength="10000" placeholder="Опишите тему..." class="forum-textarea"></textarea>
 
 
 
@@ -3693,11 +3693,11 @@ const ForumModule = (() => {
 
 
 
-                    <button id="btn-create-thread" class="forum-submit-btn">РЎРѕР·РґР°С‚СЊ С‚СЂРµРґ</button>
+                    <button id="btn-create-thread" class="forum-submit-btn">Создать тред</button>
 
 
 
-                    <a href="#/" class="forum-cancel-btn">РћС‚РјРµРЅР°</a>
+                    <a href="#/" class="forum-cancel-btn">Отмена</a>
 
 
 
@@ -3781,11 +3781,11 @@ const ForumModule = (() => {
 
 
 
-            if (!title || title.length < 3) { alert('Р—Р°РіРѕР»РѕРІРѕРє РјРёРЅРёРјСѓРј 3 СЃРёРјРІРѕР»Р°'); return; }
+            if (!title || title.length < 3) { alert('Заголовок минимум 3 символа'); return; }
 
 
 
-            if (!content) { alert('Р’РІРµРґРёС‚Рµ СЃРѕРґРµСЂР¶Р°РЅРёРµ'); return; }
+            if (!content) { alert('Введите содержание'); return; }
 
 
 
@@ -3801,7 +3801,7 @@ const ForumModule = (() => {
 
 
 
-            btn.textContent = 'РЎРѕР·РґР°РЅРёРµ...';
+            btn.textContent = 'Создание...';
 
 
 
@@ -3825,7 +3825,7 @@ const ForumModule = (() => {
 
 
 
-                alert('РћС€РёР±РєР°: ' + (err.message || 'РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ С‚СЂРµРґ'));
+                alert('Ошибка: ' + (err.message || 'Не удалось создать тред'));
 
 
 
@@ -3833,7 +3833,7 @@ const ForumModule = (() => {
 
 
 
-                btn.textContent = 'РЎРѕР·РґР°С‚СЊ С‚СЂРµРґ';
+                btn.textContent = 'Создать тред';
 
 
 

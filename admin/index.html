@@ -48,7 +48,7 @@
                     class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 transition-colors rounded-xl">
                 <button type="submit"
                     class="w-full bg-white text-black py-3 text-[10px] uppercase tracking-widest font-bold rounded-full hover:scale-105 transition-transform">
-                    Р’РѕР№С‚Рё
+                    Войти
                 </button>
                 <p id="login-error" class="text-red-400 text-xs text-center hidden"></p>
             </form>
@@ -63,117 +63,117 @@
             </h1>
             <div class="flex items-center gap-4">
                 <span id="admin-email" class="text-xs opacity-30"></span>
-                <button id="logout-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">Р’С‹Р№С‚Рё</button>
+                <button id="logout-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">Выйти</button>
             </div>
         </nav>
 
         <div class="flex">
             <aside class="w-56 min-h-[calc(100vh-56px)] border-r border-border p-4 flex flex-col gap-2">
-                <button class="admin-nav-btn active" data-section="prompts">РџСЂРѕРјРїС‚С‹</button>
-                <button class="admin-nav-btn" data-section="models">РќР°СЃС‚СЂРѕР№РєРё РјРѕРґРµР»РµР№</button>
-                <button class="admin-nav-btn" data-section="results">Р РµР·СѓР»СЊС‚Р°С‚С‹</button>
-                <button class="admin-nav-btn" data-section="stats">РЎС‚Р°С‚РёСЃС‚РёРєР°</button>
-                <button class="admin-nav-btn" data-section="invites">РРЅРІР°Р№С‚С‹</button>
-                <button class="admin-nav-btn" data-section="users">РџРѕР»СЊР·РѕРІР°С‚РµР»Рё</button>
-                <button class="admin-nav-btn" data-section="profiles">РџСЂРѕС„РёР»Рё</button>
-                <button class="admin-nav-btn" data-section="moderators">РњРѕРґРµСЂР°С‚РѕСЂС‹</button>
+                <button class="admin-nav-btn active" data-section="prompts">Промпты</button>
+                <button class="admin-nav-btn" data-section="models">Настройки моделей</button>
+                <button class="admin-nav-btn" data-section="results">Результаты</button>
+                <button class="admin-nav-btn" data-section="stats">Статистика</button>
+                <button class="admin-nav-btn" data-section="invites">Инвайты</button>
+                <button class="admin-nav-btn" data-section="users">Пользователи</button>
+                <button class="admin-nav-btn" data-section="profiles">Профили</button>
+                <button class="admin-nav-btn" data-section="moderators">Модераторы</button>
             </aside>
 
             <main class="flex-1 p-8 max-w-6xl">
 
                 <section id="section-prompts" class="admin-section">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">РџСЂРѕРјРїС‚С‹</h2>
-                        <button id="add-prompt-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Р”РѕР±Р°РІРёС‚СЊ</button>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Промпты</h2>
+                        <button id="add-prompt-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Добавить</button>
                     </div>
                     <div class="flex gap-2 mb-4">
-                        <button class="admin-difficulty-btn active" data-diff="easy">Р›С‘РіРєРёРµ</button>
-                        <button class="admin-difficulty-btn" data-diff="medium">РЎСЂРµРґРЅРёРµ</button>
-                        <button class="admin-difficulty-btn" data-diff="hard">РЎР»РѕР¶РЅС‹Рµ</button>
+                        <button class="admin-difficulty-btn active" data-diff="easy">Лёгкие</button>
+                        <button class="admin-difficulty-btn" data-diff="medium">Средние</button>
+                        <button class="admin-difficulty-btn" data-diff="hard">Сложные</button>
                     </div>
                     <div id="prompts-list" class="flex flex-col gap-3"></div>
                 </section>
 
                 <section id="section-models" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">РќР°СЃС‚СЂРѕР№РєРё РјРѕРґРµР»РµР№</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Настройки моделей</h2>
                         <div class="flex gap-3 items-center">
-                            <input id="model-settings-search" type="text" placeholder="РџРѕРёСЃРє РјРѕРґРµР»Рё..." class="bg-surface border border-border px-4 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-white/50 rounded-xl">
-                            <button id="add-model-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ РќРѕРІР°СЏ РјРѕРґРµР»СЊ</button>
+                            <input id="model-settings-search" type="text" placeholder="Поиск модели..." class="bg-surface border border-border px-4 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-white/50 rounded-xl">
+                            <button id="add-model-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Новая модель</button>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mb-6">РњРѕРґРµР»СЊ вЂ” РіР»РѕР±Р°Р»СЊРЅС‹Р№ СЃРїСЂР°РІРѕС‡РЅРёРє. Р—РґРµСЃСЊ РЅР°СЃС‚СЂР°РёРІР°СЋС‚СЃСЏ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР° (РіРґРµ С‚РµСЃС‚РёСЂСѓРµС‚СЃСЏ) Рё РїР°СЂР°РјРµС‚СЂС‹ (СЃ РєР°РєРёРјРё РЅР°СЃС‚СЂРѕР№РєР°РјРё). РЎР°РјРё СЂРµР·СѓР»СЊС‚Р°С‚С‹ РґРѕР±Р°РІР»СЏСЋС‚СЃСЏ РІРѕ РІРєР»Р°РґРєРµ В«Р РµР·СѓР»СЊС‚Р°С‚С‹В».</p>
+                    <p class="text-xs text-gray-500 mb-6">Модель — глобальный справочник. Здесь настраиваются пространства (где тестируется) и параметры (с какими настройками). Сами результаты добавляются во вкладке «Результаты».</p>
                     <div id="models-list" class="flex flex-col gap-4"></div>
                 </section>
 
                 <section id="section-results" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Р РµР·СѓР»СЊС‚Р°С‚С‹</h2>
-                        <button id="add-result-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Р”РѕР±Р°РІРёС‚СЊ</button>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Результаты</h2>
+                        <button id="add-result-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Добавить</button>
                     </div>
                     <div class="flex gap-4 mb-4 flex-wrap">
-                        <label class="text-xs uppercase tracking-widest opacity-30 self-center">РџСЂРѕРјРїС‚:</label>
+                        <label class="text-xs uppercase tracking-widest opacity-30 self-center">Промпт:</label>
                         <select id="results-prompt-filter" class="bg-surface border border-border px-3 py-2 text-xs text-white outline-none focus:border-white/50 rounded-xl">
-                            <option value="all">Р’СЃРµ</option>
+                            <option value="all">Все</option>
                         </select>
-                        <label class="text-xs uppercase tracking-widest opacity-30 self-center">РњРѕРґРµР»СЊ:</label>
+                        <label class="text-xs uppercase tracking-widest opacity-30 self-center">Модель:</label>
                         <select id="results-model-filter" class="bg-surface border border-border px-3 py-2 text-xs text-white outline-none focus:border-white/50 rounded-xl">
-                            <option value="all">Р’СЃРµ</option>
+                            <option value="all">Все</option>
                         </select>
                     </div>
                     <div id="results-list" class="flex flex-col gap-3"></div>
                 </section>
 
                 <section id="section-stats" class="admin-section hidden">
-                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">РЎС‚Р°С‚РёСЃС‚РёРєР°</h2>
+                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">Статистика</h2>
                     <div id="stats-grid" class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8"></div>
                     <div class="matte-card p-6">
-                        <h3 class="text-xs uppercase tracking-widest opacity-30 mb-4">РџСЂРѕСЃРјРѕС‚СЂС‹ Р·Р° 30 РґРЅРµР№</h3>
+                        <h3 class="text-xs uppercase tracking-widest opacity-30 mb-4">Просмотры за 30 дней</h3>
                         <div id="stats-chart" class="h-48 flex items-end gap-1"></div>
                     </div>
                 </section>
 
                 <section id="section-invites" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">РРЅРІР°Р№С‚-РєРѕРґС‹</h2>
-                        <button id="add-invite-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ РЎРіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ</button>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Инвайт-коды</h2>
+                        <button id="add-invite-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Сгенерировать</button>
                     </div>
                     <div class="flex gap-2 mb-4">
-                        <button class="invite-filter-btn active" data-inv-filter="all">Р’СЃРµ</button>
-                        <button class="invite-filter-btn" data-inv-filter="unused">РЎРІРѕР±РѕРґРЅС‹Рµ</button>
-                        <button class="invite-filter-btn" data-inv-filter="used">РСЃРїРѕР»СЊР·РѕРІР°РЅРЅС‹Рµ</button>
-                        <button class="invite-filter-btn" data-inv-filter="admin">РђРґРјРёРЅСЃРєРёРµ</button>
+                        <button class="invite-filter-btn active" data-inv-filter="all">Все</button>
+                        <button class="invite-filter-btn" data-inv-filter="unused">Свободные</button>
+                        <button class="invite-filter-btn" data-inv-filter="used">Использованные</button>
+                        <button class="invite-filter-btn" data-inv-filter="admin">Админские</button>
                     </div>
                     <div id="invites-list" class="flex flex-col gap-3"></div>
                 </section>
 
                 <section id="section-users" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">РџРѕР»СЊР·РѕРІР°С‚РµР»Рё</h2>
-                        <button id="reset-all-limits-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">РЎР±СЂРѕСЃРёС‚СЊ Р»РёРјРёС‚С‹ РІСЃРµРј</button>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Пользователи</h2>
+                        <button id="reset-all-limits-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">Сбросить лимиты всем</button>
                     </div>
                     <div id="users-list" class="flex flex-col gap-3"></div>
                 </section>
 
                 <section id="section-profiles" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">РЈРїСЂР°РІР»РµРЅРёРµ РїСЂРѕС„РёР»СЏРјРё</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Управление профилями</h2>
                         <div class="flex gap-3 items-center">
-                            <input id="profiles-search" type="text" placeholder="РџРѕРёСЃРє РїРѕ РёРјРµРЅРё/username..." class="bg-surface border border-border px-4 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-white/50 rounded-xl">
+                            <input id="profiles-search" type="text" placeholder="Поиск по имени/username..." class="bg-surface border border-border px-4 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-white/50 rounded-xl">
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mb-6">Р РѕР»Рё: admin > stmoderator > moderator > beta > alpha > member. РљР»РёРє РїРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ РѕС‚РєСЂС‹РІР°РµС‚ РїРѕР»РЅС‹Р№ РїСЂРѕС„РёР»СЊ СЃ СѓРїСЂР°РІР»РµРЅРёРµРј.</p>
+                    <p class="text-xs text-gray-500 mb-6">Роли: admin > stmoderator > moderator > beta > alpha > member. Клик по пользователю открывает полный профиль с управлением.</p>
                     <div id="profiles-grid" class="flex flex-col gap-3"></div>
                 </section>
 
                 <section id="section-moderators" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">РњРѕРґРµСЂР°С‚РѕСЂС‹</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Модераторы</h2>
                     </div>
-                    <p class="text-xs text-gray-500 mb-6">РњРѕРґРµСЂР°С‚РѕСЂС‹ РїСЂРёРІСЏР·Р°РЅС‹ Рє Telegram. РћРЅРё РјРѕРіСѓС‚: Р·Р°РєСЂРµРїР»СЏС‚СЊ/Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ/СѓРґР°Р»СЏС‚СЊ С‚СЂРµРґС‹ Рё РїРѕСЃС‚С‹, Р·Р°РіР»СѓС€Р°С‚СЊ Рё Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ (РєСЂРѕРјРµ РґСЂСѓРіРёС… РјРѕРґРµСЂР°С‚РѕСЂРѕРІ Рё Р°РґРјРёРЅРѕРІ).</p>
+                    <p class="text-xs text-gray-500 mb-6">Модераторы привязаны к Telegram. Они могут: закреплять/блокировать/удалять треды и посты, заглушать и блокировать пользователей (кроме других модераторов и админов).</p>
                     <div id="moderators-list" class="flex flex-col gap-3 mb-8"></div>
-                    <h3 class="font-title text-sm uppercase tracking-widest opacity-30 mb-4">РќР°Р·РЅР°С‡РёС‚СЊ РјРѕРґРµСЂР°С‚РѕСЂР°</h3>
-                    <p class="text-xs text-gray-500 mb-4">Р’С‹Р±РµСЂРёС‚Рµ РІРµСЂРёС„РёС†РёСЂРѕРІР°РЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ Telegram username:</p>
+                    <h3 class="font-title text-sm uppercase tracking-widest opacity-30 mb-4">Назначить модератора</h3>
+                    <p class="text-xs text-gray-500 mb-4">Выберите верифицированного пользователя с Telegram username:</p>
                     <div id="moderator-candidates" class="flex flex-col gap-3"></div>
                 </section>
 

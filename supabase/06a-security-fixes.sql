@@ -26,6 +26,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.telegram_auth_rate_limits T
 CREATE INDEX IF NOT EXISTS idx_telegram_auth_rate_limits_updated_at
     ON public.telegram_auth_rate_limits (updated_at);
 
+DROP FUNCTION IF EXISTS public.check_telegram_auth_rate_limit(TEXT, INTEGER, INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.check_telegram_auth_rate_limit(
     p_identifier TEXT,
     p_max_attempts INTEGER DEFAULT 20,
@@ -476,7 +477,7 @@ BEGIN
     END IF;
 
     IF COALESCE(v_invite.use_count, 0) > 0 OR v_invite.used_by IS NOT NULL THEN
-        RAISE EXCEPTION 'РќРµР»СЊР·СЏ СѓРґР°Р»РёС‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРЅС‹Р№ РёРЅРІР°Р№С‚';
+        RAISE EXCEPTION 'Нельзя удалить использованный инвайт';
     END IF;
 
     UPDATE public.profiles
@@ -529,6 +530,12 @@ DECLARE
     v_current_count INT;
     v_already BOOLEAN;
 BEGIN
+    IF p_user_id IS NULL OR p_achievement_id IS NULL THEN
+        RETURN jsonb_build_object('granted', false, 'reason', 'invalid_input');
+    END IF;
+
+    PERFORM pg_advisory_xact_lock(hashtext('public.grant_achievement'), hashtext(p_achievement_id));
+
     SELECT EXISTS(
         SELECT 1 FROM user_achievements WHERE user_id = p_user_id AND achievement_id = p_achievement_id
     ) INTO v_already;
@@ -685,7 +692,7 @@ BEGIN
         IF v_result THEN v_granted := array_append(v_granted, 'first_mention'); END IF;
     END IF;
 
-    IF EXISTS(SELECT 1 FROM forum_posts WHERE author_id = p_user_id AND is_deleted = false AND updated_at IS NOT NULL AND updated_at != created_at LIMIT 1) THEN
+    IF EXISTS(SELECT 1 FROM forum_posts WHERE author_id = p_user_id AND is_deleted = false AND edited_at IS NOT NULL LIMIT 1) THEN
         SELECT (grant_achievement(p_user_id, 'first_edit')->>'granted')::BOOLEAN INTO v_result;
         IF v_result THEN v_granted := array_append(v_granted, 'first_edit'); END IF;
     END IF;
@@ -805,7 +812,7 @@ REVOKE EXECUTE ON FUNCTION public.check_pin_achievement(INTEGER) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.check_pin_achievement(INTEGER) FROM anon;
 REVOKE EXECUTE ON FUNCTION public.check_pin_achievement(INTEGER) FROM authenticated;
 
-DROP FUNCTION IF EXISTS public.mod_pin_thread(INTEGER, BOOLEAN);
+DROP FUNCTION IF EXISTS public.mod_pin_thread(INTEGER, BOOLEAN) CASCADE;
 
 CREATE OR REPLACE FUNCTION public.mod_pin_thread(p_thread_id INTEGER, p_pin BOOLEAN)
 RETURNS JSONB
@@ -839,6 +846,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.create_mention_notifications(INTEGER, INTEGER, UUID[]) CASCADE;
 CREATE OR REPLACE FUNCTION public.create_mention_notifications(
     p_post_id INTEGER,
     p_thread_id INTEGER,

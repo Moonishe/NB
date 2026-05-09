@@ -64,73 +64,73 @@ const ProfileModule = (() => {
 
     const _GLYPH = {
 
-        'A':[' в–€в–€в–€ ','в–€   в–€','в–€в–€в–€в–€в–€','в–€   в–€','в–€   в–€'],
+        'A':[' ███ ','█   █','█████','█   █','█   █'],
 
-        'B':['в–€в–€в–€в–€ ','в–€   в–€','в–€в–€в–€в–€ ','в–€   в–€','в–€в–€в–€в–€ '],
+        'B':['████ ','█   █','████ ','█   █','████ '],
 
-        'C':[' в–€в–€в–€в–€','в–€    ','в–€    ','в–€    ',' в–€в–€в–€в–€'],
+        'C':[' ████','█    ','█    ','█    ',' ████'],
 
-        'D':['в–€в–€в–€в–€ ','в–€   в–€','в–€   в–€','в–€   в–€','в–€в–€в–€в–€ '],
+        'D':['████ ','█   █','█   █','█   █','████ '],
 
-        'E':['в–€в–€в–€в–€в–€','в–€    ','в–€в–€в–€в–€ ','в–€    ','в–€в–€в–€в–€в–€'],
+        'E':['█████','█    ','████ ','█    ','█████'],
 
-        'F':['в–€в–€в–€в–€в–€','в–€    ','в–€в–€в–€в–€ ','в–€    ','в–€    '],
+        'F':['█████','█    ','████ ','█    ','█    '],
 
-        'G':[' в–€в–€в–€в–€','в–€    ','в–€  в–€в–€','в–€   в–€',' в–€в–€в–€в–€'],
+        'G':[' ████','█    ','█  ██','█   █',' ████'],
 
-        'H':['в–€   в–€','в–€   в–€','в–€в–€в–€в–€в–€','в–€   в–€','в–€   в–€'],
+        'H':['█   █','█   █','█████','█   █','█   █'],
 
-        'I':['в–€в–€в–€в–€в–€','  в–€  ','  в–€  ','  в–€  ','в–€в–€в–€в–€в–€'],
+        'I':['█████','  █  ','  █  ','  █  ','█████'],
 
-        'J':['в–€в–€в–€в–€в–€','    в–€','    в–€','в–€   в–€',' в–€в–€в–€ '],
+        'J':['█████','    █','    █','█   █',' ███ '],
 
-        'K':['в–€   в–€','в–€  в–€ ','в–€в–€в–€  ','в–€  в–€ ','в–€   в–€'],
+        'K':['█   █','█  █ ','███  ','█  █ ','█   █'],
 
-        'L':['в–€    ','в–€    ','в–€    ','в–€    ','в–€в–€в–€в–€в–€'],
+        'L':['█    ','█    ','█    ','█    ','█████'],
 
-        'M':['в–€   в–€','в–€в–€ в–€в–€','в–€ в–€ в–€','в–€   в–€','в–€   в–€'],
+        'M':['█   █','██ ██','█ █ █','█   █','█   █'],
 
-        'N':['в–€   в–€','в–€в–€  в–€','в–€ в–€ в–€','в–€  в–€в–€','в–€   в–€'],
+        'N':['█   █','██  █','█ █ █','█  ██','█   █'],
 
-        'O':[' в–€в–€в–€ ','в–€   в–€','в–€   в–€','в–€   в–€',' в–€в–€в–€ '],
+        'O':[' ███ ','█   █','█   █','█   █',' ███ '],
 
-        'P':['в–€в–€в–€в–€ ','в–€   в–€','в–€в–€в–€в–€ ','в–€    ','в–€    '],
+        'P':['████ ','█   █','████ ','█    ','█    '],
 
-        'R':['в–€в–€в–€в–€ ','в–€   в–€','в–€в–€в–€в–€ ','в–€  в–€ ','в–€   в–€'],
+        'R':['████ ','█   █','████ ','█  █ ','█   █'],
 
-        'S':[' в–€в–€в–€в–€','в–€    ',' в–€в–€в–€ ','    в–€','в–€в–€в–€в–€ '],
+        'S':[' ████','█    ',' ███ ','    █','████ '],
 
-        'T':['в–€в–€в–€в–€в–€','  в–€  ','  в–€  ','  в–€  ','  в–€  '],
+        'T':['█████','  █  ','  █  ','  █  ','  █  '],
 
-        'U':['в–€   в–€','в–€   в–€','в–€   в–€','в–€   в–€',' в–€в–€в–€ '],
+        'U':['█   █','█   █','█   █','█   █',' ███ '],
 
-        'V':['в–€   в–€','в–€   в–€','в–€   в–€',' в–€ в–€ ',' в–€ в–€ '],
+        'V':['█   █','█   █','█   █',' █ █ ',' █ █ '],
 
-        'X':['в–€   в–€',' в–€ в–€ ','  в–€  ',' в–€ в–€ ','в–€   в–€'],
+        'X':['█   █',' █ █ ','  █  ',' █ █ ','█   █'],
 
-        'Y':['в–€   в–€',' в–€ в–€ ','  в–€  ','  в–€  ','  в–€  '],
+        'Y':['█   █',' █ █ ','  █  ','  █  ','  █  '],
 
-        'Z':['в–€в–€в–€в–€в–€','   в–€ ','  в–€  ',' в–€   ','в–€в–€в–€в–€в–€'],
+        'Z':['█████','   █ ','  █  ',' █   ','█████'],
 
-        '0':[' в–€в–€в–€ ','в–€  в–€в–€','в–€ в–€ в–€','в–€в–€  в–€',' в–€в–€в–€ '],
+        '0':[' ███ ','█  ██','█ █ █','██  █',' ███ '],
 
-        '1':['  в–€  ',' в–€в–€  ','  в–€  ','  в–€  ','в–€в–€в–€в–€в–€'],
+        '1':['  █  ',' ██  ','  █  ','  █  ','█████'],
 
-        '2':[' в–€в–€в–€ ','в–€   в–€','  в–€в–€ ',' в–€   ','в–€в–€в–€в–€в–€'],
+        '2':[' ███ ','█   █','  ██ ',' █   ','█████'],
 
-        '3':[' в–€в–€в–€ ','в–€   в–€',' в–€в–€в–€в–€','    в–€',' в–€в–€в–€ '],
+        '3':[' ███ ','█   █',' ████','    █',' ███ '],
 
-        '4':['в–€   в–€','в–€   в–€','в–€в–€в–€в–€в–€','    в–€','    в–€'],
+        '4':['█   █','█   █','█████','    █','    █'],
 
-        '5':['в–€в–€в–€в–€в–€','в–€    ','в–€в–€в–€в–€ ','    в–€','в–€в–€в–€в–€ '],
+        '5':['█████','█    ','████ ','    █','████ '],
 
-        '6':[' в–€в–€в–€ ','в–€    ','в–€в–€в–€в–€ ','в–€   в–€',' в–€в–€в–€ '],
+        '6':[' ███ ','█    ','████ ','█   █',' ███ '],
 
-        '7':['в–€в–€в–€в–€в–€','    в–€','   в–€ ','  в–€  ','  в–€  '],
+        '7':['█████','    █','   █ ','  █  ','  █  '],
 
-        '8':[' в–€в–€в–€ ','в–€   в–€',' в–€в–€в–€ ','в–€   в–€',' в–€в–€в–€ '],
+        '8':[' ███ ','█   █',' ███ ','█   █',' ███ '],
 
-        '9':[' в–€в–€в–€ ','в–€   в–€',' в–€в–€в–€в–€','    в–€',' в–€в–€в–€ '],
+        '9':[' ███ ','█   █',' ████','    █',' ███ '],
 
     };
 
@@ -166,9 +166,9 @@ const ProfileModule = (() => {
 
             for (const ch of row) {
 
-                if (ch === 'в–€') line += `<span class="ascii-bright" style="--copy-i:${copyIndex++}">в–€</span>`;
+                if (ch === '█') line += `<span class="ascii-bright" style="--copy-i:${copyIndex++}">█</span>`;
 
-                else if (ch === ' ') line += `<span class="ascii-dim" style="--copy-i:${copyIndex++}">В·</span>`;
+                else if (ch === ' ') line += `<span class="ascii-dim" style="--copy-i:${copyIndex++}">·</span>`;
 
                 else line += ch;
 
@@ -220,7 +220,7 @@ const ProfileModule = (() => {
 
     const INVITE_INFINITE_TTL_SECONDS = 35996400;
 
-    const INVITE_INFINITE_LABEL = 'Р±РµСЃРєРѕРЅРµС‡РЅРѕСЃС‚СЊ';
+    const INVITE_INFINITE_LABEL = 'бесконечность';
 
 
 
@@ -244,7 +244,7 @@ const ProfileModule = (() => {
 
         const sec = totalSec % 60;
 
-        return `${h} С‡ ${m} РјРёРЅ ${sec} СЃРµРє`;
+        return `${h} ч ${m} мин ${sec} сек`;
 
     }
 
@@ -252,7 +252,7 @@ const ProfileModule = (() => {
 
     function formatInviteExpiry(totalSeconds) {
 
-        return isInviteInfiniteTTL(totalSeconds) ? INVITE_INFINITE_LABEL : 'РёСЃС‚РµРєР°РµС‚ С‡РµСЂРµР· ' + formatTTL(totalSeconds);
+        return isInviteInfiniteTTL(totalSeconds) ? INVITE_INFINITE_LABEL : 'истекает через ' + formatTTL(totalSeconds);
 
     }
 
@@ -262,7 +262,7 @@ const ProfileModule = (() => {
 
         if (el._hackerDecodeRaf) { cancelAnimationFrame(el._hackerDecodeRaf); el._hackerDecodeRaf = 0; }
 
-        const glyphs = 'в–‘в–’в–“в–€в–Ђв–„в–Њв–ђв”‚в”¤в•Ўв•ўв•–в••в•Јв•‘в•—в•ќв•њв•›в”ђв””в”ґв”¬в”њв”Ђв”јв•ћв•џв•љв•”в•©в•¦в• в•ђв•¬';
+        const glyphs = '░▒▓█▀▄▌▐│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬';
 
         const len = target.length;
 
@@ -354,13 +354,13 @@ const ProfileModule = (() => {
 
             const sec = remaining % 60;
 
-            const hText = `${h} С‡`;
+            const hText = `${h} ч`;
 
-            const mText = `${m} РјРёРЅ`;
+            const mText = `${m} мин`;
 
-            const sText = `${sec} СЃРµРє`;
+            const sText = `${sec} сек`;
 
-            const prefix = 'РёСЃС‚РµРєР°РµС‚ С‡РµСЂРµР· ';
+            const prefix = 'истекает через ';
 
             let html = prefix;
 
@@ -717,13 +717,17 @@ function decodeInviteAscii(code) {
 
 
     function triggerInviteCopyAnimation(asciiEl) {
-        if (!asciiEl) return 760;
+        if (!asciiEl) return 460;
         finishDecodeAnimation();
         if (_copyAnimRafId) { cancelAnimationFrame(_copyAnimRafId); _copyAnimRafId = 0; }
         const copySeq = ++_copyAnimSeq;
         const tokenBox = asciiEl.closest('.profile-invite-token-box');
         const spans = asciiEl.querySelectorAll('.invite-ascii-text span');
-        if (!spans.length) return 760;
+        if (!spans.length) return 460;
+
+        /* reduced-motion: skip animation entirely */
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 460;
+
         if (tokenBox) {
             if (tokenBox._inviteCopyTimer) clearTimeout(tokenBox._inviteCopyTimer);
             if (tokenBox._inviteBoxTimer) { clearTimeout(tokenBox._inviteBoxTimer); tokenBox._inviteBoxTimer = null; }
@@ -732,10 +736,10 @@ function decodeInviteAscii(code) {
             if (tokenBox._inviteGenFadeTimer) { clearTimeout(tokenBox._inviteGenFadeTimer); tokenBox._inviteGenFadeTimer = null; }
             const wasGenerating = tokenBox.classList.contains('invite-generating');
             if (wasGenerating) tokenBox.classList.add('invite-gen-fading');
-            tokenBox.classList.remove('invite-copy-burst', 'invite-copy-box-burst', 'invite-copy-settling', 'invite-copy-restoring', 'invite-copy-assembling', 'invite-border-reappearing');
+            tokenBox.classList.remove('invite-copy-burst', 'invite-copy-box-burst', 'invite-copy-settling', 'invite-copy-restoring', 'invite-copy-assembling', 'invite-border-reappearing', 'invite-copy-wave');
             if (tokenBox._inviteBorderTimer) { clearTimeout(tokenBox._inviteBorderTimer); tokenBox._inviteBorderTimer = null; }
             void tokenBox.offsetWidth;
-            tokenBox.classList.add('invite-copy-box-burst', 'invite-copy-assembling');
+            tokenBox.classList.add('invite-copy-wave');
             if (wasGenerating) {
                 tokenBox._inviteGenFadeTimer = setTimeout(() => {
                     tokenBox.classList.remove('invite-generating', 'invite-gen-fading');
@@ -745,184 +749,84 @@ function decodeInviteAscii(code) {
                 tokenBox.classList.remove('invite-generating');
             }
         }
+
         const total = spans.length;
-        const brightPool = 'в–€в–“в–’в–‘в”‚в”¤в”њв•Јв•”в•ќ';
-        const dimPool   = 'В·в€™Л™\'\"';
-        const brightReduced = 'в–€в–“в–’в–‘';
-        const dimReduced    = 'В·в€™';
         const fs = parseFloat(getComputedStyle(spans[0]).fontSize) || 8;
-        const offsetScale = fs < 7 ? 0.55 : 1;
-        const cols = Math.round(total / 5);
-        const centerCol = (cols - 1) / 2;
-        const CONVERGE_DUR = 280;
-        const DISSOLVE_END = 130;
-        const CHAOS_END    = 260;
-        const STAGGER_SPAN = 320;
-        const distNorm = new Float32Array(total);
-        const offX     = new Float32Array(total);
-        const offY     = new Float32Array(total);
-        const convStart = new Float32Array(total);
-        const glyphNext = new Float32Array(total);
-        const lockedAt  = new Float32Array(total);
-        const frozen    = new Uint8Array(total);
-        const targets   = new Array(total);
-        const isBright  = new Uint8Array(total);
-        for (let i = 0; i < total; i++) {
-            const s = spans[i];
-            targets[i]  = s.textContent;
-            isBright[i] = s.classList.contains('ascii-bright') ? 1 : 0;
-            const row = Math.floor(i / cols);
-            const col = i % cols;
-            const dc = col - centerCol;
-            const dr = row - 2;
-            const maxD = Math.sqrt(centerCol * centerCol + 4) || 1;
-            distNorm[i] = Math.max(0, Math.min(1, Math.sqrt(dc*dc + dr*dr) / maxD + (Math.random()-0.5)*0.3));
-            const angle = Math.random() * Math.PI * 2;
-            const dist  = (18 + Math.random() * 37) * offsetScale;
-            offX[i] = Math.cos(angle) * dist;
-            offY[i] = Math.sin(angle) * dist;
-            convStart[i] = CHAOS_END + distNorm[i] * STAGGER_SPAN;
-            glyphNext[i] = 0;
-            lockedAt[i]  = 0;
-        }
-        const t0 = performance.now();
-        const totalDuration = CHAOS_END + STAGGER_SPAN + CONVERGE_DUR + 90;
+        const isMobile = fs < 7;
+        const STAGGER = isMobile ? 25 : 35;
+        const FLASH_DUR = 120;
+        const totalDuration = total * STAGGER + FLASH_DUR + 300;
+
+        /* Get role accent color from CSS variable */
+        let roleColor = '';
         if (tokenBox) {
-            if (tokenBox._inviteBoxTimer) { clearTimeout(tokenBox._inviteBoxTimer); tokenBox._inviteBoxTimer = null; }
-            if (tokenBox._inviteSettleTimer) { clearTimeout(tokenBox._inviteSettleTimer); tokenBox._inviteSettleTimer = null; }
+            const cs = getComputedStyle(tokenBox);
+            const rgb = cs.getPropertyValue('--profile-account-rgb').trim();
+            if (rgb) roleColor = 'rgba(' + rgb + ',0.95)';
         }
+
+        const t0 = performance.now();
+        const highlighted = new Uint8Array(total);
 
         const step = (now) => {
             if (copySeq !== _copyAnimSeq || !asciiEl.isConnected) {
                 _copyAnimRafId = 0;
-                if (tokenBox) tokenBox.classList.remove('invite-copy-assembling', 'invite-copy-box-burst', 'invite-copy-settling', 'invite-copy-restoring', 'invite-border-reappearing');
+                if (tokenBox) tokenBox.classList.remove('invite-copy-wave');
                 for (let i = 0; i < total; i++) {
                     const el = spans[i];
                     if (el && el.isConnected) {
-                        el.textContent = targets[i];
-                        el.style.transform = '';
-                        el.style.opacity = '';
+                        el.style.color = '';
                         el.style.filter = '';
+                        el.style.textShadow = '';
                     }
                 }
                 return;
             }
             const elapsed = now - t0;
             let allDone = true;
+
             for (let i = 0; i < total; i++) {
                 const el = spans[i];
                 if (!el || !el.isConnected) continue;
-                if (frozen[i]) {
-                    allDone = allDone && true;
-                    const sinceLock = now - lockedAt[i];
-                    if (sinceLock < 90) {
-                        const f = 1 + 1.2 * (1 - sinceLock / 90);
-                        el.style.filter = 'brightness(' + f.toFixed(2) + ')';
-                        const sc = 1 + 0.15 * (1 - sinceLock / 90);
-                        el.style.transform = 'scale(' + sc.toFixed(3) + ') translateZ(0)';
-                    } else {
-                        el.style.filter = '';
-                        el.style.transform = '';
-                    }
+
+                const hitAt = i * STAGGER;
+                if (elapsed < hitAt) {
+                    allDone = false;
                     continue;
                 }
-                const cs = convStart[i];
-                if (elapsed < DISSOLVE_END) {
+
+                if (!highlighted[i]) {
+                    highlighted[i] = 1;
+                    if (roleColor) el.style.color = roleColor;
+                    el.style.filter = 'brightness(1.8)';
+                    el.style.textShadow = '0 0 6px ' + (roleColor || 'rgba(255,255,255,0.3)');
+                }
+
+                const sinceHit = elapsed - hitAt;
+                if (sinceHit < FLASH_DUR) {
                     allDone = false;
-                    const dt = elapsed / DISSOLVE_END;
-                    const eased = dt * dt;
-                    const tx = offX[i] * eased;
-                    const ty = offY[i] * eased;
-                    el.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) translateZ(0)';
-                    el.style.opacity = (1 - 0.55 * eased).toFixed(2);
-                    el.style.filter = 'blur(' + (1.2 * eased).toFixed(1) + 'px)';
-                    if (now >= glyphNext[i]) {
-                        const pool = isBright[i] ? brightPool : dimPool;
-                        el.textContent = pool[Math.floor(Math.random() * pool.length)];
-                        glyphNext[i] = now + 50 + Math.random() * 40;
-                    }
-                } else if (elapsed < cs) {
-                    allDone = false;
-                    const drift = Math.sin(now * 0.008 + i * 1.7) * 3 * offsetScale;
-                    el.style.transform = 'translate(' + (offX[i] + drift).toFixed(1) + 'px,' + offY[i].toFixed(1) + 'px) translateZ(0)';
-                    el.style.opacity = (0.42 + Math.random() * 0.12).toFixed(2);
-                    el.style.filter = 'blur(0.6px)';
-                    if (now >= glyphNext[i]) {
-                        const pool = isBright[i] ? brightPool : dimPool;
-                        el.textContent = pool[Math.floor(Math.random() * pool.length)];
-                        glyphNext[i] = now + 70 + Math.random() * 50;
-                    }
                 } else {
-                    const localT = Math.min((elapsed - cs) / CONVERGE_DUR, 1);
-                    const easedT = 1 - Math.pow(1 - localT, 3);
-                    if (localT < 1) {
-                        allDone = false;
-                        const tx = offX[i] * (1 - easedT);
-                        const ty = offY[i] * (1 - easedT);
-                        el.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) translateZ(0)';
-                        el.style.opacity = (0.45 + 0.55 * easedT).toFixed(2);
-                        const blur = 0.6 * (1 - easedT);
-                        el.style.filter = blur > 0.05 ? 'blur(' + blur.toFixed(1) + 'px)' : '';
-                        if (localT < 0.25) {
-                            if (now >= glyphNext[i]) {
-                                const pool = isBright[i] ? brightPool : dimPool;
-                                el.textContent = pool[Math.floor(Math.random() * pool.length)];
-                                glyphNext[i] = now + 65 + Math.random() * 45;
-                            }
-                        } else if (localT < 0.6) {
-                            if (now >= glyphNext[i]) {
-                                const pool = isBright[i] ? brightReduced : dimReduced;
-                                el.textContent = pool[Math.floor(Math.random() * pool.length)];
-                                glyphNext[i] = now + 85 + Math.random() * 55;
-                            }
-                        } else {
-                            if (Math.random() < 0.18 && now >= glyphNext[i]) {
-                                const pool = isBright[i] ? brightReduced : dimReduced;
-                                el.textContent = pool[Math.floor(Math.random() * pool.length)];
-                                glyphNext[i] = now + 60;
-                            } else {
-                                el.textContent = targets[i];
-                            }
-                        }
-                    } else {
-                        frozen[i] = 1;
-                        el.textContent = targets[i];
-                        el.style.opacity = '';
-                        el.style.filter = 'brightness(2.2)';
-                        el.style.transform = 'scale(1.15) translateZ(0)';
-                        lockedAt[i] = now;
-                    }
+                    /* CSS transition handles the fade-back */
+                    el.style.color = '';
+                    el.style.filter = '';
+                    el.style.textShadow = '';
                 }
             }
+
             if (!allDone) {
                 _copyAnimRafId = requestAnimationFrame(step);
             } else {
                 _copyAnimRafId = 0;
                 if (tokenBox) {
-                    tokenBox.classList.remove('invite-copy-assembling', 'invite-copy-box-burst');
-                    void tokenBox.offsetWidth;
-                    tokenBox.classList.add('invite-copy-settling');
-                    if (tokenBox._inviteSettleTimer) clearTimeout(tokenBox._inviteSettleTimer);
-                    tokenBox._inviteSettleTimer = setTimeout(() => {
-                        tokenBox.classList.remove('invite-copy-settling');
-                        tokenBox._inviteSettleTimer = null;
-                    }, 300);
+                    tokenBox.classList.remove('invite-copy-wave');
                 }
                 for (let i = 0; i < total; i++) {
                     const el = spans[i];
                     if (el && el.isConnected) {
-                        el.textContent = targets[i];
-                        el.style.transform = '';
-                        el.style.opacity = '';
+                        el.style.color = '';
                         el.style.filter = '';
+                        el.style.textShadow = '';
                     }
-                }
-                if (tokenBox) {
-                    tokenBox.classList.add('invite-copy-restoring');
-                    tokenBox._inviteRestoreTimer = setTimeout(() => {
-                        tokenBox.classList.remove('invite-copy-restoring');
-                        tokenBox._inviteRestoreTimer = null;
-                    }, 260);
                 }
             }
         };
@@ -1119,11 +1023,11 @@ function decodeInviteAscii(code) {
 
 
 
-            const fallbackEmoji = escapeHtml(iconEmoji || 'рџЏ…');
+            const fallbackEmoji = escapeHtml(iconEmoji || '🏅');
 
 
 
-            return `<img class="${mediaClass}" src="${assetPath}?v=${achievementIconVersion}" alt="" aria-hidden="true" decoding="async" data-fallback="${fallbackEmoji}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'${fallbackClass}',textContent:this.dataset.fallback||'рџЏ…'}))">`;
+            return `<img class="${mediaClass}" src="${assetPath}?v=${achievementIconVersion}" alt="" aria-hidden="true" decoding="async" data-fallback="${fallbackEmoji}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'${fallbackClass}',textContent:this.dataset.fallback||'🏅'}))">`;
 
 
 
@@ -1139,7 +1043,7 @@ function decodeInviteAscii(code) {
 
 
 
-            return `<span class="showcase-icon-emoji">${escapeHtml(iconEmoji || 'рџЏ…')}</span>`;
+            return `<span class="showcase-icon-emoji">${escapeHtml(iconEmoji || '🏅')}</span>`;
 
 
 
@@ -1151,7 +1055,7 @@ function decodeInviteAscii(code) {
 
 
 
-        return `<span class="ach-icon">${escapeHtml(iconEmoji || 'рџЏ…')}</span>`;
+        return `<span class="ach-icon">${escapeHtml(iconEmoji || '🏅')}</span>`;
 
 
 
@@ -1199,7 +1103,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const glyphs = 'в–‘в–’в–“в–€в–Ђв–„в–Њв–ђв”‚в”¤в•Ўв•ўв•–в••в•Јв•‘в•—в•ќв•њв•›в”ђв””в”ґв”¬в”њв”Ђв”јв•ћв•џв•љв•”в•©в•¦в• в•ђв•¬';
+        const glyphs = '░▒▓█▀▄▌▐│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬';
 
 
 
@@ -1603,23 +1507,23 @@ function decodeInviteAscii(code) {
 
 
 
-        if (diffMins < 1) return 'С‚РѕР»СЊРєРѕ С‡С‚Рѕ';
+        if (diffMins < 1) return 'только что';
 
 
 
-        if (diffMins < 60) return `${diffMins} РјРёРЅ РЅР°Р·Р°Рґ`;
+        if (diffMins < 60) return `${diffMins} мин назад`;
 
 
 
-        if (diffHours < 24) return `${diffHours} С‡ РЅР°Р·Р°Рґ`;
+        if (diffHours < 24) return `${diffHours} ч назад`;
 
 
 
-        if (diffDays === 1) return 'РІС‡РµСЂР°';
+        if (diffDays === 1) return 'вчера';
 
 
 
-        if (diffDays < 7) return `${diffDays} РґРЅ РЅР°Р·Р°Рґ`;
+        if (diffDays < 7) return `${diffDays} дн назад`;
 
 
 
@@ -1823,7 +1727,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    bio: dev.bio || 'Dev-Р°РєРєР°СѓРЅС‚ РґР»СЏ Р»РѕРєР°Р»СЊРЅРѕР№ СЂР°Р·СЂР°Р±РѕС‚РєРё',
+                    bio: dev.bio || 'Dev-аккаунт для локальной разработки',
 
 
 
@@ -1863,15 +1767,15 @@ function decodeInviteAscii(code) {
 
 
 
-                        { id: 'benchmark_oracle', title: 'РџРѕР»СѓС‡РµРЅРёРµ РїСЂРёР·РЅР°РЅРёРµ', icon_emoji: 'рџ”®', rarity: 'unique', points: 40 },
+                        { id: 'benchmark_oracle', title: 'Получение признание', icon_emoji: '🔮', rarity: 'unique', points: 40 },
 
 
 
-                        { id: 'the_first_hundred', title: 'РџРµСЂРІС‹Рµ 100 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№', icon_emoji: 'рџ’Ћ', rarity: 'limited', points: 150 },
+                        { id: 'the_first_hundred', title: 'Первые 100 пользователей', icon_emoji: '💎', rarity: 'limited', points: 150 },
 
 
 
-                        { id: 'first_among_equals', title: 'РџРµСЂРІС‹Рµ 10 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№', icon_emoji: 'рџ‘‘', rarity: 'unique', points: 75 }
+                        { id: 'first_among_equals', title: 'Первые 10 пользователей', icon_emoji: '👑', rarity: 'unique', points: 75 }
 
 
 
@@ -1887,35 +1791,35 @@ function decodeInviteAscii(code) {
 
 
 
-                    { achievement_id: 'welcome', title: 'Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ', description: 'Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊСЃСЏ РЅР° СЃР°Р№С‚Рµ', category: 'starter', rarity: 'common', points: 5, icon_emoji: 'рџ‘‹', is_secret: false, unlocked_at: '2026-02-19T10:30:00Z', is_showcased: false },
+                    { achievement_id: 'welcome', title: 'Добро пожаловать', description: 'Зарегистрироваться на сайте', category: 'starter', rarity: 'common', points: 5, icon_emoji: '👋', is_secret: false, unlocked_at: '2026-02-19T10:30:00Z', is_showcased: false },
 
 
 
-                    { achievement_id: 'first_referral', title: 'РџРµСЂРІС‹Р№ РїСЂРёРіР»Р°С€С‘РЅРЅС‹Р№', description: 'РџСЂРёРіР»Р°СЃРёС‚СЊ 1 РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ', category: 'starter', rarity: 'common', points: 10, icon_emoji: 'рџ¤ќ', is_secret: false, unlocked_at: '2026-03-05T14:20:00Z', is_showcased: false },
+                    { achievement_id: 'first_referral', title: 'Первый приглашённый', description: 'Пригласить 1 пользователя', category: 'starter', rarity: 'common', points: 10, icon_emoji: '🤝', is_secret: false, unlocked_at: '2026-03-05T14:20:00Z', is_showcased: false },
 
 
 
-                    { achievement_id: 'benchmark_oracle', title: 'РџРѕР»СѓС‡РµРЅРёРµ РїСЂРёР·РЅР°РЅРёРµ', description: 'РџРѕР»СѓС‡РёС‚СЊ Р·Р°РєСЂРµРї С‚СЂРµРґР° РѕС‚ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°', category: 'unique', rarity: 'unique', points: 40, icon_emoji: 'рџ”®', is_secret: false, unlocked_at: '2026-03-12T09:15:00Z', is_showcased: true },
+                    { achievement_id: 'benchmark_oracle', title: 'Получение признание', description: 'Получить закреп треда от администратора', category: 'unique', rarity: 'unique', points: 40, icon_emoji: '🔮', is_secret: false, unlocked_at: '2026-03-12T09:15:00Z', is_showcased: true },
 
 
 
-                    { achievement_id: 'models_remember', title: 'Р РµР°РєС†РёСЏ РјРѕРґРµСЂР°С‚РѕСЂР°', description: 'РџРѕР»СѓС‡РёС‚СЊ СЂРµР°РєС†РёСЋ РѕС‚ РјРѕРґРµСЂР°С‚РѕСЂР° РёР»Рё Р°РґРјРёРЅР°', category: 'rare', rarity: 'rare', points: 35, icon_emoji: 'рџ¤–', is_secret: false, unlocked_at: '2026-04-01T18:40:00Z', is_showcased: false },
+                    { achievement_id: 'models_remember', title: 'Реакция модератора', description: 'Получить реакцию от модератора или админа', category: 'rare', rarity: 'rare', points: 35, icon_emoji: '🤖', is_secret: false, unlocked_at: '2026-04-01T18:40:00Z', is_showcased: false },
 
 
 
-                    { achievement_id: 'first_among_equals', title: 'РџРµСЂРІС‹Рµ 10 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№', description: 'Р’РѕР№С‚Рё РІ РїРµСЂРІС‹Рµ 10 Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С…', category: 'unique', rarity: 'unique', points: 75, icon_emoji: 'рџ‘‘', is_secret: false, unlocked_at: '2026-02-19T10:30:00Z', is_showcased: true },
+                    { achievement_id: 'first_among_equals', title: 'Первые 10 пользователей', description: 'Войти в первые 10 зарегистрированных', category: 'unique', rarity: 'unique', points: 75, icon_emoji: '👑', is_secret: false, unlocked_at: '2026-02-19T10:30:00Z', is_showcased: true },
 
 
 
-                    { achievement_id: 'the_first_hundred', title: 'РџРµСЂРІС‹Рµ 100 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№', description: 'Р’РѕР№С‚Рё РІ РїРµСЂРІС‹Рµ 100 Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… Р°РєРєР°СѓРЅС‚РѕРІ', category: 'secret_limited', rarity: 'limited', points: 150, icon_emoji: 'рџ’Ћ', is_secret: true, unlocked_at: '2026-02-19T10:30:00Z', is_showcased: true },
+                    { achievement_id: 'the_first_hundred', title: 'Первые 100 пользователей', description: 'Войти в первые 100 зарегистрированных аккаунтов', category: 'secret_limited', rarity: 'limited', points: 150, icon_emoji: '💎', is_secret: true, unlocked_at: '2026-02-19T10:30:00Z', is_showcased: true },
 
 
 
-                    { achievement_id: 'alpha_user', title: 'РђР»СЊС„Р°-РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ', description: 'РџРѕР»СѓС‡РёС‚СЊ alpha-СЂРѕР»СЊ', category: 'unique', rarity: 'unique', points: 60, icon_emoji: 'вљЎ', is_secret: false, unlocked_at: '2026-02-20T12:00:00Z', is_showcased: false },
+                    { achievement_id: 'alpha_user', title: 'Альфа-пользователь', description: 'Получить alpha-роль', category: 'unique', rarity: 'unique', points: 60, icon_emoji: '⚡', is_secret: false, unlocked_at: '2026-02-20T12:00:00Z', is_showcased: false },
 
 
 
-                    { achievement_id: 'moderator_power', title: 'РњРѕРґРµСЂР°С‚РѕСЂ', description: 'РџРѕР»СѓС‡РёС‚СЊ СЂРѕР»СЊ РјРѕРґРµСЂР°С‚РѕСЂР°', category: 'unique', rarity: 'unique', points: 80, icon_emoji: 'рџ—ЎпёЏ', is_secret: false, unlocked_at: '2026-03-01T08:00:00Z', is_showcased: false }
+                    { achievement_id: 'moderator_power', title: 'Модератор', description: 'Получить роль модератора', category: 'unique', rarity: 'unique', points: 80, icon_emoji: '🗡️', is_secret: false, unlocked_at: '2026-03-01T08:00:00Z', is_showcased: false }
 
 
 
@@ -1931,55 +1835,55 @@ function decodeInviteAscii(code) {
 
 
 
-                    { id: 'silent_wave', title: 'Р‘РµР· РЅРµРіР°С‚РёРІР°', description: 'РџРѕР»СѓС‡РёС‚СЊ 20 СЂРµР°РєС†РёР№ РЅР° РїРѕСЃС‚Рµ Р±РµР· dislike', category: 'rare', rarity: 'rare', points: 25, icon_emoji: 'рџЊЉ', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 11 },
+                    { id: 'silent_wave', title: 'Без негатива', description: 'Получить 20 реакций на посте без dislike', category: 'rare', rarity: 'rare', points: 25, icon_emoji: '🌊', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 11 },
 
 
 
-                    { id: 'puke_gradient', title: 'РќРµСЃРІР°СЂРµРЅРёРµ Р¶РµР»СѓРґРєР°', description: 'РџРѕР»СѓС‡РёС‚СЊ 20 puke-СЂРµР°РєС†РёР№ РЅР° РѕРґРЅРѕРј РїРѕСЃС‚Рµ', category: 'rare', rarity: 'rare', points: 30, icon_emoji: 'рџ¤®', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 12 },
+                    { id: 'puke_gradient', title: 'Несварение желудка', description: 'Получить 20 puke-реакций на одном посте', category: 'rare', rarity: 'rare', points: 30, icon_emoji: '🤮', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 12 },
 
 
 
-                    { id: 'binding_layer', title: 'РўСЂРё РїСЂРёРіР»Р°С€РµРЅРёСЏ', description: 'РџСЂРёРіР»Р°СЃРёС‚СЊ 3 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№', category: 'rare', rarity: 'rare', points: 20, icon_emoji: 'рџ”—', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 13 },
+                    { id: 'binding_layer', title: 'Три приглашения', description: 'Пригласить 3 пользователей', category: 'rare', rarity: 'rare', points: 20, icon_emoji: '🔗', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 13 },
 
 
 
-                    { id: 'cluster_formed', title: 'Р”РµСЃСЏС‚СЊ РїСЂРёРіР»Р°С€РµРЅРёР№', description: 'РџСЂРёРіР»Р°СЃРёС‚СЊ 10 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№', category: 'unique', rarity: 'unique', points: 50, icon_emoji: 'рџ§¬', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 22 },
+                    { id: 'cluster_formed', title: 'Десять приглашений', description: 'Пригласить 10 пользователей', category: 'unique', rarity: 'unique', points: 50, icon_emoji: '🧬', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 22 },
 
 
 
-                    { id: 'silent_observer', title: '30 РґРЅРµР№ С‚РёС€РёРЅС‹', description: 'РќРµ РїРёСЃР°С‚СЊ РїРѕСЃС‚С‹ 30 РґРЅРµР№ РїРѕСЃР»Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё', category: 'rare', rarity: 'rare', points: 20, icon_emoji: 'рџ‘ЃпёЏ', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 17 },
+                    { id: 'silent_observer', title: '30 дней тишины', description: 'Не писать посты 30 дней после регистрации', category: 'rare', rarity: 'rare', points: 20, icon_emoji: '👁️', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 17 },
 
 
 
-                    { id: 'overfitting', title: '100 РїРѕСЃС‚РѕРІ', description: 'РќР°РїРёСЃР°С‚СЊ 100 РїРѕСЃС‚РѕРІ РЅР° С„РѕСЂСѓРјРµ', category: 'rare', rarity: 'rare', points: 45, icon_emoji: 'рџ§ ', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 18 },
+                    { id: 'overfitting', title: '100 постов', description: 'Написать 100 постов на форуме', category: 'rare', rarity: 'rare', points: 45, icon_emoji: '🧠', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 18 },
 
 
 
-                    { id: 'before_public_launch', title: 'Р”Рѕ Р·Р°РїСѓСЃРєР°', description: 'РЎРѕР·РґР°С‚СЊ Р°РєРєР°СѓРЅС‚ РґРѕ РїСѓР±Р»РёС‡РЅРѕРіРѕ Р·Р°РїСѓСЃРєР°', category: 'rare', rarity: 'rare', points: 25, icon_emoji: 'рџ•°пёЏ', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 15 },
+                    { id: 'before_public_launch', title: 'До запуска', description: 'Создать аккаунт до публичного запуска', category: 'rare', rarity: 'rare', points: 25, icon_emoji: '🕰️', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 15 },
 
 
 
-                    { id: 'beta_user', title: 'Р‘РµС‚Р°-РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ', description: 'РџРѕР»СѓС‡РёС‚СЊ beta-СЂРѕР»СЊ', category: 'rare', rarity: 'rare', points: 30, icon_emoji: 'рџ§Є', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 16 },
+                    { id: 'beta_user', title: 'Бета-пользователь', description: 'Получить beta-роль', category: 'rare', rarity: 'rare', points: 30, icon_emoji: '🧪', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 16 },
 
 
 
-                    { id: 'seven_day_streak', title: 'РЎРµРјРёРґРЅРµРІРєР°', description: 'Р—Р°Р№С‚Рё РЅР° СЃР°Р№С‚ 7 РґРЅРµР№ РїРѕРґСЂСЏРґ', category: 'rare', rarity: 'rare', points: 25, icon_emoji: 'рџ”Ґ', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 19 },
+                    { id: 'seven_day_streak', title: 'Семидневка', description: 'Зайти на сайт 7 дней подряд', category: 'rare', rarity: 'rare', points: 25, icon_emoji: '🔥', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 19 },
 
 
 
-                    { id: 'night_shift', title: 'РќРѕС‡РЅР°СЏ СЃРјРµРЅР°', description: 'РћРїСѓР±Р»РёРєРѕРІР°С‚СЊ РїРѕСЃС‚ РјРµР¶РґСѓ 02:00 Рё 05:00', category: 'rare', rarity: 'rare', points: 20, icon_emoji: 'рџЊ™', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 20 },
+                    { id: 'night_shift', title: 'Ночная смена', description: 'Опубликовать пост между 02:00 и 05:00', category: 'rare', rarity: 'rare', points: 20, icon_emoji: '🌙', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 20 },
 
 
 
-                    { id: 'archaeologist', title: 'РђСЂС…РµРѕР»РѕРі', description: 'РћС‚РІРµС‚РёС‚СЊ РІ С‚СЂРµРґ СЃС‚Р°СЂС€Рµ 90 РґРЅРµР№', category: 'rare', rarity: 'rare', points: 25, icon_emoji: 'рџ¦ґ', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 21 },
+                    { id: 'archaeologist', title: 'Археолог', description: 'Ответить в тред старше 90 дней', category: 'rare', rarity: 'rare', points: 25, icon_emoji: '🦴', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 21 },
 
 
 
-                    { id: 'first_mention', title: 'РЈРїРѕРјРёРЅР°РЅРёРµ', description: 'РЈРїРѕРјСЏРЅСѓС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ С‡РµСЂРµР· @', category: 'starter', rarity: 'common', points: 5, icon_emoji: 'рџ“Ј', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 9 },
+                    { id: 'first_mention', title: 'Упоминание', description: 'Упомянуть пользователя через @', category: 'starter', rarity: 'common', points: 5, icon_emoji: '📣', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 9 },
 
 
 
-                    { id: 'first_edit', title: 'Р РµРґР°РєС‚РѕСЂ', description: 'РћС‚СЂРµРґР°РєС‚РёСЂРѕРІР°С‚СЊ СЃРІРѕР№ РїРѕСЃС‚ РёР»Рё РєРѕРјРјРµРЅС‚Р°СЂРёР№', category: 'starter', rarity: 'common', points: 5, icon_emoji: 'вњЏпёЏ', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 10 }
+                    { id: 'first_edit', title: 'Редактор', description: 'Отредактировать свой пост или комментарий', category: 'starter', rarity: 'common', points: 5, icon_emoji: '✏️', is_secret: false, max_supply: null, total_unlocked: 0, sort_order: 10 }
 
 
 
@@ -2223,7 +2127,7 @@ function decodeInviteAscii(code) {
 
 
 
-        main.innerHTML = '<div class="forum-loading">Р—Р°РіСЂСѓР·РєР° РїСЂРѕС„РёР»СЏ...</div>';
+        main.innerHTML = '<div class="forum-loading">Загрузка профиля...</div>';
 
 
 
@@ -2323,7 +2227,7 @@ function decodeInviteAscii(code) {
 
 
 
-            main.innerHTML = `<div class="forum-error">РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РїСЂРѕС„РёР»СЏ</div>`;
+            main.innerHTML = `<div class="forum-error">Ошибка загрузки профиля</div>`;
 
 
 
@@ -2471,7 +2375,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const glyphs = '?ВївЃ‡вЃ€вЃ‰в—‡в—†в–Ўв– в–ів–І';
+        const glyphs = '?¿⁇⁈⁉◇◆□■△▲';
 
 
 
@@ -2515,7 +2419,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const glyphs = '?ВївЃ‡вЃ€вЃ‰в—‡в—†в–Ўв– в–ів–І';
+        const glyphs = '?¿⁇⁈⁉◇◆□■△▲';
 
 
 
@@ -2751,7 +2655,7 @@ function decodeInviteAscii(code) {
 
 
 
-            || cleanText(profileData.telegram_username, 50) || 'РђРЅРѕРЅРёРј';
+            || cleanText(profileData.telegram_username, 50) || 'Аноним';
 
 
 
@@ -2791,7 +2695,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const bioText = profileData.bio ? escapeHtml(cleanText(profileData.bio, 400)) : (isOwnProfile ? 'Р Р°СЃСЃРєР°Р¶РёС‚Рµ Рѕ СЃРµР±Рµ...' : '');
+        const bioText = profileData.bio ? escapeHtml(cleanText(profileData.bio, 400)) : (isOwnProfile ? 'Расскажите о себе...' : '');
 
 
 
@@ -2819,7 +2723,7 @@ function decodeInviteAscii(code) {
 
 
 
-            ? `<div class="profile-bio-display" id="bio-display"><span class="profile-bio-text" data-decode>${bioText}</span><button class="profile-bio-edit-btn" id="btn-edit-bio">Р РµРґ.</button></div>`
+            ? `<div class="profile-bio-display" id="bio-display"><span class="profile-bio-text" data-decode>${bioText}</span><button class="profile-bio-edit-btn" id="btn-edit-bio">Ред.</button></div>`
 
 
 
@@ -2827,7 +2731,7 @@ function decodeInviteAscii(code) {
 
 
 
-                ? `<div class="profile-bio-edit"><textarea id="bio-textarea" maxlength="400" rows="3" class="forum-textarea">${escapeHtml(profileData.bio || '')}</textarea><div class="profile-bio-edit-actions"><button id="btn-save-bio" class="forum-submit-btn">РЎРѕС…СЂР°РЅРёС‚СЊ</button><button id="btn-cancel-bio" class="forum-cancel-btn">РћС‚РјРµРЅР°</button></div></div>`
+                ? `<div class="profile-bio-edit"><textarea id="bio-textarea" maxlength="400" rows="3" class="forum-textarea">${escapeHtml(profileData.bio || '')}</textarea><div class="profile-bio-edit-actions"><button id="btn-save-bio" class="forum-submit-btn">Сохранить</button><button id="btn-cancel-bio" class="forum-cancel-btn">Отмена</button></div></div>`
 
 
 
@@ -2847,7 +2751,7 @@ function decodeInviteAscii(code) {
 
 
 
-                ? '<div class="forum-restriction forum-ban-notice">Р’Р°С€ Р°РєРєР°СѓРЅС‚ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ</div>'
+                ? '<div class="forum-restriction forum-ban-notice">Ваш аккаунт заблокирован</div>'
 
 
 
@@ -2855,7 +2759,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    ? '<div class="forum-restriction forum-mute-notice">Р’Р°С€ Р°РєРєР°СѓРЅС‚ Р·Р°РіР»СѓС€РµРЅ</div>'
+                    ? '<div class="forum-restriction forum-mute-notice">Ваш аккаунт заглушен</div>'
 
 
 
@@ -2999,7 +2903,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <p class="profile-joined">Р”Р°С‚Р° СЂРµРіРёСЃС‚СЂР°С†РёРё: ${formatDate(profileData.created_at)}</p>
+                            <p class="profile-joined">Дата регистрации: ${formatDate(profileData.created_at)}</p>
 
 
 
@@ -3023,7 +2927,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <h3 class="profile-section-title">Рћ СЃРµР±Рµ</h3>
+                            <h3 class="profile-section-title">О себе</h3>
 
 
 
@@ -3067,7 +2971,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <h3 class="profile-section-title">РЈСЂРѕРІРµРЅСЊ РїСЂРѕС„РёР»СЏ</h3>
+                            <h3 class="profile-section-title">Уровень профиля</h3>
 
 
 
@@ -3095,7 +2999,7 @@ function decodeInviteAscii(code) {
 
 
 
-                                <p class="profile-level-score" data-decode>${formatNumber(score + achievementPoints)} Р±Р°Р»Р»РѕРІ Р°РєС‚РёРІРЅРѕСЃС‚Рё</p>
+                                <p class="profile-level-score" data-decode>${formatNumber(score + achievementPoints)} баллов активности</p>
 
 
 
@@ -3119,7 +3023,7 @@ function decodeInviteAscii(code) {
 
 
 
-                        <p class="profile-progress-note" data-decode>Р”Рѕ СЃР»РµРґСѓСЋС‰РµРіРѕ СѓСЂРѕРІРЅСЏ: ${formatNumber(Math.max(0, levelInfo.next - (score + achievementPoints)))}</p>
+                        <p class="profile-progress-note" data-decode>До следующего уровня: ${formatNumber(Math.max(0, levelInfo.next - (score + achievementPoints)))}</p>
 
 
 
@@ -3191,15 +3095,15 @@ function decodeInviteAscii(code) {
 
 
 
-                        <button class="profile-tab profile-tab-active" data-tab="activity" type="button">РђРєС‚РёРІРЅРѕСЃС‚СЊ</button>
+                        <button class="profile-tab profile-tab-active" data-tab="activity" type="button">Активность</button>
 
 
 
-                        <button class="profile-tab" data-tab="threads" type="button">РўСЂРµРґС‹</button>
+                        <button class="profile-tab" data-tab="threads" type="button">Треды</button>
 
 
 
-                        <button class="profile-tab" data-tab="achievements" type="button">Р”РѕСЃС‚РёР¶РµРЅРёСЏ</button>
+                        <button class="profile-tab" data-tab="achievements" type="button">Достижения</button>
 
 
 
@@ -3219,7 +3123,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <span class="profile-mini-label">РўСЂРµРґРѕРІ</span>
+                            <span class="profile-mini-label">Тредов</span>
 
 
 
@@ -3235,7 +3139,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <span class="profile-mini-label">РџРѕСЃС‚РѕРІ</span>
+                            <span class="profile-mini-label">Постов</span>
 
 
 
@@ -3251,7 +3155,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <span class="profile-mini-label">Р РµР°РєС†РёР№</span>
+                            <span class="profile-mini-label">Реакций</span>
 
 
 
@@ -3267,7 +3171,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <span class="profile-mini-label">Р”РѕСЃС‚РёР¶РµРЅРёР№</span>
+                            <span class="profile-mini-label">Достижений</span>
 
 
 
@@ -3291,7 +3195,7 @@ function decodeInviteAscii(code) {
 
 
 
-                        <div class="forum-loading">Р—Р°РіСЂСѓР·РєР°...</div>
+                        <div class="forum-loading">Загрузка...</div>
 
 
 
@@ -3371,7 +3275,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const titleName = cleanText(profileData.telegram_first_name, 30) || cleanText(profileData.telegram_username, 30) || 'РџСЂРѕС„РёР»СЊ';
+        const titleName = cleanText(profileData.telegram_first_name, 30) || cleanText(profileData.telegram_username, 30) || 'Профиль';
 
 
 
@@ -3431,7 +3335,7 @@ function decodeInviteAscii(code) {
 
             const remaining = Math.max(0, max - active);
 
-            const quotaLabel = max >= 999999 ? 'Р‘РµР·Р»РёРјРёС‚РЅРѕ' : `${active} / ${max}`;
+            const quotaLabel = max >= 999999 ? 'Безлимитно' : `${active} / ${max}`;
 
             const selectedMaxUses = isAdminRole ? Math.max(1, Math.min(9999, Number(userInfo.selected_invite_max_uses || 1))) : 1;
 
@@ -3571,7 +3475,7 @@ function decodeInviteAscii(code) {
 
                 <div class="profile-account-invite-quota">
 
-                    <span class="profile-account-invite-quota-label" data-decode>РРЅРІР°Р№С‚С‹</span>
+                    <span class="profile-account-invite-quota-label" data-decode>Инвайты</span>
 
                     <span class="profile-account-invite-quota-value" data-decode>${quotaLabel}</span>
 
@@ -3609,7 +3513,7 @@ function decodeInviteAscii(code) {
 
                 <div class="auth-terminal-header" aria-hidden="true">
 
-                    <span style="color:rgba(100,200,100,0.6)" data-decode>РЎС‚Р°С‚СѓСЃ РђРєРєР°СѓРЅС‚Р°:</span>
+                    <span style="color:rgba(100,200,100,0.6)" data-decode>Статус Аккаунта:</span>
 
                     <span>${statusLabel}</span>
 
@@ -3625,7 +3529,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    <button id="account-logout" class="forum-cancel-btn" data-decode style="border-color:rgba(255,60,60,0.15);color:rgba(255,100,100,0.5)">Р’С‹Р№С‚Рё</button>
+                    <button id="account-logout" class="forum-cancel-btn" data-decode style="border-color:rgba(255,60,60,0.15);color:rgba(255,100,100,0.5)">Выйти</button>
 
 
 
@@ -3965,7 +3869,7 @@ function decodeInviteAscii(code) {
 
 
 
-        btn.textContent = 'Р“РµРЅРµСЂР°С†РёСЏ...';
+        btn.textContent = 'Генерация...';
 
 
 
@@ -4005,9 +3909,9 @@ function decodeInviteAscii(code) {
 
 
 
-            if (!userInfo || !userInfo.is_verified) throw new Error('РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РїСЂР°РІ');
+            if (!userInfo || !userInfo.is_verified) throw new Error('Недостаточно прав');
 
-            if (!isAdminRole && userInfo.invite_use_count > 0) throw new Error('РЎС‚Р°СЂС‹Р№ РёРЅРІР°Р№С‚ СѓР¶Рµ РёСЃРїРѕР»СЊР·РѕРІР°РЅ вЂ” РїРµСЂРµРіРµРЅРµСЂР°С†РёСЏ Р·Р°РїСЂРµС‰РµРЅР°');
+            if (!isAdminRole && userInfo.invite_use_count > 0) throw new Error('Старый инвайт уже использован — перегенерация запрещена');
 
 
 
@@ -4019,7 +3923,7 @@ function decodeInviteAscii(code) {
 
 
 
-            if (!code) throw new Error('РќРµ СѓРґР°Р»РѕСЃСЊ СЃРіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ РєРѕРґ');
+            if (!code) throw new Error('Не удалось сгенерировать код');
 
 
 
@@ -4193,7 +4097,7 @@ function decodeInviteAscii(code) {
 
 
 
-            alert(err.message || 'РћС€РёР±РєР° РіРµРЅРµСЂР°С†РёРё');
+            alert(err.message || 'Ошибка генерации');
 
 
 
@@ -4293,7 +4197,7 @@ function decodeInviteAscii(code) {
 
 
 
-                } catch (err) { alert('РћС€РёР±РєР°: ' + err.message); }
+                } catch (err) { alert('Ошибка: ' + err.message); }
 
 
 
@@ -4529,7 +4433,7 @@ function decodeInviteAscii(code) {
 
 
 
-            container.innerHTML = '<div class="forum-loading">Р—Р°РіСЂСѓР·РєР° С‚СЂРµРґРѕРІ...</div>';
+            container.innerHTML = '<div class="forum-loading">Загрузка тредов...</div>';
 
 
 
@@ -4545,7 +4449,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">РќРµС‚ СЃРѕР·РґР°РЅРЅС‹С… С‚СЂРµРґРѕРІ</p></div>';
+                    container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">Нет созданных тредов</p></div>';
 
 
 
@@ -4561,7 +4465,7 @@ function decodeInviteAscii(code) {
 
 
 
-                let html = '<section class="profile-card profile-activity-card"><h3 class="profile-section-title">РЎРѕР·РґР°РЅРЅС‹Рµ С‚СЂРµРґС‹</h3><div class="profile-activity-list">';
+                let html = '<section class="profile-card profile-activity-card"><h3 class="profile-section-title">Созданные треды</h3><div class="profile-activity-list">';
 
 
 
@@ -4589,7 +4493,7 @@ function decodeInviteAscii(code) {
 
 
 
-                        <span class="profile-activity-mark">рџ“ќ</span>
+                        <span class="profile-activity-mark">📝</span>
 
 
 
@@ -4601,7 +4505,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <p>${cat} В· ${t.posts_count || 0} РѕС‚РІРµС‚РѕРІ</p>
+                            <p>${cat} · ${t.posts_count || 0} ответов</p>
 
 
 
@@ -4633,7 +4537,7 @@ function decodeInviteAscii(code) {
 
 
 
-                container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё</p></div>';
+                container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">Ошибка загрузки</p></div>';
 
 
 
@@ -4713,19 +4617,19 @@ function decodeInviteAscii(code) {
 
 
 
-            starter: { label: 'РЎС‚Р°СЂС‚РѕРІС‹Рµ', order: 0 },
+            starter: { label: 'Стартовые', order: 0 },
 
 
 
-            rare: { label: 'Р РµРґРєРёРµ', order: 1 },
+            rare: { label: 'Редкие', order: 1 },
 
 
 
-            unique: { label: 'РЈРЅРёРєР°Р»СЊРЅС‹Рµ', order: 2 },
+            unique: { label: 'Уникальные', order: 2 },
 
 
 
-            secret_limited: { label: 'Р›РёРјРёС‚РёСЂРѕРІР°РЅРЅС‹Рµ', order: 3 }
+            secret_limited: { label: 'Лимитированные', order: 3 }
 
 
 
@@ -4785,7 +4689,7 @@ function decodeInviteAscii(code) {
 
 
 
-                <h3 class="profile-section-title">Р”РѕСЃС‚РёР¶РµРЅРёСЏ</h3>
+                <h3 class="profile-section-title">Достижения</h3>
 
 
 
@@ -4805,7 +4709,7 @@ function decodeInviteAscii(code) {
 
 
 
-            html += `<div class="ach-showcase-hint">РќР°Р¶РјРёС‚Рµ в† С‡С‚РѕР±С‹ РїРѕРєР°Р·Р°С‚СЊ РґРѕСЃС‚РёР¶РµРЅРёРµ Сѓ Р°РІР°С‚Р°СЂРєРё</div>`;
+            html += `<div class="ach-showcase-hint">Нажмите в† чтобы показать достижение у аватарки</div>`;
 
 
 
@@ -4945,7 +4849,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    ${isOwnProfile && isOwned ? `<button class="ach-showcase-btn ${isShowcased ? 'ach-showcase-active' : ''}" data-ach-id="${escapeHtml(a.id)}" title="${isShowcased ? 'РЈР±СЂР°С‚СЊ РёР· РїСЂРѕС„РёР»СЏ' : 'РџРѕРєР°Р·Р°С‚СЊ РІ РїСЂРѕС„РёР»Рµ'}">${isShowcased ? 'в…' : 'в†'}</button>` : ''}
+                    ${isOwnProfile && isOwned ? `<button class="ach-showcase-btn ${isShowcased ? 'ach-showcase-active' : ''}" data-ach-id="${escapeHtml(a.id)}" title="${isShowcased ? 'Убрать из профиля' : 'Показать в профиле'}">${isShowcased ? 'в…' : 'в†'}</button>` : ''}
 
 
 
@@ -5193,7 +5097,7 @@ function decodeInviteAscii(code) {
 
 
 
-            alert('РћС€РёР±РєР°: ' + (err.message || 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕР±РЅРѕРІРёС‚СЊ'));
+            alert('Ошибка: ' + (err.message || 'Не удалось обновить'));
 
 
 
@@ -5225,7 +5129,7 @@ function decodeInviteAscii(code) {
 
 
 
-            container.innerHTML = '<div class="forum-loading">Р—Р°РіСЂСѓР·РєР° Р°РєС‚РёРІРЅРѕСЃС‚Рё...</div>';
+            container.innerHTML = '<div class="forum-loading">Загрузка активности...</div>';
 
 
 
@@ -5253,7 +5157,7 @@ function decodeInviteAscii(code) {
 
 
 
-                container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">РќРµС‚ Р°РєС‚РёРІРЅРѕСЃС‚Рё РЅР° С„РѕСЂСѓРјРµ</p></div>';
+                container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">Нет активности на форуме</p></div>';
 
 
 
@@ -5273,7 +5177,7 @@ function decodeInviteAscii(code) {
 
 
 
-            if (offset === 0) html = '<section class="profile-card profile-activity-card"><h3 class="profile-section-title">РђРєС‚РёРІРЅРѕСЃС‚СЊ</h3><div class="profile-activity-list" id="activity-feed-list">';
+            if (offset === 0) html = '<section class="profile-card profile-activity-card"><h3 class="profile-section-title">Активность</h3><div class="profile-activity-list" id="activity-feed-list">';
 
 
 
@@ -5285,7 +5189,7 @@ function decodeInviteAscii(code) {
 
 
 
-                let icon = 'рџ’¬', actionText = '', href = '';
+                let icon = '💬', actionText = '', href = '';
 
 
 
@@ -5293,15 +5197,15 @@ function decodeInviteAscii(code) {
 
 
 
-                if (type === 'thread') { icon = 'рџ“ќ'; actionText = 'РЎРѕР·РґР°Р» С‚СЂРµРґ'; href = `forum.html#thread/${item.thread_id}`; }
+                if (type === 'thread') { icon = '📝'; actionText = 'Создал тред'; href = `forum.html#thread/${item.thread_id}`; }
 
 
 
-                else if (type === 'post') { icon = 'рџ’¬'; actionText = 'РћС‚РІРµС‚РёР» РІ С‚СЂРµРґРµ'; href = `forum.html#thread/${item.thread_id}`; }
+                else if (type === 'post') { icon = '💬'; actionText = 'Ответил в треде'; href = `forum.html#thread/${item.thread_id}`; }
 
 
 
-                else if (type === 'reaction') { icon = item.emoji || 'рџ‘Ќ'; actionText = 'РџРѕСЃС‚Р°РІРёР» СЂРµР°РєС†РёСЋ'; href = `forum.html#thread/${item.thread_id}`; }
+                else if (type === 'reaction') { icon = item.emoji || '👍'; actionText = 'Поставил реакцию'; href = `forum.html#thread/${item.thread_id}`; }
 
 
 
@@ -5313,7 +5217,7 @@ function decodeInviteAscii(code) {
 
 
 
-                html += `<a href="${href}" class="profile-activity-item"><span class="profile-activity-mark">${icon}</span><div><strong>${actionText}${title ? ' В· ' + title : ''}</strong>${preview ? `<p>${preview}</p>` : ''}<span class="profile-activity-time">${time}</span></div></a>`;
+                html += `<a href="${href}" class="profile-activity-item"><span class="profile-activity-mark">${icon}</span><div><strong>${actionText}${title ? ' · ' + title : ''}</strong>${preview ? `<p>${preview}</p>` : ''}<span class="profile-activity-time">${time}</span></div></a>`;
 
 
 
@@ -5329,7 +5233,7 @@ function decodeInviteAscii(code) {
 
 
 
-                if (activityHasMore) html += '<button class="forum-cancel-btn" id="activity-load-more" style="margin-top:12px;width:100%">Р—Р°РіСЂСѓР·РёС‚СЊ РµС‰С‘</button>';
+                if (activityHasMore) html += '<button class="forum-cancel-btn" id="activity-load-more" style="margin-top:12px;width:100%">Загрузить ещё</button>';
 
 
 
@@ -5353,7 +5257,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    loadMoreBtn.textContent = 'Р—Р°РіСЂСѓР·РєР°...';
+                    loadMoreBtn.textContent = 'Загрузка...';
 
 
 
@@ -5405,7 +5309,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    btn.textContent = 'Р—Р°РіСЂСѓР·РёС‚СЊ РµС‰С‘';
+                    btn.textContent = 'Загрузить ещё';
 
 
 
@@ -5417,7 +5321,7 @@ function decodeInviteAscii(code) {
 
 
 
-                        btn.textContent = 'Р—Р°РіСЂСѓР·РєР°...';
+                        btn.textContent = 'Загрузка...';
 
 
 
@@ -5453,7 +5357,7 @@ function decodeInviteAscii(code) {
 
 
 
-            if (offset === 0) container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё</p></div>';
+            if (offset === 0) container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">Ошибка загрузки</p></div>';
 
 
 
@@ -5497,7 +5401,7 @@ function decodeInviteAscii(code) {
 
 
 
-                ${!userInfo ? '<a href="register.html">Р’РѕР№РґРёС‚Рµ</a> С‡С‚РѕР±С‹ РїСЂРѕСЃРјРѕС‚СЂРµС‚СЊ РїСЂРѕС„РёР»СЊ' : 'РџСЂРѕС„РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ'}
+                ${!userInfo ? '<a href="register.html">Войдите</a> чтобы просмотреть профиль' : 'Профиль не найден'}
 
 
 
@@ -5509,7 +5413,7 @@ function decodeInviteAscii(code) {
 
 
 
-                <a href="forum.html" class="forum-cancel-btn">&larr; РќР° С„РѕСЂСѓРј</a>
+                <a href="forum.html" class="forum-cancel-btn">&larr; На форум</a>
 
 
 

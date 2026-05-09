@@ -550,6 +550,7 @@ $$;
 -- It locks the target profile row to make same-user retries idempotent, checks
 -- whether the user already used the same code, then claims the code with a row
 -- lock so concurrent multi-use claims serialize instead of returning false.
+DROP FUNCTION IF EXISTS public._claim_invite_code_for_user(TEXT, UUID) CASCADE;
 CREATE OR REPLACE FUNCTION public._claim_invite_code_for_user(
     p_code TEXT,
     p_user_id UUID
@@ -708,6 +709,7 @@ GRANT EXECUTE ON FUNCTION public.claim_invite_code(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.claim_invite_code(TEXT) TO service_role;
 
 -- Admin/service claim stays available for trusted server flows only.
+DROP FUNCTION IF EXISTS public.admin_claim_invite_for_user(TEXT, UUID) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_claim_invite_for_user(
     p_code TEXT,
     p_user_id UUID
@@ -888,6 +890,7 @@ REVOKE EXECUTE ON FUNCTION public.generate_user_invite_code() FROM anon;
 GRANT EXECUTE ON FUNCTION public.generate_user_invite_code() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.generate_user_invite_code() TO service_role;
 
+DROP FUNCTION IF EXISTS public.admin_generate_invite_for_user(UUID, INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_generate_invite_for_user(
     p_user_id UUID,
     p_max_uses INT DEFAULT 1
@@ -1005,6 +1008,9 @@ GRANT EXECUTE ON FUNCTION public.update_profile_bio(TEXT) TO service_role;
 -- ============================================================
 -- DB-level profile photo hardening
 -- ============================================================
+
+ALTER TABLE public.profiles
+    DROP CONSTRAINT IF EXISTS profiles_telegram_photo_url_safe;
 
 DROP FUNCTION IF EXISTS public.normalize_telegram_photo_url(TEXT);
 CREATE OR REPLACE FUNCTION public.normalize_telegram_photo_url(p_value TEXT)
@@ -1219,6 +1225,7 @@ DROP POLICY IF EXISTS "service_manage_post_reactions" ON public.post_reactions;
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.create_forum_thread(INTEGER, TEXT, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.create_forum_thread(
     p_category_id INTEGER,
     p_title TEXT,
@@ -1303,6 +1310,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.create_forum_post(INTEGER, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.create_forum_post(
     p_thread_id INTEGER,
     p_content TEXT
@@ -1412,6 +1420,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.update_forum_post(INTEGER, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.update_forum_post(
     p_post_id INTEGER,
     p_content TEXT
@@ -1487,6 +1496,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.update_forum_thread(INTEGER, TEXT, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.update_forum_thread(
     p_thread_id INTEGER,
     p_title TEXT,
@@ -1568,6 +1578,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.create_mention_notifications(INTEGER, INTEGER, UUID[]) CASCADE;
 CREATE OR REPLACE FUNCTION public.create_mention_notifications(
     p_post_id INTEGER,
     p_thread_id INTEGER,
@@ -1672,6 +1683,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.toggle_post_reaction(INTEGER, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.toggle_post_reaction(
     p_post_id INTEGER,
     p_emoji TEXT
@@ -2055,7 +2067,7 @@ BEGIN
 END;
 $$;
 
-DROP FUNCTION IF EXISTS public.get_result_rating_stats(INTEGER);
+DROP FUNCTION IF EXISTS public.get_result_rating_stats(INTEGER[]);
 CREATE OR REPLACE FUNCTION public.get_result_rating_stats(p_result_ids INTEGER[])
 RETURNS TABLE (
     result_id INTEGER,
@@ -2095,6 +2107,7 @@ AS $$
     GROUP BY r.id;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_result_rating_entries(INTEGER[], INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_result_rating_entries(
     p_result_ids INTEGER[],
     p_limit_per_result INTEGER DEFAULT 8
@@ -2186,6 +2199,7 @@ GRANT EXECUTE ON FUNCTION public.get_result_rating_entries(INTEGER[], INTEGER) T
 GRANT EXECUTE ON FUNCTION public.get_result_rating_entries(INTEGER[], INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_result_rating_entries(INTEGER[], INTEGER) TO service_role;
 
+DROP FUNCTION IF EXISTS public.rate_result(INTEGER, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC) CASCADE;
 CREATE OR REPLACE FUNCTION public.rate_result(
     p_result_id INTEGER,
     p_s_visual NUMERIC,
@@ -2215,6 +2229,15 @@ DECLARE
 BEGIN
     IF v_user_id IS NULL THEN
         RAISE EXCEPTION 'Authentication required';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.profiles
+        WHERE user_id = v_user_id
+          AND is_verified = true
+    ) THEN
+        RAISE EXCEPTION 'Not verified';
     END IF;
 
     IF p_result_id IS NULL THEN
@@ -2398,6 +2421,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_update_user_profile(UUID, BOOLEAN, TIMESTAMPTZ, TEXT, TEXT, TEXT, TEXT, TEXT) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_update_user_profile(
     p_user_id UUID,
     p_is_verified BOOLEAN DEFAULT NULL,
@@ -2823,6 +2847,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_user_recent_activity(UUID, INTEGER, INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_user_recent_activity(
     p_user_id UUID,
     p_limit INTEGER DEFAULT 10,
@@ -2875,6 +2900,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_user_threads(UUID, INTEGER, INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_user_threads(
     p_user_id UUID,
     p_limit INTEGER DEFAULT 20,
@@ -3083,6 +3109,9 @@ REVOKE EXECUTE ON FUNCTION public.normalize_https_url(TEXT) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.normalize_https_url(TEXT) FROM anon;
 REVOKE EXECUTE ON FUNCTION public.normalize_https_url(TEXT) FROM authenticated;
 REVOKE EXECUTE ON FUNCTION public.normalize_https_url(TEXT) FROM service_role;
+
+ALTER TABLE public.results
+    DROP CONSTRAINT IF EXISTS results_svg_content_safe;
 
 DROP FUNCTION IF EXISTS public.is_safe_svg_content(TEXT);
 CREATE OR REPLACE FUNCTION public.is_safe_svg_content(p_svg TEXT)
@@ -3862,6 +3891,7 @@ AS $$
     SELECT public.admin_delete_content_row('results', p_id);
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_set_result_param_values(INTEGER, INTEGER[]) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_set_result_param_values(
     p_result_id INTEGER,
     p_param_value_ids INTEGER[]

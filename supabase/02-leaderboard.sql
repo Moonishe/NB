@@ -1,5 +1,5 @@
 ﻿-- ============================================
--- BUNDLE 2: LEADERBOARD вЂ” Models, Results, Ratings
+-- BUNDLE 2: LEADERBOARD — Models, Results, Ratings
 -- Run AFTER 01-core.sql
 -- ============================================
 
@@ -210,7 +210,7 @@ BEFORE UPDATE ON result_ratings
 FOR EACH ROW
 EXECUTE FUNCTION touch_result_rating_updated_at();
 
-DROP FUNCTION IF EXISTS public.get_result_rating_stats(INTEGER);
+DROP FUNCTION IF EXISTS public.get_result_rating_stats(INTEGER[]);
 CREATE OR REPLACE FUNCTION get_result_rating_stats(p_result_ids INTEGER[])
 RETURNS TABLE (
     result_id INTEGER,
@@ -299,6 +299,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_result_rating_entries(INTEGER[], INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_result_rating_entries(
     p_result_ids INTEGER[],
     p_limit_per_result INTEGER DEFAULT 8

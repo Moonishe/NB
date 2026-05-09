@@ -22433,6 +22433,20 @@ span.ach-rarity-limited.ach-rarity-badge {
 
 
 
+.profile-invite-token-box.invite-copy-wave .invite-ascii-text span {
+
+    will-change: color, filter, text-shadow;
+
+    transition:
+        color 0.28s ease,
+        filter 0.28s ease,
+        text-shadow 0.28s ease,
+        opacity 0.18s ease;
+
+}
+
+
+
 .invite-ascii-text .ascii-bright {
 
     color: rgba(var(--profile-account-rgb),0.78);

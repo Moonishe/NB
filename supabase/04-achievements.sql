@@ -65,13 +65,23 @@ CREATE INDEX IF NOT EXISTS idx_user_achievements_achievement ON user_achievement
 
 ALTER TABLE user_achievements ENABLE ROW LEVEL SECURITY;
 
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE user_achievements FROM PUBLIC;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE user_achievements FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE user_achievements FROM authenticated;
+GRANT SELECT ON TABLE user_achievements TO anon;
+GRANT SELECT ON TABLE user_achievements TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE user_achievements TO service_role;
+
 DROP POLICY IF EXISTS "public_read_user_achievements" ON user_achievements;
 CREATE POLICY "public_read_user_achievements" ON user_achievements
     FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "user_manage_own_achievements" ON user_achievements;
-CREATE POLICY "user_manage_own_achievements" ON user_achievements
-    FOR ALL USING (user_id = auth.uid());
+DROP POLICY IF EXISTS "service_manage_user_achievements" ON user_achievements;
+CREATE POLICY "service_manage_user_achievements" ON user_achievements
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
 
 -- ==========================================
 -- STEP 3: Seed achievements catalog
@@ -81,33 +91,33 @@ DELETE FROM user_achievements WHERE achievement_id = 'first_post';
 DELETE FROM achievements WHERE id = 'first_post';
 
 INSERT INTO achievements (id, title, description, category, rarity, points, icon_emoji, max_supply, is_secret, sort_order) VALUES
-    ('welcome',            'Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ',       'Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊСЃСЏ РЅР° СЃР°Р№С‚Рµ',                                   'starter',       'common',    5,   'рџ‘‹', NULL,  FALSE, 1),
-    ('first_referral',     'РџРµСЂРІС‹Р№ РїСЂРёРіР»Р°С€С‘РЅРЅС‹Р№',    'РџСЂРёРіР»Р°СЃРёС‚СЊ 1 РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ',                                        'starter',       'common',    10,  'рџ¤ќ', NULL,  FALSE, 2),
-    ('first_thread',       'РџРµСЂРІС‹Р№ С‚СЂРµРґ',            'РЎРѕР·РґР°С‚СЊ РїРµСЂРІС‹Р№ С‚СЂРµРґ',                                           'starter',       'common',    10,  'рџ“Ў', NULL,  FALSE, 3),
-    ('first_reaction',     'РџРµСЂРІР°СЏ СЂРµР°РєС†РёСЏ',         'РџРѕСЃС‚Р°РІРёС‚СЊ РїРµСЂРІСѓСЋ СЂРµР°РєС†РёСЋ',                                      'starter',       'common',    5,   'вњЁ', NULL,  FALSE, 4),
-    ('profile_tuned',      'РџСЂРѕС„РёР»СЊ Р·Р°РїРѕР»РЅРµРЅ',       'Р—Р°РїРѕР»РЅРёС‚СЊ РїСЂРѕС„РёР»СЊ',                                             'starter',       'common',    10,  'вљ™пёЏ', NULL,  FALSE, 5),
-    ('daily_login',        '3 РґРЅСЏ РїРѕРґСЂСЏРґ',           'Р—Р°Р№С‚Рё РЅР° СЃР°Р№С‚ 3 РґРЅСЏ РїРѕРґСЂСЏРґ',                                    'starter',       'common',    15,  'рџ”‹', NULL,  FALSE, 6),
-    ('first_comment',      'РџРµСЂРІС‹Р№ РєРѕРјРјРµРЅС‚Р°СЂРёР№',     'РќР°РїРёСЃР°С‚СЊ РїРµСЂРІС‹Р№ РєРѕРјРјРµРЅС‚Р°СЂРёР№',                                   'starter',       'common',    5,   'пїЅ', NULL,  FALSE, 7),
-    ('first_model_rate',   'РџРµСЂРІР°СЏ РѕС†РµРЅРєР° РјРѕРґРµР»Рё',   'РћС†РµРЅРёС‚СЊ РјРѕРґРµР»СЊ РїРµСЂРІС‹Р№ СЂР°Р·',                                     'starter',       'common',    10,  'в­ђ', NULL,  FALSE, 8),
-    ('first_mention',      'РЈРїРѕРјРёРЅР°РЅРёРµ',             'РЈРїРѕРјСЏРЅСѓС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ С‡РµСЂРµР· @',                                'starter',       'common',    5,   'рџ“Ј', NULL,  FALSE, 9),
-    ('first_edit',         'Р РµРґР°РєС‚РѕСЂ',               'РћС‚СЂРµРґР°РєС‚РёСЂРѕРІР°С‚СЊ СЃРІРѕР№ РїРѕСЃС‚ РёР»Рё РєРѕРјРјРµРЅС‚Р°СЂРёР№',                      'starter',       'common',    5,   'вњЏпёЏ', NULL,  FALSE, 10),
-    ('silent_wave',        'Р‘РµР· РЅРµРіР°С‚РёРІР°',           'РџРѕР»СѓС‡РёС‚СЊ 20 СЂРµР°РєС†РёР№ РЅР° РїРѕСЃС‚Рµ Р±РµР· dislike',                      'rare',          'rare',      25,  'рџЊЉ', NULL,  FALSE, 11),
-    ('puke_gradient',      'РќРµСЃРІР°СЂРµРЅРёРµ Р¶РµР»СѓРґРєР°',     'РџРѕР»СѓС‡РёС‚СЊ 20 puke-СЂРµР°РєС†РёР№ РЅР° РѕРґРЅРѕРј РїРѕСЃС‚Рµ',                      'rare',          'rare',      30,  'рџ¤®', NULL,  FALSE, 12),
-    ('binding_layer',      'РўСЂРё РїСЂРёРіР»Р°С€РµРЅРёСЏ',        'РџСЂРёРіР»Р°СЃРёС‚СЊ 3 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№',                                   'rare',          'rare',      20,  'пїЅ', NULL,  FALSE, 13),
-    ('models_remember',    'Р РµР°РєС†РёСЏ РјРѕРґРµСЂР°С‚РѕСЂР°',     'РџРѕР»СѓС‡РёС‚СЊ СЂРµР°РєС†РёСЋ РѕС‚ РјРѕРґРµСЂР°С‚РѕСЂР° РёР»Рё Р°РґРјРёРЅР°',                     'rare',          'rare',      35,  'рџ¤–', NULL,  FALSE, 14),
-    ('before_public_launch','Р”Рѕ Р·Р°РїСѓСЃРєР°',            'РЎРѕР·РґР°С‚СЊ Р°РєРєР°СѓРЅС‚ РґРѕ РїСѓР±Р»РёС‡РЅРѕРіРѕ Р·Р°РїСѓСЃРєР°',                        'rare',          'rare',      25,  'рџ•°пёЏ', NULL,  FALSE, 15),
-    ('beta_user',          'Р‘РµС‚Р°-РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ',      'РџРѕР»СѓС‡РёС‚СЊ beta-СЂРѕР»СЊ',                                           'rare',          'rare',      30,  'рџ§Є', NULL,  FALSE, 16),
-    ('silent_observer',    '30 РґРЅРµР№ С‚РёС€РёРЅС‹',         'РќРµ РїРёСЃР°С‚СЊ РїРѕСЃС‚С‹ 30 РґРЅРµР№ РїРѕСЃР»Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё',                   'rare',          'rare',      20,  'рџ‘ЃпёЏ', NULL,  FALSE, 17),
-    ('overfitting',        '100 РїРѕСЃС‚РѕРІ',             'РќР°РїРёСЃР°С‚СЊ 100 РїРѕСЃС‚РѕРІ РЅР° С„РѕСЂСѓРјРµ',                                'rare',          'rare',      45,  'рџ§ ', NULL,  FALSE, 18),
-    ('seven_day_streak',   'РЎРµРјРёРґРЅРµРІРєР°',             'Р—Р°Р№С‚Рё РЅР° СЃР°Р№С‚ 7 РґРЅРµР№ РїРѕРґСЂСЏРґ',                                  'rare',          'rare',      25,  'пїЅ', NULL,  FALSE, 19),
-    ('night_shift',        'РќРѕС‡РЅР°СЏ СЃРјРµРЅР°',           'РћРїСѓР±Р»РёРєРѕРІР°С‚СЊ РїРѕСЃС‚ РјРµР¶РґСѓ 02:00 Рё 05:00',                        'rare',          'rare',      20,  'рџЊ™', NULL,  FALSE, 20),
-    ('archaeologist',      'РђСЂС…РµРѕР»РѕРі',               'РћС‚РІРµС‚РёС‚СЊ РІ С‚СЂРµРґ СЃС‚Р°СЂС€Рµ 90 РґРЅРµР№',                               'rare',          'rare',      25,  'рџ¦ґ', NULL,  FALSE, 21),
-    ('cluster_formed',     'Р”РµСЃСЏС‚СЊ РїСЂРёРіР»Р°С€РµРЅРёР№',     'РџСЂРёРіР»Р°СЃРёС‚СЊ 10 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№',                                  'unique',        'unique',    50,  'рџ§¬', NULL,  FALSE, 22),
-    ('benchmark_oracle',   'РџРѕР»СѓС‡РµРЅРёРµ РїСЂРёР·РЅР°РЅРёРµ',    'РџРѕР»СѓС‡РёС‚СЊ Р·Р°РєСЂРµРї С‚СЂРµРґР° РѕС‚ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°',                       'unique',        'unique',    40,  'пїЅ', NULL,  FALSE, 23),
-    ('first_among_equals', 'РџРµСЂРІС‹Рµ 10 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№','Р’РѕР№С‚Рё РІ РїРµСЂРІС‹Рµ 10 Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С…',                         'unique',        'unique',    75,  'рџ‘‘', NULL,  FALSE, 24),
-    ('alpha_user',         'РђР»СЊС„Р°-РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ',     'РџРѕР»СѓС‡РёС‚СЊ alpha-СЂРѕР»СЊ',                                          'unique',        'unique',    60,  'вљЎ', NULL,  FALSE, 25),
-    ('moderator_power',    'РњРѕРґРµСЂР°С‚РѕСЂ',              'РџРѕР»СѓС‡РёС‚СЊ СЂРѕР»СЊ РјРѕРґРµСЂР°С‚РѕСЂР°',                                      'unique',        'unique',    80,  'рџ—ЎпёЏ', NULL,  FALSE, 26),
-    ('the_first_hundred',  'РџРµСЂРІС‹Рµ 100 РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№','Р’РѕР№С‚Рё РІ РїРµСЂРІС‹Рµ 100 Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… Р°РєРєР°СѓРЅС‚РѕРІ',             'secret_limited','limited',   150, 'рџ’Ћ', 100,   TRUE,  27)
+    ('welcome',            'Добро пожаловать',       'Зарегистрироваться на сайте',                                   'starter',       'common',    5,   '👋', NULL,  FALSE, 1),
+    ('first_referral',     'Первый приглашённый',    'Пригласить 1 пользователя',                                        'starter',       'common',    10,  '🤝', NULL,  FALSE, 2),
+    ('first_thread',       'Первый тред',            'Создать первый тред',                                           'starter',       'common',    10,  '📡', NULL,  FALSE, 3),
+    ('first_reaction',     'Первая реакция',         'Поставить первую реакцию',                                      'starter',       'common',    5,   '✨', NULL,  FALSE, 4),
+    ('profile_tuned',      'Профиль заполнен',       'Заполнить профиль',                                             'starter',       'common',    10,  '⚙️', NULL,  FALSE, 5),
+    ('daily_login',        '3 дня подряд',           'Зайти на сайт 3 дня подряд',                                    'starter',       'common',    15,  '🔋', NULL,  FALSE, 6),
+    ('first_comment',      'Первый комментарий',     'Написать первый комментарий',                                   'starter',       'common',    5,   '💬', NULL,  FALSE, 7),
+    ('first_model_rate',   'Первая оценка модели',   'Оценить модель первый раз',                                     'starter',       'common',    10,  '⭐', NULL,  FALSE, 8),
+    ('first_mention',      'Упоминание',             'Упомянуть пользователя через @',                                'starter',       'common',    5,   '📣', NULL,  FALSE, 9),
+    ('first_edit',         'Редактор',               'Отредактировать свой пост или комментарий',                      'starter',       'common',    5,   '✏️', NULL,  FALSE, 10),
+    ('silent_wave',        'Без негатива',           'Получить 20 реакций на посте без dislike',                      'rare',          'rare',      25,  '🌊', NULL,  FALSE, 11),
+    ('puke_gradient',      'Несварение желудка',     'Получить 20 puke-реакций на одном посте',                      'rare',          'rare',      30,  '🤮', NULL,  FALSE, 12),
+    ('binding_layer',      'Три приглашения',        'Пригласить 3 пользователей',                                   'rare',          'rare',      20,  '🔗', NULL,  FALSE, 13),
+    ('models_remember',    'Реакция модератора',     'Получить реакцию от модератора или админа',                     'rare',          'rare',      35,  '🤖', NULL,  FALSE, 14),
+    ('before_public_launch','До запуска',            'Создать аккаунт до публичного запуска',                        'rare',          'rare',      25,  '🕰️', NULL,  FALSE, 15),
+    ('beta_user',          'Бета-пользователь',      'Получить beta-роль',                                           'rare',          'rare',      30,  '🧪', NULL,  FALSE, 16),
+    ('silent_observer',    '30 дней тишины',         'Не писать посты 30 дней после регистрации',                   'rare',          'rare',      20,  '👁️', NULL,  FALSE, 17),
+    ('overfitting',        '100 постов',             'Написать 100 постов на форуме',                                'rare',          'rare',      45,  '🧠', NULL,  FALSE, 18),
+    ('seven_day_streak',   'Семидневка',             'Зайти на сайт 7 дней подряд',                                  'rare',          'rare',      25,  '🔥', NULL,  FALSE, 19),
+    ('night_shift',        'Ночная смена',           'Опубликовать пост между 02:00 и 05:00',                        'rare',          'rare',      20,  '🌙', NULL,  FALSE, 20),
+    ('archaeologist',      'Археолог',               'Ответить в тред старше 90 дней',                               'rare',          'rare',      25,  '🦴', NULL,  FALSE, 21),
+    ('cluster_formed',     'Десять приглашений',     'Пригласить 10 пользователей',                                  'unique',        'unique',    50,  '🧬', NULL,  FALSE, 22),
+    ('benchmark_oracle',   'Получение признание',    'Получить закреп треда от администратора',                       'unique',        'unique',    40,  '🔮', NULL,  FALSE, 23),
+    ('first_among_equals', 'Первые 10 пользователей','Войти в первые 10 зарегистрированных',                         'unique',        'unique',    75,  '👑', NULL,  FALSE, 24),
+    ('alpha_user',         'Альфа-пользователь',     'Получить alpha-роль',                                          'unique',        'unique',    60,  '⚡', NULL,  FALSE, 25),
+    ('moderator_power',    'Модератор',              'Получить роль модератора',                                      'unique',        'unique',    80,  '🗡️', NULL,  FALSE, 26),
+    ('the_first_hundred',  'Первые 100 пользователей','Войти в первые 100 зарегистрированных аккаунтов',             'secret_limited','limited',   150, '💎', 100,   TRUE,  27)
 ON CONFLICT (id) DO UPDATE SET
     title = EXCLUDED.title,
     description = EXCLUDED.description,
@@ -136,7 +146,7 @@ ON CONFLICT (id) DO UPDATE SET
     sort_order = EXCLUDED.sort_order;
 
 -- ==========================================
--- STEP 4: RPC вЂ” Grant achievement (idempotent)
+-- STEP 4: RPC — Grant achievement (idempotent)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.grant_achievement(UUID, TEXT);
@@ -151,6 +161,12 @@ DECLARE
     v_current_count INT;
     v_already BOOLEAN;
 BEGIN
+    IF p_user_id IS NULL OR p_achievement_id IS NULL THEN
+        RETURN jsonb_build_object('granted', false, 'reason', 'invalid_input');
+    END IF;
+
+    PERFORM pg_advisory_xact_lock(hashtext('public.grant_achievement'), hashtext(p_achievement_id));
+
     SELECT EXISTS(
         SELECT 1 FROM user_achievements WHERE user_id = p_user_id AND achievement_id = p_achievement_id
     ) INTO v_already;
@@ -160,6 +176,10 @@ BEGIN
     END IF;
 
     SELECT max_supply INTO v_max_supply FROM achievements WHERE id = p_achievement_id;
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('granted', false, 'reason', 'achievement_not_found');
+    END IF;
+
     IF v_max_supply IS NOT NULL THEN
         SELECT COUNT(*) INTO v_current_count FROM user_achievements WHERE achievement_id = p_achievement_id;
         IF v_current_count >= v_max_supply THEN
@@ -174,8 +194,12 @@ BEGIN
 END;
 $$;
 
+REVOKE EXECUTE ON FUNCTION public.grant_achievement(UUID, TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.grant_achievement(UUID, TEXT) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.grant_achievement(UUID, TEXT) FROM authenticated;
+
 -- ==========================================
--- STEP 5: RPC вЂ” Check and grant all eligible achievements
+-- STEP 5: RPC — Check and grant all eligible achievements
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.check_and_grant_achievements(UUID);
@@ -187,7 +211,7 @@ SET search_path = public
 AS $$
 DECLARE
     v_granted TEXT[] := '{}';
-    v_result JSONB;
+    v_result BOOLEAN;
     v_referral_count INT := 0;
     v_profile RECORD;
     v_uid_seq INT;
@@ -307,7 +331,7 @@ BEGIN
     END IF;
 
     -- first_model_rate: at least 1 result submitted
-    IF EXISTS(SELECT 1 FROM results WHERE author = p_user_id LIMIT 1) THEN
+    IF EXISTS(SELECT 1 FROM results WHERE author = p_user_id::text LIMIT 1) THEN
         SELECT (grant_achievement(p_user_id, 'first_model_rate')->>'granted')::BOOLEAN INTO v_result;
         IF v_result THEN v_granted := array_append(v_granted, 'first_model_rate'); END IF;
     END IF;
@@ -319,7 +343,7 @@ BEGIN
     END IF;
 
     -- first_edit: edited a post or comment
-    IF EXISTS(SELECT 1 FROM forum_posts WHERE author_id = p_user_id AND is_deleted = false AND updated_at IS NOT NULL AND updated_at != created_at LIMIT 1) THEN
+    IF EXISTS(SELECT 1 FROM forum_posts WHERE author_id = p_user_id AND is_deleted = false AND edited_at IS NOT NULL LIMIT 1) THEN
         SELECT (grant_achievement(p_user_id, 'first_edit')->>'granted')::BOOLEAN INTO v_result;
         IF v_result THEN v_granted := array_append(v_granted, 'first_edit'); END IF;
     END IF;
@@ -359,7 +383,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 6: RPC вЂ” Check reaction-based achievements
+-- STEP 6: RPC — Check reaction-based achievements
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.check_reaction_achievements(INTEGER, UUID);
@@ -375,7 +399,7 @@ DECLARE
     v_dislike_count INT;
     v_puke_count INT;
     v_reactor_role TEXT;
-    v_result JSONB;
+    v_result BOOLEAN;
     v_granted TEXT[] := '{}';
 BEGIN
     SELECT author_id INTO v_post_author FROM forum_posts WHERE id = p_post_id;
@@ -411,7 +435,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 7: RPC вЂ” Check pin-based achievement
+-- STEP 7: RPC — Check pin-based achievement
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.check_pin_achievement(INTEGER);
@@ -423,7 +447,7 @@ SET search_path = public
 AS $$
 DECLARE
     v_author UUID;
-    v_result JSONB;
+    v_result BOOLEAN;
 BEGIN
     SELECT author_id INTO v_author FROM forum_threads WHERE id = p_thread_id;
     IF v_author IS NULL THEN RETURN jsonb_build_object('granted', false); END IF;
@@ -433,7 +457,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 8: RPC вЂ” Set showcased achievements (max 3)
+-- STEP 8: RPC — Set showcased achievements (max 3)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.set_showcased_achievements(TEXT);
@@ -478,7 +502,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 9: RPC вЂ” Get user achievements
+-- STEP 9: RPC — Get user achievements
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_user_achievements(UUID);
@@ -525,7 +549,7 @@ END;
 $$;
 
 -- ==========================================
--- STEP 10: RPC вЂ” Get achievements catalog
+-- STEP 10: RPC — Get achievements catalog
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_achievements_catalog();
@@ -696,7 +720,7 @@ $$;
 -- STEP 13: Update mod_pin_thread to trigger achievement
 -- ==========================================
 
-DROP FUNCTION IF EXISTS public.mod_pin_thread(INTEGER, BOOLEAN);
+DROP FUNCTION IF EXISTS public.mod_pin_thread(INTEGER, BOOLEAN) CASCADE;
 CREATE OR REPLACE FUNCTION public.mod_pin_thread(p_thread_id INTEGER, p_pin BOOLEAN)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -738,7 +762,7 @@ CREATE POLICY "users_read_own_streak" ON login_streaks
     FOR SELECT USING (user_id = auth.uid());
 
 -- ==========================================
--- STEP 15: RPC вЂ” Record login (upsert streak)
+-- STEP 15: RPC — Record login (upsert streak)
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.record_login();
