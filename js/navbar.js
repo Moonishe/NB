@@ -260,6 +260,9 @@
     const asciiGlyphs = '░▒▓█▀▄▌▐│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬';
 
     function createDropdown() {
+        // FIX: info не существует в этом scope — берём uid из dataset кнопки
+        const uid = (userBtn && userBtn.dataset.uid) ? userBtn.dataset.uid : '';
+        const profileHref = uid ? 'profile/' + uid : 'register';
         const el = document.createElement('div');
         el.id = 'nav-user-dropdown';
         el.className = 'nav-user-dropdown-float';
@@ -268,7 +271,7 @@
                 <div class="nav-user-menu-ascii-border"></div>
                 <p id="nav-user-display" class="nav-user-menu-name"></p>
                 <div class="nav-user-menu-divider"></div>
-                <a href="profile/${info.uid || ''}" class="nav-user-menu-item" id="nav-dropdown-profile">
+                <a href="${profileHref}" class="nav-user-menu-item" id="nav-dropdown-profile">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="nav-item-text" data-text="Аккаунт"></span>
                 </a>
@@ -373,13 +376,15 @@
         if (userBtn) userBtn.dataset.displayName = name;
     }
 
-    function showUserMenu(name, role) {
+    function showUserMenu(name, role, uid) {
         if (authLink) authLink.classList.add('hidden');
         if (mobileAuthLink) mobileAuthLink.classList.add('hidden');
         if (userMenuWrap) userMenuWrap.classList.remove('hidden');
         const notifWrap = document.getElementById('nav-notif-wrap');
         if (notifWrap) notifWrap.classList.remove('hidden');
         setDisplayName(name);
+        // FIX: сохраняем uid в dataset кнопки, чтобы createDropdown мог его использовать
+        if (uid && userBtn) userBtn.dataset.uid = String(uid);
         if (role === 'admin') {
             const adminLink = document.getElementById('nav-dropdown-admin');
             if (adminLink) adminLink.style.display = '';
@@ -407,7 +412,8 @@
             const info = await Api.getUserDisplayName();
             if (!info) return;
             const name = safeDisplayName(info) || 'User';
-            showUserMenu(name, info.role);
+            // FIX: передаём uid чтобы createDropdown мог построить ссылку на профиль
+            showUserMenu(name, info.role, info.uid);
 
             if (info.telegram_photo_url) {
                 const photoEl = document.getElementById('nav-user-photo');

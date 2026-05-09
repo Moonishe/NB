@@ -2663,7 +2663,8 @@ function decodeInviteAscii(code) {
 
     function renderProfile() {
 
-
+        // FIX: сбрасываем флаг чтобы decode-анимации запускались при каждом ре-рендере (например при редактировании bio)
+        animationsRan = false;
 
         const main = document.getElementById('profile-main');
 
