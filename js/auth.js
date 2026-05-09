@@ -435,7 +435,7 @@ const AuthApp = (() => {
 
         const t0 = performance.now();
 
-        const duration = Math.min(1108, Math.max(808, target.length * 30));
+        const duration = Math.min(520, Math.max(320, target.length * 18)); // FIX: было 808-1108мс — слишком долго, вызывало лаг при одновременном запуске 12+ анимаций
 
         function rg() { return chars[Math.floor(Math.random() * chars.length)]; }
 
@@ -522,39 +522,32 @@ const AuthApp = (() => {
 
 
     function runInitialDecode() {
-
+        // FIX: добавлен stagger (60мс между элементами) чтобы не запускать 12+ RAF-анимаций одновременно
+        const selectors = [
+            '.register-shell > .text-center a span',
+            '[data-view="auth"] .auth-terminal-header span',
+            '#auth-title',
+            '#auth-subtitle',
+            '[data-auth-mode]',
+            '.auth-ascii-line span',
+            '.invite-access-label span',
+            '#invite-section p',
+            '#dev-login-section p',
+            '#dev-login-btn',
+            '#tg-custom-btn-text',
+            '.tg-custom-btn span:last-child'
+        ];
         requestAnimationFrame(() => {
-
-            decodeTextGroup([
-
-                '.register-shell > .text-center a span',
-
-                '[data-view="auth"] .auth-terminal-header span',
-
-                '#auth-title',
-
-                '#auth-subtitle',
-
-                '[data-auth-mode]',
-
-                '.auth-ascii-line span',
-
-                '.invite-access-label span',
-
-                '#invite-section p',
-
-                '#dev-login-section p',
-
-                '#dev-login-btn',
-
-                '#tg-custom-btn-text',
-
-                '.tg-custom-btn span:last-child'
-
-            ]);
-
+            selectors.forEach((sel, i) => {
+                setTimeout(() => {
+                    const scope = document;
+                    scope.querySelectorAll(sel).forEach(el => {
+                        if (el.closest('.hidden')) return;
+                        decodeText(el, el.dataset.text || el.dataset.decodeText || el.textContent.trim());
+                    });
+                }, i * 60);
+            });
         });
-
     }
 
 
@@ -995,11 +988,11 @@ const AuthApp = (() => {
 
         showView('account');
 
-
+        let info = null; // FIX: объявляем снаружи try, иначе return info кидает ReferenceError
 
         try {
 
-            const info = await Api.getUserDisplayName();
+            info = await Api.getUserDisplayName();
 
             if (info) {
 

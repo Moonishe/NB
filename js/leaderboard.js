@@ -187,7 +187,11 @@ const LeaderboardModule = (() => {
 
     let _autoRefreshTimer = null;
     function startAutoRefresh() {
-        if (_autoRefreshTimer) return;
+        // FIX: сбрасываем старый таймер при каждом вызове чтобы он всегда обновлял актуальный currentPromptId
+        if (_autoRefreshTimer) {
+            clearInterval(_autoRefreshTimer);
+            _autoRefreshTimer = null;
+        }
         _autoRefreshTimer = setInterval(async () => {
             if (document.hidden || !currentPromptId) return;
             try {
