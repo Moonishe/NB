@@ -90,6 +90,10 @@ const AdminApp = (() => {
         return d.innerHTML.replace(/"/g, '&quot;');
     }
 
+    function escapeJs(str) {
+        return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '');
+    }
+
     function formatDateForDisplay(dateVal) {
         if (!dateVal) return '';
         if (typeof dateVal === 'string') {
@@ -1503,6 +1507,7 @@ const AdminApp = (() => {
     }
 
     async function unban(uid) {
+        if (!confirm('Разбанить пользователя?')) return;
         try {
             if (Api.modUnbanUser) await Api.modUnbanUser(uid);
             toast('Пользователь разбанен', 'success');
@@ -1597,7 +1602,7 @@ const AdminApp = (() => {
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] opacity-30">${a.points || 0} pts</span>
-                            <button class="mod-action-btn" onclick="AdminApp.grantAchById('${a.id}')">Выдать</button>
+                            <button class="mod-action-btn" onclick="AdminApp.grantAchById('${escapeJs(a.id)}')">Выдать</button>
                         </div>
                     </div>
                     <p class="text-[10px] opacity-40 mt-1">${escapeHtml(a.description || '')}</p>
