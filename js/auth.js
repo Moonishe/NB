@@ -1192,18 +1192,20 @@ const AuthApp = (() => {
 window.onTelegramAuth = handleTelegramAuth;
 
 function renderTurnstile() {
-    const wrap = document.getElementById('turnstile-wrap');
-    if (wrap && window.TURNSTILE_SITE_KEY && window.turnstile) {
-        wrap.classList.remove('hidden');
-        const container = wrap.querySelector('.cf-turnstile');
-        if (container && !container.hasChildNodes()) {
-            turnstile.render(container, {
-                sitekey: window.TURNSTILE_SITE_KEY,
-                callback: onTurnstile,
-                'expired-callback': onTurnstileExpired,
-            });
+    try {
+        const wrap = document.getElementById('turnstile-wrap');
+        if (wrap && window.TURNSTILE_SITE_KEY && window.turnstile) {
+            wrap.classList.remove('hidden');
+            const container = wrap.querySelector('.cf-turnstile');
+            if (container && !container.hasChildNodes()) {
+                turnstile.render(container, {
+                    sitekey: window.TURNSTILE_SITE_KEY,
+                    callback: onTurnstile,
+                    'expired-callback': onTurnstileExpired,
+                });
+            }
         }
-    }
+    } catch (e) { console.warn('Turnstile render error:', e.message); }
 }
 window._renderTurnstile = renderTurnstile;
 if (window._turnstileReady) renderTurnstile();
