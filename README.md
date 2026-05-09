@@ -44,38 +44,6 @@
 
 ---
 
-## ▸ Скриншоты
-
-<table>
-  <tr>
-    <td align="center"><b>Главная</b></td>
-    <td align="center"><b>SVG Bench</b></td>
-    <td align="center"><b>Форум</b></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/main.png" alt="Главная" width="360" /></td>
-    <td><img src="docs/screenshots/svg.png" alt="SVG Bench" width="360" /></td>
-    <td><img src="docs/screenshots/forum.png" alt="Форум" width="360" /></td>
-  </tr>
-  <tr>
-    <td align="center"><b>Профиль</b></td>
-    <td align="center"><b>Авторизация</b></td>
-    <td align="center"><b>Админ-панель</b></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/profile.png" alt="Профиль" width="360" /></td>
-    <td><img src="docs/screenshots/register.png" alt="Авторизация" width="360" /></td>
-    <td><img src="docs/screenshots/admin.png" alt="Админ-панель" width="360" /></td>
-  </tr>
-</table>
-
-> 📹 Запись: ShareX/OBS → GIF через ffmpeg:
-> ```bash
-> ffmpeg -i input.mp4 -vf "fps=30,scale=720:-1:flags=lanczos" -c:v gif output.gif
-> ```
-
----
-
 ## ▸ Архитектура
 
 ```
