@@ -202,7 +202,7 @@ const ForumModule = (() => {
 
 
 
-            if (uid) return `<a href="profile?id=${uid}" class="forum-mention">@${username}</a>`;
+            if (uid) return `<a href="profile/${uid}" class="forum-mention">@${username}</a>`;
 
 
 
@@ -406,7 +406,7 @@ const ForumModule = (() => {
 
 
 
-        const href = info.author_id ? `profile?id=${info.author_id}` : '#';
+        const href = info.author_id ? `profile/${info.author_id}` : '#';
 
 
 
@@ -1332,7 +1332,7 @@ const ForumModule = (() => {
 
 
 
-            const authorHref = thread.author_id ? `profile?id=${thread.author_id}` : '#';
+            const authorHref = thread.author_id ? `profile/${thread.author_id}` : '#';
 
 
 
@@ -2789,7 +2789,7 @@ const ForumModule = (() => {
 
 
 
-            <a href="profile?id=${userId}" class="forum-popover-link">Открыть профиль</a>
+            <a href="profile/${userId}" class="forum-popover-link">Открыть профиль</a>
 
 
 

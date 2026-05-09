@@ -507,7 +507,7 @@ const LeaderboardModule = (() => {
             const role = normalizeRole(entry.rater_role);
             const nickname = entry.rater_nickname || entry.rater_uid || 'user';
             const uid = entry.rater_uid ? String(entry.rater_uid) : '';
-            const href = uid ? `profile?id=${encodeURIComponent(uid)}` : '#';
+            const href = uid ? `profile/${encodeURIComponent(uid)}` : '#';
             const rank = Number(entry.rating_rank) || idx + 1;
             const score = Number(entry.total_score);
             const scoreText = Number.isFinite(score) ? formatScore(score) : '—';

@@ -1651,11 +1651,8 @@ function decodeInviteAscii(code) {
 
 
 
-        const params = new URLSearchParams(window.location.search);
-
-
-
-        const requestedId = params.get('id');
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        const requestedId = pathParts[pathParts.length - 1] === 'profile' ? null : pathParts[pathParts.length - 1];
 
 
 
