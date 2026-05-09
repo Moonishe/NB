@@ -46,6 +46,8 @@ const AdminApp = (() => {
                         sitekey: window.TURNSTILE_SITE_KEY,
                         callback: onTurnstile,
                         'expired-callback': onTurnstileExpired,
+                        theme: 'dark',
+                        size: 'compact',
                     });
                 }
             }

@@ -789,6 +789,17 @@ const AuthApp = (() => {
 
     async function handleTelegramAuth(user) {
         if (isProcessing) return;
+
+        if (authMode === 'register') {
+            const code = document.getElementById('invite-code').value.trim().toUpperCase();
+            if (!code) {
+                showError('auth-error', 'Введите инвайт-код для регистрации');
+                const inviteSection = document.getElementById('invite-section');
+                if (inviteSection) inviteSection.classList.add('ring-1', 'ring-red-400/50');
+                return;
+            }
+        }
+
         if (!turnstileToken) {
             showError('auth-error', 'Пройдите проверку капчи');
             return;
@@ -1202,6 +1213,8 @@ function renderTurnstile() {
                     sitekey: window.TURNSTILE_SITE_KEY,
                     callback: onTurnstile,
                     'expired-callback': onTurnstileExpired,
+                    theme: 'dark',
+                    size: 'compact',
                 });
             }
         }
