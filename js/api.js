@@ -478,7 +478,7 @@ const Api = (() => {
     async function trackPageView(visitorHash, page, referrer) {
         const client = getClient();
         if (!client) return;
-        await client.from('page_views').insert({ visitor_hash: visitorHash, page, referrer });
+        await client.rpc('log_page_view', { p_visitor_hash: visitorHash, p_page: page, p_referrer: referrer });
     }
 
     async function getStats() {

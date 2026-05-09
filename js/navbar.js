@@ -4,11 +4,17 @@
 
         if (!info) return 'User';
 
-        const _DANGEROUS_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/;
+        const _DANGEROUS_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g;
 
         const raw = [info.telegram_first_name, info.telegram_last_name].filter(Boolean).join(' ').trim();
 
-        if (raw && !_DANGEROUS_RE.test(raw) && raw.replace(/\s/g, '').length > 0) return raw;
+        if (raw) {
+
+            const clean = raw.replace(_DANGEROUS_RE, '').replace(/\s+/g, ' ').trim();
+
+            if (clean.length > 0) return clean;
+
+        }
 
         if (info.telegram_username) return info.telegram_username;
 

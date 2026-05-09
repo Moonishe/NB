@@ -39,8 +39,6 @@ async function sha256Hex(value: string): Promise<string> {
 }
 
 function getClientIp(req: Request): string {
-  const forwardedFor = req.headers.get('x-forwarded-for')
-  if (forwardedFor) return forwardedFor.split(',')[0].trim()
   return req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || 'unknown'
 }
 
@@ -84,9 +82,8 @@ async function verifyTelegramHash(authData: Record<string, string>): Promise<boo
   return timingSafeEqualHex(computedHash, hash)
 }
 
-async function generatePassword(telegramId: string): Promise<string> {
-  const hash = await hmacSha256(getRequiredEnv('SESSION_SECRET'), telegramId)
-  return hash.slice(0, 32)
+function generatePassword(): string {
+  return crypto.randomUUID().replace(/-/g, '').slice(0, 32)
 }
 
 function getAllowedOrigins(): Set<string> {
@@ -235,7 +232,7 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Invalid Telegram authentication' }, 401)
     }
 
-    const password = await generatePassword(telegramId)
+    const password = generatePassword()
 
     const tgProfile = {
       telegram_username: authData.username || null,

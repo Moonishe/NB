@@ -99,6 +99,20 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === 'delete_user') {
+      if (user_id === adminId) {
+        return jsonResponse({ error: 'Cannot delete yourself' }, 400)
+      }
+
+      const { data: targetIsAdmin } = await adminClient
+        .from('admin_users')
+        .select('id')
+        .eq('user_id', user_id)
+        .maybeSingle()
+
+      if (targetIsAdmin) {
+        return jsonResponse({ error: 'Cannot delete another admin' }, 400)
+      }
+
       const { data: profile } = await adminClient
         .from('profiles')
         .select('user_id')
@@ -144,6 +158,13 @@ Deno.serve(async (req: Request) => {
           console.error('admin-action post-delete cleanup threw', { user_id, step: step.label, error })
         }
       }
+
+      await adminClient.from('admin_actions').insert({
+        actor_id: adminId,
+        action: 'delete_user',
+        target_id: user_id,
+        created_at: new Date().toISOString(),
+      })
 
       return jsonResponse({ success: true })
     }

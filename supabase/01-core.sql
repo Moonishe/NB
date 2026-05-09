@@ -13,12 +13,42 @@ CREATE TABLE IF NOT EXISTS page_views (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "public_insert_page_views" ON page_views;
-CREATE POLICY "public_insert_page_views" ON page_views FOR INSERT WITH CHECK (true);
-DROP POLICY IF EXISTS "public_read_page_views" ON page_views;
-CREATE POLICY "public_read_page_views" ON page_views FOR SELECT USING (true);
 CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
 CREATE INDEX IF NOT EXISTS idx_page_views_visitor_hash ON page_views(visitor_hash);
+
+-- Only admins can read page_views
+DROP POLICY IF EXISTS "admin_read_page_views" ON page_views;
+CREATE POLICY "admin_read_page_views" ON page_views
+    FOR SELECT USING (EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid()));
+
+-- Insert via SECURITY DEFINER RPC with rate-limit
+DROP FUNCTION IF EXISTS public.log_page_view(TEXT, TEXT, TEXT);
+CREATE OR REPLACE FUNCTION public.log_page_view(
+    p_visitor_hash TEXT,
+    p_page TEXT,
+    p_referrer TEXT
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_count INTEGER;
+BEGIN
+    IF p_visitor_hash IS NULL OR p_visitor_hash = '' THEN RETURN; END IF;
+
+    SELECT COUNT(*) INTO v_count FROM page_views
+    WHERE visitor_hash = p_visitor_hash AND created_at > NOW() - INTERVAL '1 second';
+
+    IF v_count >= 3 THEN RETURN; END IF;
+
+    INSERT INTO page_views (visitor_hash, page, referrer) VALUES (p_visitor_hash, p_page, p_referrer);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.log_page_view(TEXT, TEXT, TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION public.log_page_view(TEXT, TEXT, TEXT) TO authenticated;
 
 -- --- PREREQUISITE: admin_users + moderators tables ---
 
