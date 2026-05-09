@@ -5,6 +5,7 @@ const AuthApp = (() => {
     let isProcessing = false;
 
     let authMode = 'login';
+    let turnstileToken = '';
 
     const _DANGEROUS_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g;
 
@@ -778,14 +779,23 @@ const AuthApp = (() => {
 
 
 
+    function onTurnstile(token) {
+        turnstileToken = token;
+    }
+
+    function onTurnstileExpired() {
+        turnstileToken = '';
+    }
+
     async function handleTelegramAuth(user) {
-
         if (isProcessing) return;
-
+        if (!turnstileToken) {
+            showError('auth-error', 'Пройдите проверку капчи');
+            return;
+        }
         isProcessing = true;
 
         hideError('auth-error');
-
 
 
         const code = authMode === 'register' ? document.getElementById('invite-code').value.trim().toUpperCase() : '';
@@ -806,7 +816,7 @@ const AuthApp = (() => {
 
         try {
 
-            const result = await Api.telegramAuth(user, code || null);
+            const result = await Api.telegramAuth(user, code || null, turnstileToken);
 
             await Api.setSession(result.access_token, result.refresh_token);
 

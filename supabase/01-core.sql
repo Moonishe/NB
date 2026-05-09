@@ -487,7 +487,7 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT
-        COALESCE(NULLIF(p.telegram_username, ''), NULLIF(p.telegram_first_name, ''), p.email) AS display_name,
+        COALESCE(NULLIF(regexp_replace(p.telegram_username, '[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]', '', 'g'), ''), NULLIF(regexp_replace(p.telegram_first_name, '[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]', '', 'g'), ''), p.email) AS display_name,
         p.telegram_username,
         p.telegram_first_name,
         p.telegram_last_name,
@@ -722,7 +722,7 @@ BEGIN
     RETURN QUERY
     SELECT
         p.user_id,
-        COALESCE(NULLIF(p.telegram_username, ''), NULLIF(p.telegram_first_name, ''), p.email) AS display_name,
+        COALESCE(NULLIF(regexp_replace(p.telegram_username, '[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]', '', 'g'), ''), NULLIF(regexp_replace(p.telegram_first_name, '[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]', '', 'g'), ''), p.email) AS display_name,
         p.telegram_first_name,
         p.telegram_last_name,
         p.telegram_username,
@@ -1577,7 +1577,7 @@ BEGIN
            p.telegram_last_name,
            p.telegram_username,
            p.telegram_photo_url,
-           COALESCE(p.telegram_first_name, split_part(p.email, '@', 1)) AS display_name,
+           COALESCE(NULLIF(regexp_replace(p.telegram_first_name, '[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]', '', 'g'), ''), NULLIF(regexp_replace(p.telegram_username, '[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]', '', 'g'), ''), split_part(p.email, '@', 1)) AS display_name,
            p.is_verified,
            p.has_generated_invite,
            ic.code AS generated_code,
