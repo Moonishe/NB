@@ -146,11 +146,103 @@
 
         }
 
-        .tg-widget-container { display: flex; justify-content: center; align-items: center; min-height: 48px; }
+        .tg-widget-container {
+
+            position: relative;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            width: 100%;
+
+            min-height: 52px;
+
+            padding: 5px;
+
+            border: 1px solid rgba(84, 169, 235, 0.38);
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(135deg, rgba(84, 169, 235, 0.18), rgba(84, 169, 235, 0.04)),
+                rgba(255,255,255,0.025);
+
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.035) inset, 0 14px 38px rgba(84, 169, 235, 0.1);
+
+            overflow: hidden;
+
+            transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+
+        }
+
+        .tg-widget-container:hover {
+
+            border-color: rgba(84, 169, 235, 0.68);
+
+            background:
+                linear-gradient(135deg, rgba(84, 169, 235, 0.25), rgba(84, 169, 235, 0.075)),
+                rgba(255,255,255,0.035);
+
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 18px 44px rgba(84, 169, 235, 0.16);
+
+            transform: scale(1.015);
+
+        }
+
+        .tg-widget-container:active {
+
+            transform: scale(0.985);
+
+        }
+
+        .tg-widget-container::before {
+
+            content: '';
+
+            position: absolute;
+
+            inset: 0;
+
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+
+            opacity: 0;
+
+            transform: translateX(-70%);
+
+            transition: opacity 0.18s ease, transform 0.45s ease;
+
+            pointer-events: none;
+
+        }
+
+        .tg-widget-container:hover::before {
+
+            opacity: 1;
+
+            transform: translateX(70%);
+
+        }
 
         .tg-widget-container > div { width: 100% !important; }
 
-        .tg-widget-container iframe { border-radius: 10px !important; }
+        .tg-widget-container iframe {
+
+            position: relative;
+
+            z-index: 1;
+
+            display: block !important;
+
+            margin: 0 auto !important;
+
+            border-radius: 8px !important;
+
+            filter: saturate(0.9) contrast(1.04);
+
+        }
 
         .tg-widget-state {
 
@@ -1181,6 +1273,10 @@
                 newScript.setAttribute('data-telegram-login', botUsername);
 
                 newScript.setAttribute('data-size', 'large');
+
+                newScript.setAttribute('data-radius', '8');
+
+                newScript.setAttribute('data-userpic', 'false');
 
                 newScript.setAttribute('data-onauth', 'onTelegramAuth(user)');
 
