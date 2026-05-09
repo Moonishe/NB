@@ -1083,7 +1083,7 @@ const Api = (() => {
     async function adminGetAllThreads() {
         const client = getClient();
         if (!client) return [];
-        const { data, error } = await client.rpc('admin_get_all_threads').catch(() => client.from('forum_threads').select('id,title,author_id,author_nickname,is_pinned,is_locked,posts_count,created_at').order('created_at', { ascending: false }).limit(50));
+        const { data, error } = await client.rpc('admin_get_all_threads').catch(() => client.from('forum_threads').select('id,title,author_id,is_pinned,is_locked,posts_count,created_at').order('created_at', { ascending: false }).limit(50));
         if (error) return [];
         return data || [];
     }
@@ -1091,7 +1091,7 @@ const Api = (() => {
     async function adminGetBans() {
         const client = getClient();
         if (!client) return [];
-        const { data, error } = await client.from('bans').select('user_id,reason,created_at,expires_at').order('created_at', { ascending: false });
+        const { data, error } = await client.from('user_mod_actions').select('user_id,action_type,reason,created_at,expires_at,is_active').eq('action_type', 'ban').eq('is_active', true).order('created_at', { ascending: false });
         if (error) return [];
         return data || [];
     }
@@ -1122,7 +1122,7 @@ const Api = (() => {
     async function adminCreateAchievement(ach) {
         const client = getClient();
         if (!client) throw new Error('Supabase not configured');
-        const { data, error } = await client.from('achievements_catalog').insert(ach).select().single();
+        const { data, error } = await client.from('achievements').insert(ach).select().single();
         if (error) throw new Error(error.message);
         return data;
     }

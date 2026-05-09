@@ -1396,7 +1396,7 @@ const AdminApp = (() => {
                 const threads = Api.adminGetAllThreads ? await Api.adminGetAllThreads().catch(() => []) : [];
                 if (threads.length === 0) { list.innerHTML = '<p class="text-xs opacity-30">Нет тредов</p>'; return; }
                 list.innerHTML = threads.slice(0, 30).map(t => {
-                    const author = t.author_nickname || t.author_username || 'anon';
+                    const author = t.author_nickname || t.author_username || (t.author_id ? t.author_id.substring(0,8) + '...' : 'anon');
                     return `<div class="mod-thread-card">
                         <div class="flex justify-between items-start mb-2">
                             <div>
@@ -1450,7 +1450,7 @@ const AdminApp = (() => {
                 return;
             }
             list.innerHTML = bans.map(b => {
-                const name = b.telegram_username || b.user_id || 'Unknown';
+                const name = b.telegram_username || (b.user_id ? b.user_id.substring(0,8) + '...' : 'Unknown');
                 const reason = b.reason || 'Не указана';
                 const expires = b.expires_at ? formatDateForDisplay(b.expires_at.split('T')[0]) : 'Навсегда';
                 return `<div class="ban-card">
@@ -1765,7 +1765,6 @@ const AdminApp = (() => {
         });
 
         // Start/stop live logs when switching sections
-        const origNavHandler = () => {};
         document.querySelectorAll('.admin-nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const sec = btn.getAttribute('data-section');
