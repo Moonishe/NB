@@ -502,7 +502,11 @@ const AuthApp = (() => {
 
                 '#dev-login-section p',
 
-                '#dev-login-btn'
+                '#dev-login-btn',
+
+                '#tg-custom-btn-text',
+
+                '.tg-custom-btn span:last-child'
 
             ]);
 
