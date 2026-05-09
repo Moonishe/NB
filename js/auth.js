@@ -752,6 +752,10 @@ const AuthApp = (() => {
 
             await Api.setSession(result.access_token, result.refresh_token);
 
+            const tgSvg = tgBtn ? tgBtn.querySelector('.tg-custom-btn svg') : null;
+
+            if (tgSvg) tgSvg.classList.add('tg-fly-away');
+
             const info = await showAccountView();
 
             cacheSession(info);
@@ -783,6 +787,16 @@ const AuthApp = (() => {
             }
 
         } catch (err) {
+
+            const tgSvgErr = tgBtn ? tgBtn.querySelector('.tg-custom-btn svg') : null;
+
+            if (tgSvgErr) {
+
+                tgSvgErr.classList.add('tg-crash');
+
+                setTimeout(() => tgSvgErr.classList.remove('tg-crash'), 1000);
+
+            }
 
             if (err.needsInvite) {
 

@@ -254,6 +254,64 @@
 
         }
 
+        @keyframes tg-glow-pulse {
+
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(84,169,235,0.3)); }
+
+            50% { filter: drop-shadow(0 0 12px rgba(84,169,235,0.7)) drop-shadow(0 0 4px rgba(84,169,235,0.4)); }
+
+        }
+
+        .tg-custom-btn svg {
+
+            animation: tg-glow-pulse 3s ease-in-out infinite;
+
+        }
+
+        @keyframes tg-fly {
+
+            0% { transform: translate(0,0) rotate(0) scale(1); opacity: 1; }
+
+            30% { transform: translate(30px,-15px) rotate(-8deg) scale(1.1); opacity: 1; }
+
+            100% { transform: translate(250px,-100px) rotate(25deg) scale(0); opacity: 0; }
+
+        }
+
+        .tg-fly-away {
+
+            animation: tg-fly 0.7s cubic-bezier(0.4,0,0.2,1) forwards !important;
+
+        }
+
+        @keyframes tg-crash {
+
+            0% { transform: translate(0,0) rotate(0); opacity: 1; }
+
+            10% { transform: translate(-4px,0) rotate(-2deg); }
+
+            20% { transform: translate(4px,0) rotate(2deg); }
+
+            30% { transform: translate(-4px,0) rotate(-2deg); }
+
+            40% { transform: translate(4px,0) rotate(0); }
+
+            50% { transform: translate(0,0) rotate(30deg); opacity: 1; }
+
+            70% { transform: translate(0,20px) rotate(90deg); opacity: 0.6; }
+
+            100% { transform: translate(0,60px) rotate(120deg); opacity: 0; }
+
+        }
+
+        .tg-crash {
+
+            animation: tg-crash 0.8s cubic-bezier(0.4,0,0.8,0.4) forwards !important;
+
+            color: #ef4444 !important;
+
+        }
+
         .tg-widget-state {
 
             width: 100%;
@@ -1352,7 +1410,53 @@
 
                         loadingEl.remove();
 
-                        if (customBtn) customBtn.style.display = '';
+                        if (customBtn) {
+
+                            customBtn.style.display = '';
+
+                            var span = customBtn.querySelector('span');
+
+                            if (span) {
+
+                                var target = span.textContent;
+
+                                var glyphs = '░▒▓█▀▄▌▐│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬';
+
+                                var len = target.length;
+
+                                var t0 = performance.now();
+
+                                var dur = 600;
+
+                                span.textContent = '';
+
+                                (function step(now) {
+
+                                    var t = Math.min((now - t0) / dur, 1);
+
+                                    var reveal = Math.floor(t * len);
+
+                                    var out = '';
+
+                                    for (var i = 0; i < len; i++) {
+
+                                        if (i < reveal) out += target[i];
+
+                                        else if (target[i] === ' ') out += ' ';
+
+                                        else out += glyphs[Math.floor(Math.random() * glyphs.length)];
+
+                                    }
+
+                                    span.textContent = t < 1 ? out : target;
+
+                                    if (t < 1) requestAnimationFrame(step);
+
+                                })(performance.now());
+
+                            }
+
+                        }
 
                         window.clearInterval(widgetCheck);
 
