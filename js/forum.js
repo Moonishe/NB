@@ -1344,7 +1344,7 @@ const ForumModule = (() => {
 
 
 
-                    ? cleanText([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username, 50) || 'Аноним'
+                    ? cleanText((typeof safeDisplayName === 'function') ? safeDisplayName(authorInfo) : ([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username), 50) || 'Аноним'
 
 
 
@@ -1380,7 +1380,7 @@ const ForumModule = (() => {
 
 
 
-                    ? `<a href="${authorHref}" class="forum-username">${escapeHtml(authorInfo ? cleanText([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username, 50) || 'Аноним' : 'Удалённый пользователь')}</a>`
+                    ? `<a href="${authorHref}" class="forum-username">${escapeHtml(authorInfo ? cleanText((typeof safeDisplayName === 'function') ? safeDisplayName(authorInfo) : ([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username), 50) || 'Аноним' : 'Удалённый пользователь')}</a>`
 
 
 
@@ -2701,7 +2701,7 @@ const ForumModule = (() => {
 
 
 
-        const name = [profile.telegram_first_name, profile.telegram_last_name].filter(Boolean).join(' ') || profile.telegram_username || 'Аноним';
+        const name = (typeof safeDisplayName === 'function') ? safeDisplayName(profile) : ([profile.telegram_first_name, profile.telegram_last_name].filter(Boolean).join(' ') || profile.telegram_username || 'Аноним');
 
 
 

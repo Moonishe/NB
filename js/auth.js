@@ -6,6 +6,22 @@ const AuthApp = (() => {
 
     let authMode = 'login';
 
+    const _DANGEROUS_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/;
+
+    function safeDisplayName(info) {
+
+        if (!info) return 'User';
+
+        const raw = [info.telegram_first_name, info.telegram_last_name].filter(Boolean).join(' ').trim();
+
+        if (raw && !_DANGEROUS_RE.test(raw) && raw.replace(/\s/g, '').length > 0) return raw;
+
+        if (info.telegram_username) return info.telegram_username;
+
+        return info.display_name || 'User';
+
+    }
+
 
 
     function showError(id, msg) {
@@ -878,9 +894,7 @@ const AuthApp = (() => {
 
                 if (nameEl) {
 
-                    const parts = [info.telegram_first_name, info.telegram_last_name].filter(Boolean);
-
-                    nameEl.textContent = parts.length > 0 ? parts.join(' ') : info.display_name;
+                    nameEl.textContent = safeDisplayName(info);
 
                 }
 
@@ -968,7 +982,7 @@ const AuthApp = (() => {
 
                     const nameEl = document.getElementById('account-name');
 
-                    if (nameEl) nameEl.textContent = [devInfo.telegram_first_name, devInfo.telegram_last_name].filter(Boolean).join(' ') || devInfo.display_name;
+                    if (nameEl) nameEl.textContent = safeDisplayName(devInfo);
 
                     const usernameEl = document.getElementById('account-username');
 
@@ -1032,9 +1046,7 @@ const AuthApp = (() => {
 
         if (nameEl) {
 
-            const parts = [info.telegram_first_name, info.telegram_last_name].filter(Boolean);
-
-            nameEl.textContent = parts.length > 0 ? parts.join(' ') : info.display_name;
+            nameEl.textContent = safeDisplayName(info);
 
         }
 
@@ -1112,7 +1124,7 @@ const AuthApp = (() => {
 
         const nameEl = document.getElementById('account-name');
 
-        if (nameEl) nameEl.textContent = devInfo.telegram_first_name + ' ' + devInfo.telegram_last_name;
+        if (nameEl) nameEl.textContent = safeDisplayName(devInfo);
 
         const usernameEl = document.getElementById('account-username');
 
@@ -1266,9 +1278,11 @@ const AuthApp = (() => {
 
 
 
-    return { init };
+    return { init, safeDisplayName };
 
 })();
+
+window.safeDisplayName = AuthApp.safeDisplayName;
 
 
 

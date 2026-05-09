@@ -1,4 +1,21 @@
 (function() {
+
+    window.safeDisplayName = window.safeDisplayName || function(info) {
+
+        if (!info) return 'User';
+
+        const _DANGEROUS_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/;
+
+        const raw = [info.telegram_first_name, info.telegram_last_name].filter(Boolean).join(' ').trim();
+
+        if (raw && !_DANGEROUS_RE.test(raw) && raw.replace(/\s/g, '').length > 0) return raw;
+
+        if (info.telegram_username) return info.telegram_username;
+
+        return info.display_name || 'User';
+
+    };
+
     const page = location.pathname.split('/').pop() || 'index.html';
     const isIndex = page === 'index.html' || page === '' || page === '/';
     const isForum = page === 'forum.html' || page === 'forum';
@@ -362,7 +379,7 @@
             if (devRaw) {
                 try {
                     const dev = JSON.parse(devRaw);
-                    const name = [dev.telegram_first_name, dev.telegram_last_name].filter(Boolean).join(' ') || dev.telegram_username || dev.display_name || 'Dev';
+                    const name = safeDisplayName(dev) || 'Dev';
                     showUserMenu(name, dev.role);
                     return;
                 } catch {}
@@ -375,7 +392,7 @@
             if (!session) return;
             const info = await Api.getUserDisplayName();
             if (!info) return;
-            const name = [info.telegram_first_name, info.telegram_last_name].filter(Boolean).join(' ') || info.telegram_username || info.display_name || 'User';
+            const name = safeDisplayName(info) || 'User';
             showUserMenu(name, info.role);
 
             if (info.telegram_photo_url) {

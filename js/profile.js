@@ -2028,11 +2028,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const parts = [userInfo.telegram_first_name, userInfo.telegram_last_name].filter(Boolean);
-
-
-
-        const displayName = parts.length > 0 ? parts.join(' ') : (userInfo.telegram_username || userInfo.display_name);
+        const displayName = (typeof safeDisplayName === 'function') ? safeDisplayName(userInfo) : ([userInfo.telegram_first_name, userInfo.telegram_last_name].filter(Boolean).join(' ') || userInfo.telegram_username || userInfo.display_name);
 
 
 
@@ -2648,7 +2644,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const rawName = [cleanText(profileData.telegram_first_name, 50), cleanText(profileData.telegram_last_name, 50)].filter(Boolean).join(' ')
+        const rawName = (typeof safeDisplayName === 'function') ? safeDisplayName(profileData) : [cleanText(profileData.telegram_first_name, 50), cleanText(profileData.telegram_last_name, 50)].filter(Boolean).join(' ')
 
 
 
