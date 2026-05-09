@@ -22,6 +22,7 @@ supabase/.branches/
 .vscode/
 .idea/
 .DS_Store
+.kiro/
 
 # Build artifacts
 dist/
