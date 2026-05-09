@@ -276,6 +276,34 @@
 
             animation: tg-glow-pulse 3s ease-in-out infinite;
 
+            transition: opacity 0.4s ease;
+
+        }
+
+        .tg-btn-loading svg {
+
+            animation: tg-plane-spin 2s linear infinite !important;
+
+            filter: none !important;
+
+            opacity: 0.5;
+
+        }
+
+        .tg-btn-loading span {
+
+            opacity: 0.3;
+
+            transition: opacity 0.4s ease;
+
+        }
+
+        @keyframes tg-plane-spin {
+
+            0% { transform: rotate(0deg); }
+
+            100% { transform: rotate(360deg); }
+
         }
 
         @keyframes tg-fly {
@@ -1376,15 +1404,7 @@
 
             if (botUsername) {
 
-                var loadingEl = document.createElement('div');
-
-                loadingEl.className = 'tg-widget-state';
-
-                loadingEl.innerHTML = telegramIcon + '<span>Загрузка Telegram</span>';
-
-                if (customBtn) customBtn.style.display = 'none';
-
-                container.appendChild(loadingEl);
+                if (customBtn) customBtn.classList.add('tg-btn-loading');
 
                 var newScript = document.createElement('script');
 
@@ -1404,7 +1424,9 @@
 
                 newScript.onerror = function() {
 
-                    loadingEl.innerHTML = telegramIcon + '<span>Telegram widget не загружен</span>';
+                    if (customBtn) customBtn.classList.remove('tg-btn-loading');
+
+                    showFallback('Telegram widget не загружен');
 
                 };
 
@@ -1418,11 +1440,9 @@
 
                     if (iframe) {
 
-                        loadingEl.remove();
-
                         if (customBtn) {
 
-                            customBtn.style.display = '';
+                            customBtn.classList.remove('tg-btn-loading');
 
                             var span = customBtn.querySelector('span');
 
@@ -1472,7 +1492,9 @@
 
                     } else if (--checksLeft <= 0) {
 
-                        loadingEl.innerHTML = telegramIcon + '<span>Telegram widget не отображается</span>';
+                        if (customBtn) customBtn.classList.remove('tg-btn-loading');
+
+                        showFallback('Telegram widget не отображается');
 
                         window.clearInterval(widgetCheck);
 
