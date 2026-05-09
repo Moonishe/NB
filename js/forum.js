@@ -406,7 +406,7 @@ const ForumModule = (() => {
 
 
 
-        const href = info.author_id ? `profile/${info.author_id}` : '#';
+        const href = (info.author_id && info.author_uid) ? `profile/${info.author_uid}` : (info.author_id ? `profile/${info.author_id}` : '#');
 
 
 
@@ -2789,7 +2789,7 @@ const ForumModule = (() => {
 
 
 
-            <a href="profile/${userId}" class="forum-popover-link">Открыть профиль</a>
+            <a href="profile/${profile.uid || userId}" class="forum-popover-link">Открыть профиль</a>
 
 
 

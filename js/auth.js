@@ -1059,6 +1059,9 @@ const AuthApp = (() => {
 
                 }
 
+                const profileLink = document.getElementById('account-profile-link');
+                if (profileLink && info.uid) profileLink.href = 'profile/' + info.uid;
+
                 runAccountDecode();
 
             }
@@ -1193,11 +1196,11 @@ const AuthApp = (() => {
 
         }
 
+        const profileLink = document.getElementById('account-profile-link');
+        if (profileLink && info.uid) profileLink.href = 'profile/' + info.uid;
+
         runAccountDecode();
-
     }
-
-
 
     function activateDevLogin() {
 

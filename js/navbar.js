@@ -268,7 +268,7 @@
                 <div class="nav-user-menu-ascii-border"></div>
                 <p id="nav-user-display" class="nav-user-menu-name"></p>
                 <div class="nav-user-menu-divider"></div>
-                <a href="profile" class="nav-user-menu-item" id="nav-dropdown-profile">
+                <a href="profile/${info.uid || ''}" class="nav-user-menu-item" id="nav-dropdown-profile">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="nav-item-text" data-text="Аккаунт"></span>
                 </a>

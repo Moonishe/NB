@@ -906,6 +906,14 @@ const Api = (() => {
         return data && data[0] ? data[0] : null;
     }
 
+    async function getPublicProfileByUid(uid) {
+        const client = getClient();
+        if (!client) throw new Error('Supabase not configured');
+        const { data, error } = await client.rpc('get_public_profile_by_uid', { p_uid: uid });
+        if (error) throw error;
+        return data && data[0] ? data[0] : null;
+    }
+
     async function updateProfileBio(bio) {
         const client = getClient();
         if (!client) throw new Error('Supabase not configured');
@@ -1171,7 +1179,7 @@ const Api = (() => {
         createForumThread, createForumPost, updateForumPost, updateForumThread,
         modPinThread, modLockThread, modDeleteThread, modDeletePost,
         modBanUser, modMuteUser, modUnbanUser, modUnmuteUser,
-        getUserModActions, getPublicProfile, updateProfileBio,
+        getUserModActions, getPublicProfile, getPublicProfileByUid, updateProfileBio,
         adminAssignModerator, adminRemoveModerator, adminGetModerators,
         togglePostReaction,
         getMyNotifications, getUnreadCount, markNotificationsRead,

@@ -14,6 +14,10 @@ const ProfileModule = (() => {
 
 
 
+    let profileUserUid = null;
+
+
+
     let isOwnProfile = false;
 
 
@@ -1652,7 +1656,17 @@ function decodeInviteAscii(code) {
 
 
         const pathParts = window.location.pathname.split('/').filter(Boolean);
-        const requestedId = pathParts[pathParts.length - 1] === 'profile' ? null : pathParts[pathParts.length - 1];
+        const lastPart = pathParts[pathParts.length - 1];
+        const isProfilePage = lastPart === 'profile' || pathParts[pathParts.length - 2] === 'profile';
+        let requestedId = null;
+        let requestedUid = null;
+        if (isProfilePage && lastPart !== 'profile') {
+            if (/^\d+$/.test(lastPart)) {
+                requestedUid = parseInt(lastPart, 10);
+            } else {
+                requestedId = lastPart;
+            }
+        }
 
 
 
@@ -1660,7 +1674,20 @@ function decodeInviteAscii(code) {
 
 
 
-        if (requestedId) {
+        if (requestedUid) {
+
+
+
+            profileUserId = null;
+            profileUserUid = requestedUid;
+
+
+
+            isOwnProfile = userInfo && userInfo.uid === requestedUid;
+
+
+
+        } else if (requestedId) {
 
 
 
@@ -1968,7 +1995,7 @@ function decodeInviteAscii(code) {
 
 
 
-        if (!profileUserId) {
+        if (!profileUserId && !profileUserUid) {
 
 
 
@@ -2132,7 +2159,9 @@ function decodeInviteAscii(code) {
 
 
 
-            profileData = await Api.getPublicProfile(profileUserId);
+            profileData = await (profileUserUid
+                ? Api.getPublicProfileByUid(profileUserUid)
+                : Api.getPublicProfile(profileUserId));
 
 
 
@@ -2149,6 +2178,10 @@ function decodeInviteAscii(code) {
 
 
             }
+
+
+
+            if (profileUserUid && profileData.user_id) profileUserId = profileData.user_id;
 
 
 
