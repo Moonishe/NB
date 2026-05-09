@@ -602,7 +602,7 @@ const AuthApp = (() => {
 
         if (btnTextEl) {
 
-            const btnLabel = isRegister ? 'Регистрация через Telegram' : 'Войти через Telegram';
+            const btnLabel = isRegister ? 'Регистрация' : 'Войти';
 
             if (animate) decodeText(btnTextEl, btnLabel);
 
