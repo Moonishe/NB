@@ -406,7 +406,7 @@ const ForumModule = (() => {
 
 
 
-        const href = info.author_id ? `profile.html?id=${info.author_id}` : '#';
+        const href = info.author_id ? `profile?id=${info.author_id}` : '#';
 
 
 
@@ -1332,7 +1332,7 @@ const ForumModule = (() => {
 
 
 
-            const authorHref = thread.author_id ? `profile.html?id=${thread.author_id}` : '#';
+            const authorHref = thread.author_id ? `profile?id=${thread.author_id}` : '#';
 
 
 

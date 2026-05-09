@@ -1,9 +1,9 @@
 (function() {
     const page = location.pathname.split('/').pop() || 'index.html';
     const isIndex = page === 'index.html' || page === '' || page === '/';
-    const isForum = page === 'forum.html';
+    const isForum = page === 'forum.html' || page === 'forum';
     const aboutHref = isIndex ? '#about' : './#about';
-    const forumHref = 'forum.html';
+    const forumHref = 'forum';
     const logoHref = isIndex ? '#' : './';
     const isLocal = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 
@@ -19,9 +19,9 @@
     }
 
     const lbItems = [
-        { href: 'svg.html',    label: '&lt;/&gt; SVG' },
-        { href: 'voxel.html',  label: '[▦] Voxel' },
-        { href: 'shader.html', label: '{◈} Shader' },
+        { href: 'svg',    label: '&lt;/&gt; SVG' },
+        { href: 'voxel',  label: '[▦] Voxel' },
+        { href: 'shader', label: '{◈} Shader' },
     ];
 
     function lbLinkClass(href) {
@@ -547,7 +547,7 @@
             }
             if (n.snippet) text += `<span class="notif-snippet">${esc(n.snippet.slice(0, 60))}</span>`;
             const time = formatNotifTime(n.created_at);
-            const href = n.ref_thread_id ? `forum.html#thread/${encodeURIComponent(String(n.ref_thread_id))}` : '#';
+            const href = n.ref_thread_id ? `forum#thread/${encodeURIComponent(String(n.ref_thread_id))}` : '#';
             html += `<a href="${href}" class="notif-item${unread}">
                 ${avatarHtml}
                 <div class="notif-body">

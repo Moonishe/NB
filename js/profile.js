@@ -4473,7 +4473,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    const href = `forum.html#thread/${t.id}`;
+                    const href = `forum#thread/${t.id}`;
 
 
 
@@ -5197,15 +5197,15 @@ function decodeInviteAscii(code) {
 
 
 
-                if (type === 'thread') { icon = '📝'; actionText = 'Создал тред'; href = `forum.html#thread/${item.thread_id}`; }
+                if (type === 'thread') { icon = '📝'; actionText = 'Создал тред'; href = `forum#thread/${item.thread_id}`; }
 
 
 
-                else if (type === 'post') { icon = '💬'; actionText = 'Ответил в треде'; href = `forum.html#thread/${item.thread_id}`; }
+                else if (type === 'post') { icon = '💬'; actionText = 'Ответил в треде'; href = `forum#thread/${item.thread_id}`; }
 
 
 
-                else if (type === 'reaction') { icon = item.emoji || '👍'; actionText = 'Поставил реакцию'; href = `forum.html#thread/${item.thread_id}`; }
+                else if (type === 'reaction') { icon = item.emoji || '👍'; actionText = 'Поставил реакцию'; href = `forum#thread/${item.thread_id}`; }
 
 
 
