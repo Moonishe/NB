@@ -9,7 +9,7 @@ const Api = (() => {
         sb = supabase.createClient(url, key, {
             auth: {
                 storageKey: 'neurobench-auth',
-                storage: window.sessionStorage,
+                storage: window.localStorage,
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: false
@@ -31,7 +31,7 @@ const Api = (() => {
         sb = supabase.createClient(url, key, {
             auth: {
                 storageKey: 'neurobench-admin-auth',
-                storage: window.sessionStorage,
+                storage: window.localStorage,
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: false

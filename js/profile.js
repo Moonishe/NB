@@ -5406,7 +5406,7 @@ function decodeInviteAscii(code) {
 
 
 
-                <a href="forum" class="forum-cancel-btn">&larr; На форум</a>
+                <a href="forum" class="btn-terminal block text-center mt-4">На форум</a>
 
 
 

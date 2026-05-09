@@ -837,7 +837,7 @@ const AuthApp = (() => {
 
         try {
 
-            sessionStorage.setItem('nb_auth_cache', JSON.stringify({ ts: Date.now(), info: info }));
+            localStorage.setItem('nb_auth_cache', JSON.stringify({ ts: Date.now(), info: info }));
 
         } catch (e) { /* quota */ }
 
@@ -849,15 +849,13 @@ const AuthApp = (() => {
 
         try {
 
-            localStorage.removeItem('nb_auth_cache');
-
-            const raw = sessionStorage.getItem('nb_auth_cache');
+            const raw = localStorage.getItem('nb_auth_cache');
 
             if (!raw) return null;
 
             const cache = JSON.parse(raw);
 
-            if (Date.now() - cache.ts > 3600000) { sessionStorage.removeItem('nb_auth_cache'); return null; }
+            if (Date.now() - cache.ts > 3600000) { localStorage.removeItem('nb_auth_cache'); return null; }
 
             return cache.info;
 
@@ -1380,8 +1378,6 @@ devBtn.addEventListener('click', activateDevLogin);
             localStorage.removeItem('nb_dev_session');
 
             localStorage.removeItem('nb_auth_cache');
-
-            sessionStorage.removeItem('nb_auth_cache');
 
             await Api.logout();
 
