@@ -454,6 +454,18 @@ const AuthApp = (() => {
 
         requestAnimationFrame(step);
 
+        setTimeout(() => {
+
+            if (el.isConnected && el._decodeToken === token) {
+
+                el.textContent = target;
+
+                el._decodeRunning = false;
+
+            }
+
+        }, duration + 150);
+
     }
 
 

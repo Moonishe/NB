@@ -1492,48 +1492,6 @@
 
                             customBtn.classList.remove('tg-btn-loading');
 
-                            var span = customBtn.querySelector('span');
-
-                            if (span) {
-
-                                var target = span.textContent;
-
-                                var glyphs = '░▒▓█▀▄▌▐│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬';
-
-                                var len = target.length;
-
-                                var t0 = performance.now();
-
-                                var dur = 600;
-
-                                span.textContent = '';
-
-                                (function step(now) {
-
-                                    var t = Math.min((now - t0) / dur, 1);
-
-                                    var reveal = Math.floor(t * len);
-
-                                    var out = '';
-
-                                    for (var i = 0; i < len; i++) {
-
-                                        if (i < reveal) out += target[i];
-
-                                        else if (target[i] === ' ') out += ' ';
-
-                                        else out += glyphs[Math.floor(Math.random() * glyphs.length)];
-
-                                    }
-
-                                    span.textContent = t < 1 ? out : target;
-
-                                    if (t < 1) requestAnimationFrame(step);
-
-                                })(performance.now());
-
-                            }
-
                         }
 
                         window.clearInterval(widgetCheck);
@@ -1560,7 +1518,7 @@
 
     </script>
 
-    <script src="js/auth.js?v=47"></script>
+    <script src="js/auth.js?v=48"></script>
 
     <script src="js/ascii-bg.js?v=1"></script>
 
