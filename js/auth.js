@@ -583,6 +583,90 @@ const AuthApp = (() => {
 
 
 
+    let _inviteDecodeRaf = 0;
+
+    function decodeInviteInput(input, target) {
+
+        target = target.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+
+        if (!target) return;
+
+        if (_inviteDecodeRaf) { cancelAnimationFrame(_inviteDecodeRaf); _inviteDecodeRaf = 0; }
+
+        input.value = '';
+
+        input.classList.add('decoding');
+
+        input.classList.remove('decoded');
+
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (reduceMotion) {
+
+            input.value = target;
+
+            input.classList.remove('decoding');
+
+            input.classList.add('decoded');
+
+            setTimeout(() => input.classList.remove('decoded'), 600);
+
+            return;
+
+        }
+
+        const chars = 'ABCDEFGHKNOPRSTUVXYZ023456789░▒▓█';
+
+        const t0 = performance.now();
+
+        const duration = Math.min(900, Math.max(500, target.length * 80));
+
+        function rg() { return chars[Math.floor(Math.random() * chars.length)]; }
+
+        function step(now) {
+
+            const t = Math.min((now - t0) / duration, 1);
+
+            const sweep = Math.pow(t, 1.4) * (target.length + 2);
+
+            let out = '';
+
+            for (let i = 0; i < target.length; i++) {
+
+                if (i < sweep - 1 || t >= 1) out += target[i];
+
+                else if (i < sweep + 1 && Math.random() < t * 0.4) out += target[i];
+
+                else out += rg();
+
+            }
+
+            input.value = out;
+
+            if (t < 1) _inviteDecodeRaf = requestAnimationFrame(step);
+
+            else {
+
+                input.value = target;
+
+                input.classList.remove('decoding');
+
+                input.classList.add('decoded');
+
+                _inviteDecodeRaf = 0;
+
+                setTimeout(() => input.classList.remove('decoded'), 600);
+
+            }
+
+        }
+
+        _inviteDecodeRaf = requestAnimationFrame(step);
+
+    }
+
+
+
     function setAuthMode(mode, animate = true) {
 
         authMode = mode === 'register' ? 'register' : 'login';
@@ -664,6 +748,10 @@ const AuthApp = (() => {
             const inviteInput = document.getElementById('invite-code');
 
             if (inviteInput) inviteInput.value = '';
+
+            const inviteSection = document.getElementById('invite-section');
+
+            if (inviteSection) inviteSection.classList.remove('ring-1', 'ring-red-400/50');
 
         }
 
@@ -1256,6 +1344,16 @@ devBtn.addEventListener('click', activateDevLogin);
                 const inviteSection = document.getElementById('invite-section');
 
                 if (inviteSection) inviteSection.classList.remove('ring-1', 'ring-red-400/50');
+
+            });
+
+            inviteInput.addEventListener('paste', (e) => {
+
+                e.preventDefault();
+
+                const pasted = (e.clipboardData || window.clipboardData).getData('text');
+
+                if (pasted) decodeInviteInput(inviteInput, pasted);
 
             });
 

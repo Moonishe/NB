@@ -155,7 +155,7 @@
 
             width: 100%;
 
-            min-height: 44px;
+            height: 44px;
 
         }
 
@@ -1116,6 +1116,38 @@
             border-color: rgba(255,255,255,0.42);
 
             box-shadow: none;
+
+        }
+
+        .invite-input-terminal.decoding {
+
+            border-color: rgba(74,222,128,0.5);
+
+            box-shadow: 0 0 0 3px rgba(74,222,128,0.08), 0 0 24px rgba(74,222,128,0.12);
+
+            color: rgba(74,222,128,0.85);
+
+            caret-color: transparent;
+
+        }
+
+        .invite-input-terminal.decoded {
+
+            border-color: rgba(74,222,128,0.35);
+
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.06), 0 0 16px rgba(74,222,128,0.08);
+
+            color: rgba(74,222,128,0.7);
+
+            animation: invite-decode-settle 0.6s ease-out forwards;
+
+        }
+
+        @keyframes invite-decode-settle {
+
+            0% { color: rgba(74,222,128,0.85); border-color: rgba(74,222,128,0.5); box-shadow: 0 0 0 3px rgba(74,222,128,0.08), 0 0 24px rgba(74,222,128,0.12); }
+
+            100% { color: #fff; border-color: rgba(255,255,255,0.35); box-shadow: none; }
 
         }
 
