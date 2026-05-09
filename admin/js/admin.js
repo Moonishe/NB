@@ -1814,7 +1814,8 @@ const AdminApp = (() => {
         switchSection, openAddPrompt: showAddPromptForm, openAddInvite: () => document.getElementById('add-invite-btn')?.click(),
         pinThread, deleteThread, unban, doBan,
         doAnnouncement, deleteAnnouncement, editAnnouncement: () => toast('Редактирование в разработке'),
-        doCreateAchievement, grantAchById
+        doCreateAchievement, grantAchById,
+        onTurnstile, onTurnstileExpired
     };
 })();
 

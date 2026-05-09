@@ -1310,7 +1310,7 @@ devBtn.addEventListener('click', activateDevLogin);
 
 
 
-    return { init, safeDisplayName };
+    return { init, safeDisplayName, onTurnstile, onTurnstileExpired };
 
 })();
 
