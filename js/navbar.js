@@ -53,7 +53,7 @@
                     </div>
                 </div>
                 <a href="${forumHref}" class="nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold ${isForum ? 'opacity-100' : 'opacity-30 hover:opacity-100'} transition-opacity">Форум</a>
-                <a href="register.html" id="nav-auth-link" class="nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity" style="${hasSession ? 'display:none' : ''}">Войти</a>
+                <a href="register" id="nav-auth-link" class="nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity" style="${hasSession ? 'display:none' : ''}">Войти</a>
             </div>
             <div id="nav-actions" class="flex items-center gap-2">
                 <div id="nav-notif-wrap" class="${hasSession ? 'relative' : 'hidden relative'}">
@@ -82,7 +82,7 @@
                 </div>
             </div>
             <a href="${forumHref}" class="mobile-nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold ${isForum ? 'opacity-100' : 'opacity-30 hover:opacity-100'} transition-opacity block py-2">Форум</a>
-            <a href="register.html" id="mobile-nav-auth-link" class="mobile-nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity block py-2" style="${hasSession ? 'display:none' : ''}">Войти</a>
+            <a href="register" id="mobile-nav-auth-link" class="mobile-nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity block py-2" style="${hasSession ? 'display:none' : ''}">Войти</a>
         </div>
     </nav>`;
 
@@ -237,7 +237,7 @@
                 <div class="nav-user-menu-ascii-border"></div>
                 <p id="nav-user-display" class="nav-user-menu-name"></p>
                 <div class="nav-user-menu-divider"></div>
-                <a href="profile.html" class="nav-user-menu-item" id="nav-dropdown-profile">
+                <a href="profile" class="nav-user-menu-item" id="nav-dropdown-profile">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="nav-item-text" data-text="Аккаунт"></span>
                 </a>

@@ -202,7 +202,7 @@ const ForumModule = (() => {
 
 
 
-            if (uid) return `<a href="profile.html?id=${uid}" class="forum-mention">@${username}</a>`;
+            if (uid) return `<a href="profile?id=${uid}" class="forum-mention">@${username}</a>`;
 
 
 
@@ -1536,7 +1536,7 @@ const ForumModule = (() => {
 
 
 
-                    ? '<div class="forum-login-prompt"><a href="register.html">Войдите</a> чтобы отвечать в тредах</div>'
+                    ? '<div class="forum-login-prompt"><a href="register">Войдите</a> чтобы отвечать в тредах</div>'
 
 
 
@@ -2789,7 +2789,7 @@ const ForumModule = (() => {
 
 
 
-            <a href="profile.html?id=${userId}" class="forum-popover-link">Открыть профиль</a>
+            <a href="profile?id=${userId}" class="forum-popover-link">Открыть профиль</a>
 
 
 
@@ -3597,7 +3597,7 @@ const ForumModule = (() => {
 
 
 
-                <div class="forum-empty">${!userInfo ? '<a href="register.html">Войдите</a> чтобы создавать треды' : 'У вас нет прав для создания тредов'}</div>
+                <div class="forum-empty">${!userInfo ? '<a href="register">Войдите</a> чтобы создавать треды' : 'У вас нет прав для создания тредов'}</div>
 
 
 

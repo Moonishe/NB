@@ -5401,7 +5401,7 @@ function decodeInviteAscii(code) {
 
 
 
-                ${!userInfo ? '<a href="register.html">Войдите</a> чтобы просмотреть профиль' : 'Профиль не найден'}
+                ${!userInfo ? '<a href="register">Войдите</a> чтобы просмотреть профиль' : 'Профиль не найден'}
 
 
 
@@ -5413,7 +5413,7 @@ function decodeInviteAscii(code) {
 
 
 
-                <a href="forum.html" class="forum-cancel-btn">&larr; На форум</a>
+                <a href="forum" class="forum-cancel-btn">&larr; На форум</a>
 
 
 
