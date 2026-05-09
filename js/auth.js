@@ -598,6 +598,18 @@ const AuthApp = (() => {
 
         }
 
+        const btnTextEl = document.getElementById('tg-custom-btn-text');
+
+        if (btnTextEl) {
+
+            const btnLabel = isRegister ? 'Регистрация через Telegram' : 'Войти через Telegram';
+
+            if (animate) decodeText(btnTextEl, btnLabel);
+
+            else btnTextEl.textContent = btnLabel;
+
+        }
+
         hideError('auth-error');
 
         if (!isRegister) {
