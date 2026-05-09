@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "args": ["/c", "npx", "-y", "chrome-devtools-mcp@latest"],
+      "command": "cmd"
+    },
+    "context7": {
+      "disabled": true
+    },
+    "duckduckgo-search": {
+      "args": ["/c", "uvx", "duckduckgo-mcp-server"],
+      "command": "cmd",
+      "env": {
+        "DDG_REGION": "wt-wt",
+        "DDG_SAFE_SEARCH": "MODERATE"
+      }
+    },
+    "fetch": {
+      "args": ["/c", "uvx", "mcp-server-fetch"],
+      "command": "cmd"
+    },
+    "filesystem": {
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\My\\CascadeProjects"],
+      "command": "cmd"
+    },
+    "github": {
+      "disabled": true
+    },
+    "memory": {
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-memory"],
+      "command": "cmd",
+      "env": {
+        "MEMORY_FILE_PATH": "C:\\Users\\My\\.codeium\\windsurf\\memory.json"
+      }
+    },
+    "playwright": {
+      "args": ["/c", "npx", "-y", "@playwright/mcp@latest"],
+      "command": "cmd"
+    },
+    "sequential-thinking": {
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "command": "cmd",
+      "disabled": true
+    },
+    "shadcn": {
+      "args": ["/c", "npx", "-y", "shadcn@latest", "mcp"],
+      "command": "cmd"
+    },
+    "storybook": {
+      "disabled": true,
+      "serverUrl": "http://localhost:6006/mcp"
+    }
+  }
+}

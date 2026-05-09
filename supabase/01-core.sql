@@ -353,64 +353,10 @@ BEGIN
 END;
 $$;
 
--- 14. Enable pg_net extension for Turnstile verification
-CREATE EXTENSION IF NOT EXISTS pg_net SCHEMA extensions;
-
--- 15. RPC: Verify Cloudflare Turnstile token server-side
--- IMPORTANT: Replace 'YOUR_TURNSTILE_SECRET_KEY' with your actual secret key
--- The function source is NOT readable by anon users — only database admins can see it
-DROP FUNCTION IF EXISTS public.verify_turnstile(TEXT);
-CREATE OR REPLACE FUNCTION public.verify_turnstile(p_token TEXT)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, extensions
-AS $$
-DECLARE
-    req_id bigint;
-    response_body text;
-    success_val boolean;
-    attempts integer := 0;
-BEGIN
-    IF p_token IS NULL OR p_token = '' THEN
-        RETURN false;
-    END IF;
-
-    SELECT INTO req_id extensions.net.http_post(
-        url := 'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-        body := json_build_object(
-            'secret', 'YOUR_TURNSTILE_SECRET_KEY',
-            'response', p_token
-        )::text,
-        content_type := 'application/json'
-    );
-
-    LOOP
-        attempts := attempts + 1;
-        IF attempts > 30 THEN
-            RETURN false;
-        END IF;
-
-        SELECT t.body INTO response_body
-        FROM extensions.net._http_response t
-        WHERE t.id = req_id;
-
-        IF response_body IS NOT NULL THEN
-            EXIT;
-        END IF;
-
-        PERFORM pg_sleep(0.15);
-    END LOOP;
-
-    IF response_body IS NULL THEN
-        RETURN false;
-    END IF;
-
-    SELECT INTO success_val (response_body::json->>'success')::boolean;
-    RETURN COALESCE(success_val, false);
-END;
-$$;
-
+-- 14. Turnstile verification — moved to Edge Function
+-- See supabase/functions/turnstile-verify/index.ts
+-- Deploy: supabase secrets set TURNSTILE_SECRET_KEY=your-cloudflare-secret
+-- Call: POST https://<project>.supabase.co/functions/v1/turnstile-verify { token: "..." }
 
 -- --- migration_telegram_auth.sql ---
 
