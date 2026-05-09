@@ -2,9 +2,9 @@
     const page = location.pathname.split('/').pop() || 'index.html';
     const isIndex = page === 'index.html' || page === '' || page === '/';
     const isForum = page === 'forum.html';
-    const aboutHref = isIndex ? '#about' : 'index.html#about';
+    const aboutHref = isIndex ? '#about' : './#about';
     const forumHref = 'forum.html';
-    const logoHref = isIndex ? '#' : 'index.html';
+    const logoHref = isIndex ? '#' : './';
     const isLocal = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 
     function getSupabaseAuthStorageKey() {
@@ -395,9 +395,9 @@
         if (!btn) return;
         localStorage.removeItem('nb_dev_session');
         if (typeof Api !== 'undefined' && Api.logout) {
-            Api.logout().then(() => { location.href = 'index.html'; });
+            Api.logout().then(() => { location.href = './'; });
         } else {
-            location.href = 'index.html';
+            location.href = './';
         }
     });
 
