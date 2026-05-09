@@ -241,6 +241,10 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span class="nav-item-text" data-text="Аккаунт"></span>
                 </a>
+                <a href="admin/index.html" class="nav-user-menu-item" id="nav-dropdown-admin" style="display:none">
+                    <span style="font-size:14px">👑</span>
+                    <span class="nav-item-text" data-text="Admin"></span>
+                </a>
                 <button id="nav-user-logout" class="nav-user-menu-item nav-user-menu-logout">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     <span class="nav-item-text" data-text="Выйти"></span>
@@ -338,13 +342,17 @@
         if (userBtn) userBtn.dataset.displayName = name;
     }
 
-    function showUserMenu(name) {
+    function showUserMenu(name, role) {
         if (authLink) authLink.classList.add('hidden');
         if (mobileAuthLink) mobileAuthLink.classList.add('hidden');
         if (userMenuWrap) userMenuWrap.classList.remove('hidden');
         const notifWrap = document.getElementById('nav-notif-wrap');
         if (notifWrap) notifWrap.classList.remove('hidden');
         setDisplayName(name);
+        if (role === 'admin') {
+            const adminLink = document.getElementById('nav-dropdown-admin');
+            if (adminLink) adminLink.style.display = '';
+        }
         initNotifications();
     }
 
@@ -355,7 +363,7 @@
                 try {
                     const dev = JSON.parse(devRaw);
                     const name = [dev.telegram_first_name, dev.telegram_last_name].filter(Boolean).join(' ') || dev.telegram_username || dev.display_name || 'Dev';
-                    showUserMenu(name);
+                    showUserMenu(name, dev.role);
                     return;
                 } catch {}
             }
@@ -368,7 +376,7 @@
             const info = await Api.getUserDisplayName();
             if (!info) return;
             const name = [info.telegram_first_name, info.telegram_last_name].filter(Boolean).join(' ') || info.telegram_username || info.display_name || 'User';
-            showUserMenu(name);
+            showUserMenu(name, info.role);
 
             if (info.telegram_photo_url) {
                 const photoEl = document.getElementById('nav-user-photo');

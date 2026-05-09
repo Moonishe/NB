@@ -34,7 +34,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin.css?v=2">
 </head>
 <body class="bg-black text-white antialiased min-h-screen font-mono">
 
@@ -69,7 +69,15 @@
 
         <div class="flex">
             <aside class="w-56 min-h-[calc(100vh-56px)] border-r border-border p-4 flex flex-col gap-2">
-                <button class="admin-nav-btn active" data-section="prompts">Промпты</button>
+                <button class="admin-nav-btn active" data-section="dashboard">Dashboard</button>
+                <button class="admin-nav-btn" data-section="live-logs">Live-логи</button>
+                <div class="border-t border-border my-2"></div>
+                <button class="admin-nav-btn" data-section="moderation">Модерация</button>
+                <button class="admin-nav-btn" data-section="bans">Бан-хаммер</button>
+                <button class="admin-nav-btn" data-section="announcements">Анонсы</button>
+                <div class="border-t border-border my-2"></div>
+                <button class="admin-nav-btn" data-section="achievements">Ачивки</button>
+                <button class="admin-nav-btn" data-section="prompts">Промпты</button>
                 <button class="admin-nav-btn" data-section="models">Настройки моделей</button>
                 <button class="admin-nav-btn" data-section="results">Результаты</button>
                 <button class="admin-nav-btn" data-section="stats">Статистика</button>
@@ -81,7 +89,83 @@
 
             <main class="flex-1 p-8 max-w-6xl">
 
-                <section id="section-prompts" class="admin-section">
+                <!-- ========== DASHBOARD ========== -->
+                <section id="section-dashboard" class="admin-section">
+                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">Dashboard</h2>
+                    <div id="dashboard-metrics" class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8"></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="matte-card p-6">
+                            <h3 class="text-xs uppercase tracking-widest opacity-30 mb-4">Последние события</h3>
+                            <div id="dashboard-events" class="flex flex-col gap-2 max-h-80 overflow-y-auto custom-scrollbar"></div>
+                        </div>
+                        <div class="matte-card p-6">
+                            <h3 class="text-xs uppercase tracking-widest opacity-30 mb-4">Быстрые действия</h3>
+                            <div class="flex flex-col gap-2">
+                                <button onclick="AdminApp.switchSection('prompts');AdminApp.openAddPrompt()" class="admin-quick-action">+ Добавить промпт</button>
+                                <button onclick="AdminApp.switchSection('invites');AdminApp.openAddInvite()" class="admin-quick-action">+ Сгенерировать инвайт</button>
+                                <button onclick="AdminApp.switchSection('announcements')" class="admin-quick-action">📢 Отправить анонс</button>
+                                <button onclick="AdminApp.switchSection('moderation')" class="admin-quick-action">🔍 Модерация форума</button>
+                                <a href="../forum" class="admin-quick-action text-center">Перейти на форум →</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== LIVE LOGS ========== -->
+                <section id="section-live-logs" class="admin-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny flex items-center gap-3">Live-логи <span id="live-indicator" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span></h2>
+                        <div class="flex gap-2">
+                            <button class="admin-log-filter active" data-log-filter="all">Все</button>
+                            <button class="admin-log-filter" data-log-filter="auth">Входы</button>
+                            <button class="admin-log-filter" data-log-filter="forum">Форум</button>
+                            <button class="admin-log-filter" data-log-filter="achievement">Ачивки</button>
+                        </div>
+                    </div>
+                    <div id="live-logs-console" class="bg-black/60 border border-border rounded-xl p-4 font-mono text-xs h-[60vh] overflow-y-auto custom-scrollbar">
+                        <div class="opacity-30">Ожидание событий...</div>
+                    </div>
+                </section>
+
+                <!-- ========== MODERATION ========== -->
+                <section id="section-moderation" class="admin-section hidden">
+                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">Модерация форума</h2>
+                    <div class="flex gap-2 mb-4">
+                        <button class="admin-mod-filter active" data-mod-filter="threads">Треды</button>
+                        <button class="admin-mod-filter" data-mod-filter="posts">Посты</button>
+                        <button class="admin-mod-filter" data-mod-filter="reports">Жалобы</button>
+                    </div>
+                    <div id="moderation-list" class="flex flex-col gap-3"></div>
+                </section>
+
+                <!-- ========== BAN HAMMER ========== -->
+                <section id="section-bans" class="admin-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny flex items-center gap-3">Бан-хаммер 🔨</h2>
+                        <button id="add-ban-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Забанить</button>
+                    </div>
+                    <div id="bans-list" class="flex flex-col gap-3"></div>
+                </section>
+
+                <!-- ========== ANNOUNCEMENTS ========== -->
+                <section id="section-announcements" class="admin-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Анонсы</h2>
+                        <button id="add-announcement-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Новый анонс</button>
+                    </div>
+                    <div id="announcements-list" class="flex flex-col gap-3"></div>
+                </section>
+
+                <!-- ========== ACHIEVEMENTS ========== -->
+                <section id="section-achievements" class="admin-section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Управление ачивками</h2>
+                        <button id="add-achievement-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Новая ачивка</button>
+                    </div>
+                    <div id="achievements-list" class="flex flex-col gap-3"></div>
+                </section>
+
+                <section id="section-prompts" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Промпты</h2>
                         <button id="add-prompt-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Добавить</button>
@@ -187,7 +271,7 @@
     </div>
 
     <script src="../js/config.js"></script>
-    <script src="../js/api.js?v=11"></script>
-    <script src="js/admin.js"></script>
+    <script src="../js/api.js?v=12"></script>
+    <script src="js/admin.js?v=2"></script>
 </body>
 </html>

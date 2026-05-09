@@ -169,3 +169,230 @@ select option {
     background: rgba(255,60,60,0.3);
     color: #fff;
 }
+
+/* ========== DASHBOARD ========== */
+.admin-metric-card {
+    background: #0c0c0c;
+    border: 1px solid #161616;
+    border-radius: 20px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+.admin-metric-card:hover {
+    border-color: rgba(255,255,255,0.2);
+}
+.admin-metric-value {
+    font-family: 'Geist Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+}
+.admin-metric-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.3);
+    margin-top: 4px;
+}
+.admin-quick-action {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    text-align: left;
+}
+.admin-quick-action:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.05);
+}
+
+/* ========== LIVE LOGS ========== */
+.admin-log-filter {
+    padding: 4px 12px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: rgba(255,255,255,0.35);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+.admin-log-filter:hover {
+    color: rgba(255,255,255,0.7);
+    border-color: rgba(255,255,255,0.3);
+}
+.admin-log-filter.active {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border-color: rgba(255,255,255,0.3);
+}
+.log-entry {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    line-height: 1.6;
+}
+.log-time {
+    color: rgba(255,255,255,0.2);
+}
+.log-type-auth { color: #60a5fa; }
+.log-type-forum { color: #fbbf24; }
+.log-type-achievement { color: #a78bfa; }
+.log-type-ban { color: #f87171; }
+.log-type-system { color: rgba(255,255,255,0.4); }
+
+/* ========== MODERATION ========== */
+.admin-mod-filter {
+    padding: 6px 16px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: rgba(255,255,255,0.35);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+.admin-mod-filter:hover {
+    color: rgba(255,255,255,0.7);
+    border-color: rgba(255,255,255,0.4);
+}
+.admin-mod-filter.active {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border-color: rgba(255,255,255,0.4);
+}
+.mod-thread-card, .mod-post-card, .mod-report-card {
+    border: 1px solid #161616;
+    background: #0c0c0c;
+    padding: 16px 20px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+    transition: all 0.3s ease;
+    border-radius: 20px;
+}
+.mod-thread-card:hover, .mod-post-card:hover, .mod-report-card:hover {
+    border-color: rgba(255,255,255,0.2);
+}
+.mod-action-btn {
+    padding: 4px 12px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+.mod-action-btn:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+.mod-action-btn.danger { border-color: rgba(255,60,60,0.3); color: rgba(255,100,100,0.7); }
+.mod-action-btn.danger:hover { background: rgba(255,60,60,0.15); color: #f87171; }
+.mod-action-btn.success { border-color: rgba(60,255,60,0.3); color: rgba(100,255,100,0.7); }
+.mod-action-btn.success:hover { background: rgba(60,255,60,0.15); color: #4ade80; }
+
+/* ========== BAN HAMMER ========== */
+.ban-card {
+    border: 1px solid rgba(255,60,60,0.15);
+    background: #0c0c0c;
+    padding: 16px 20px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+    transition: all 0.3s ease;
+    border-radius: 20px;
+}
+.ban-card:hover {
+    border-color: rgba(255,60,60,0.3);
+}
+
+/* ========== ANNOUNCEMENTS ========== */
+.announcement-card {
+    border: 1px solid #161616;
+    background: #0c0c0c;
+    padding: 16px 20px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+    transition: all 0.3s ease;
+    border-radius: 20px;
+}
+.announcement-card:hover {
+    border-color: rgba(255,255,255,0.2);
+}
+
+/* ========== ACHIEVEMENTS ADMIN ========== */
+.ach-admin-card {
+    border: 1px solid #161616;
+    background: #0c0c0c;
+    padding: 16px 20px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+    transition: all 0.3s ease;
+    border-radius: 20px;
+}
+.ach-admin-card:hover {
+    border-color: rgba(255,255,255,0.2);
+}
+.ach-rarity-common { color: rgba(255,255,255,0.5); }
+.ach-rarity-rare { color: #60a5fa; }
+.ach-rarity-unique { color: #fbbf24; }
+.ach-rarity-limited { color: #a78bfa; }
+.ach-rarity-secret { color: #f87171; }
+
+/* ========== TOAST ========== */
+.admin-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #0c0c0c;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    z-index: 9999;
+    animation: toast-in 0.3s ease, toast-out 0.3s ease 2.7s;
+    pointer-events: none;
+}
+.admin-toast.success { border-color: rgba(60,255,60,0.3); }
+.admin-toast.error { border-color: rgba(255,60,60,0.3); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toast-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* ========== SKELETON ========== */
+.skeleton {
+    background: linear-gradient(90deg, #0c0c0c 25%, #161616 50%, #0c0c0c 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+    border-radius: 8px;
+    height: 20px;
+}
+@keyframes skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

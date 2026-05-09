@@ -1,5 +1,5 @@
 const AdminApp = (() => {
-    let currentSection = 'prompts';
+    let currentSection = 'dashboard';
     let currentDifficulty = 'easy';
     let allModelsData = [];
     let allModelSpacesData = [];
@@ -44,15 +44,42 @@ const AdminApp = (() => {
         }
     }
 
+    let currentLogFilter = 'all';
+    let currentModFilter = 'threads';
+    let liveLogsInterval = null;
+    let achievementsCatalogData = [];
+
+    function toast(msg, type) {
+        const el = document.createElement('div');
+        el.className = 'admin-toast ' + (type || '');
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3000);
+    }
+
+    function switchSection(name) {
+        document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+        const btn = document.querySelector(`.admin-nav-btn[data-section="${name}"]`);
+        if (btn) btn.classList.add('active');
+        currentSection = name;
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
+        const sec = document.getElementById('section-' + name);
+        if (sec) sec.classList.remove('hidden');
+    }
+
     function showAdmin(email) {
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('admin-screen').classList.remove('hidden');
         document.getElementById('admin-email').textContent = email || '';
+        loadDashboard();
         loadPrompts();
         loadModels();
         loadResults();
         loadStats();
         loadInvites();
+        loadBans();
+        loadAnnouncements();
+        loadAchievementsAdmin();
         const profilesReady = loadProfiles().then(() => loadModerators());
         Promise.all([profilesReady, loadAchievementsCatalog()]).then(() => renderProfilesGrid());
     }
@@ -1268,6 +1295,366 @@ const AdminApp = (() => {
         }).join('');
     }
 
+    // ========== DASHBOARD ==========
+
+    async function loadDashboard() {
+        const grid = document.getElementById('dashboard-metrics');
+        const events = document.getElementById('dashboard-events');
+        if (!grid || !events) return;
+
+        grid.innerHTML = '<div class="admin-metric-card"><div class="skeleton"></div></div>'.repeat(5);
+        events.innerHTML = '<div class="skeleton" style="margin:4px 0"></div>'.repeat(5);
+
+        try {
+            const [profiles, threads, models, prompts, results] = await Promise.all([
+                Api.adminGetProfiles().catch(() => []),
+                Api.adminGetAllThreads ? Api.adminGetAllThreads().catch(() => []) : Promise.resolve([]),
+                Api.getAllModels().catch(() => []),
+                Api.getAllPrompts().catch(() => []),
+                Api.getAllResults().catch(() => [])
+            ]);
+
+            const metrics = [
+                { value: profiles.length, label: 'Пользователей' },
+                { value: Array.isArray(threads) ? threads.length : 0, label: 'Тредов' },
+                { value: models.length, label: 'Моделей' },
+                { value: prompts.length, label: 'Промптов' },
+                { value: results.length, label: 'Результатов' }
+            ];
+
+            grid.innerHTML = metrics.map(m => `
+                <div class="admin-metric-card">
+                    <div class="admin-metric-value">${m.value}</div>
+                    <div class="admin-metric-label">${m.label}</div>
+                </div>
+            `).join('');
+
+            // Recent events from profiles (latest signups)
+            const recent = [...(profiles || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 8);
+            events.innerHTML = recent.map(p => {
+                const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.telegram_username || 'User';
+                const date = p.created_at ? formatDateForDisplay(p.created_at.split('T')[0]) : '';
+                return `<div class="flex justify-between items-center py-1 border-b border-white/5">
+                    <span class="text-xs opacity-60">${escapeHtml(name)}</span>
+                    <span class="text-[10px] opacity-30">зарегистрирован ${date}</span>
+                </div>`;
+            }).join('') || '<p class="text-xs opacity-30">Нет событий</p>';
+        } catch (e) {
+            grid.innerHTML = '<p class="text-xs opacity-30 col-span-5">Ошибка загрузки метрик</p>';
+            events.innerHTML = '<p class="text-xs opacity-30">Ошибка</p>';
+        }
+    }
+
+    // ========== LIVE LOGS ==========
+
+    function startLiveLogs() {
+        if (liveLogsInterval) return;
+        const console = document.getElementById('live-logs-console');
+        if (!console) return;
+        console.innerHTML = '';
+        addLogEntry('system', 'Подключение к логам...');
+
+        // Poll for recent activity every 5s
+        liveLogsInterval = setInterval(async () => {
+            try {
+                const profiles = await Api.adminGetProfiles().catch(() => []);
+                if (profiles.length > 0) {
+                    const latest = profiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+                    const name = [latest.telegram_first_name, latest.telegram_last_name].filter(Boolean).join(' ') || latest.telegram_username;
+                    if (name) addLogEntry('auth', `${escapeHtml(name)} — новый пользователь`);
+                }
+            } catch {}
+        }, 5000);
+    }
+
+    function stopLiveLogs() {
+        if (liveLogsInterval) { clearInterval(liveLogsInterval); liveLogsInterval = null; }
+    }
+
+    function addLogEntry(type, text) {
+        const console = document.getElementById('live-logs-console');
+        if (!console) return;
+        if (currentLogFilter !== 'all' && type !== currentLogFilter) return;
+        const now = new Date();
+        const time = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-type-${type}">${text}</span>`;
+        console.appendChild(entry);
+        console.scrollTop = console.scrollHeight;
+    }
+
+    // ========== MODERATION ==========
+
+    async function loadModeration() {
+        const list = document.getElementById('moderation-list');
+        if (!list) return;
+        list.innerHTML = '<div class="skeleton" style="margin:8px 0"></div>'.repeat(3);
+
+        try {
+            if (currentModFilter === 'threads') {
+                const threads = Api.adminGetAllThreads ? await Api.adminGetAllThreads().catch(() => []) : [];
+                if (threads.length === 0) { list.innerHTML = '<p class="text-xs opacity-30">Нет тредов</p>'; return; }
+                list.innerHTML = threads.slice(0, 30).map(t => {
+                    const author = t.author_nickname || t.author_username || 'anon';
+                    return `<div class="mod-thread-card">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="opacity-70">${escapeHtml(t.title || 'Без названия')}</span>
+                                <span class="text-[10px] opacity-30 ml-2">by ${escapeHtml(author)}</span>
+                            </div>
+                            <div class="flex gap-1">
+                                ${t.is_pinned ? '<span class="text-[9px] opacity-30">📌</span>' : `<button class="mod-action-btn success" onclick="AdminApp.pinThread('${t.id}')">Pin</button>`}
+                                <button class="mod-action-btn danger" onclick="AdminApp.deleteThread('${t.id}')">Del</button>
+                            </div>
+                        </div>
+                        <p class="text-[10px] opacity-30">${t.posts_count || 0} постов · ${formatDateForDisplay((t.created_at || '').split('T')[0])}</p>
+                    </div>`;
+                }).join('');
+            } else if (currentModFilter === 'posts') {
+                list.innerHTML = '<p class="text-xs opacity-30">Загрузка постов...</p>';
+            } else {
+                list.innerHTML = '<p class="text-xs opacity-30">Жалобы пока не реализованы в API</p>';
+            }
+        } catch (e) {
+            list.innerHTML = '<p class="text-xs opacity-30">Ошибка загрузки</p>';
+        }
+    }
+
+    async function pinThread(id) {
+        try {
+            if (Api.modPinThread) await Api.modPinThread(id);
+            toast('Тред закреплён', 'success');
+            loadModeration();
+        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    async function deleteThread(id) {
+        if (!confirm('Удалить тред?')) return;
+        try {
+            if (Api.modDeleteThread) await Api.modDeleteThread(id);
+            toast('Тред удалён', 'success');
+            loadModeration();
+        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    // ========== BAN HAMMER ==========
+
+    async function loadBans() {
+        const list = document.getElementById('bans-list');
+        if (!list) return;
+        try {
+            const bans = Api.adminGetBans ? await Api.adminGetBans().catch(() => []) : [];
+            if (bans.length === 0) {
+                list.innerHTML = '<p class="text-xs opacity-30 uppercase tracking-widest">Нет забаненных 🔨</p>';
+                return;
+            }
+            list.innerHTML = bans.map(b => {
+                const name = b.telegram_username || b.user_id || 'Unknown';
+                const reason = b.reason || 'Не указана';
+                const expires = b.expires_at ? formatDateForDisplay(b.expires_at.split('T')[0]) : 'Навсегда';
+                return `<div class="ban-card">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="opacity-70">🔨 ${escapeHtml(name)}</span>
+                            <span class="text-[10px] opacity-30 ml-2">Причина: ${escapeHtml(reason)}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] opacity-30">${expires}</span>
+                            <button class="mod-action-btn success" onclick="AdminApp.unban('${b.user_id}')">Разбан</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch {
+            list.innerHTML = '<p class="text-xs opacity-30">Ошибка загрузки</p>';
+        }
+    }
+
+    function showBanForm() {
+        showModal(`
+            <h2 class="font-title text-lg uppercase tracking-widest text-shiny mb-6">🔨 Забанить пользователя</h2>
+            <div class="flex flex-col gap-4">
+                <input id="ban-uid" placeholder="User ID" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl">
+                <input id="ban-reason" placeholder="Причина" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl">
+                <select id="ban-duration" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white outline-none focus:border-white/50 rounded-xl">
+                    <option value="1h">1 час</option>
+                    <option value="1d">1 день</option>
+                    <option value="7d" selected>7 дней</option>
+                    <option value="30d">30 дней</option>
+                    <option value="forever">Навсегда</option>
+                </select>
+                <button onclick="AdminApp.doBan()" class="w-full bg-red-900/50 text-red-300 border border-red-800/50 py-3 text-[10px] uppercase tracking-widest font-bold rounded-full hover:bg-red-900/80 transition-colors">🔨 Забанить</button>
+            </div>
+        `);
+    }
+
+    async function doBan() {
+        const uid = document.getElementById('ban-uid').value.trim();
+        const reason = document.getElementById('ban-reason').value.trim();
+        const duration = document.getElementById('ban-duration').value;
+        if (!uid) { toast('Укажите User ID', 'error'); return; }
+        try {
+            if (Api.adminBanUser) await Api.adminBanUser(uid, reason, duration);
+            toast('Пользователь забанен 🔨', 'success');
+            hideModal();
+            loadBans();
+        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    async function unban(uid) {
+        try {
+            if (Api.modUnbanUser) await Api.modUnbanUser(uid);
+            toast('Пользователь разбанен', 'success');
+            loadBans();
+        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    // ========== ANNOUNCEMENTS ==========
+
+    async function loadAnnouncements() {
+        const list = document.getElementById('announcements-list');
+        if (!list) return;
+        try {
+            const anns = Api.adminGetAnnouncements ? await Api.adminGetAnnouncements().catch(() => []) : [];
+            if (anns.length === 0) {
+                list.innerHTML = '<p class="text-xs opacity-30 uppercase tracking-widest">Нет анонсов</p>';
+                return;
+            }
+            list.innerHTML = anns.map(a => {
+                return `<div class="announcement-card">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="opacity-70">${escapeHtml(a.title || 'Без названия')}</span>
+                            <span class="text-[10px] opacity-30 ml-2">${formatDateForDisplay((a.created_at || '').split('T')[0])}</span>
+                        </div>
+                        <div class="flex gap-1">
+                            <button class="mod-action-btn" onclick="AdminApp.editAnnouncement('${a.id}')">Edit</button>
+                            <button class="mod-action-btn danger" onclick="AdminApp.deleteAnnouncement('${a.id}')">Del</button>
+                        </div>
+                    </div>
+                    <p class="text-[10px] opacity-40 mt-2">${escapeHtml((a.body || '').substring(0, 120))}</p>
+                </div>`;
+            }).join('');
+        } catch {
+            list.innerHTML = '<p class="text-xs opacity-30">Ошибка загрузки</p>';
+        }
+    }
+
+    function showAnnouncementForm() {
+        showModal(`
+            <h2 class="font-title text-lg uppercase tracking-widest text-shiny mb-6">📢 Новый анонс</h2>
+            <div class="flex flex-col gap-4">
+                <input id="ann-title" placeholder="Заголовок" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl">
+                <textarea id="ann-body" placeholder="Текст анонса" rows="5" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl"></textarea>
+                <button onclick="AdminApp.doAnnouncement()" class="w-full bg-white text-black py-3 text-[10px] uppercase tracking-widest font-bold rounded-full hover:scale-105 transition-transform">📢 Отправить</button>
+            </div>
+        `);
+    }
+
+    async function doAnnouncement() {
+        const title = document.getElementById('ann-title').value.trim();
+        const body = document.getElementById('ann-body').value.trim();
+        if (!title) { toast('Укажите заголовок', 'error'); return; }
+        try {
+            if (Api.adminCreateAnnouncement) await Api.adminCreateAnnouncement(title, body);
+            toast('Анонс отправлен 📢', 'success');
+            hideModal();
+            loadAnnouncements();
+        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    async function deleteAnnouncement(id) {
+        if (!confirm('Удалить анонс?')) return;
+        try {
+            if (Api.adminDeleteAnnouncement) await Api.adminDeleteAnnouncement(id);
+            toast('Анонс удалён', 'success');
+            loadAnnouncements();
+        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    // ========== ACHIEVEMENTS ADMIN ==========
+
+    async function loadAchievementsAdmin() {
+        const list = document.getElementById('achievements-list');
+        if (!list) return;
+        try {
+            const achs = await Api.getAchievementsCatalog ? Api.getAchievementsCatalog().catch(() => []) : (achievementsCatalogData || []);
+            if (achs.length === 0) {
+                list.innerHTML = '<p class="text-xs opacity-30 uppercase tracking-widest">Нет ачивок</p>';
+                return;
+            }
+            list.innerHTML = achs.map(a => {
+                const rarityClass = 'ach-rarity-' + (a.rarity || 'common');
+                return `<div class="ach-admin-card">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg">${a.icon_emoji || '🏆'}</span>
+                            <div>
+                                <span class="opacity-70">${escapeHtml(a.title || a.id)}</span>
+                                <span class="${rarityClass} text-[9px] ml-2">${a.rarity || 'common'}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] opacity-30">${a.points || 0} pts</span>
+                            <button class="mod-action-btn" onclick="AdminApp.grantAchById('${a.id}')">Выдать</button>
+                        </div>
+                    </div>
+                    <p class="text-[10px] opacity-40 mt-1">${escapeHtml(a.description || '')}</p>
+                </div>`;
+            }).join('');
+        } catch {
+            list.innerHTML = '<p class="text-xs opacity-30">Ошибка загрузки</p>';
+        }
+    }
+
+    function showAchievementForm() {
+        showModal(`
+            <h2 class="font-title text-lg uppercase tracking-widest text-shiny mb-6">🏆 Новая ачивка</h2>
+            <div class="flex flex-col gap-4">
+                <input id="ach-id" placeholder="ID (например: first_step)" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl">
+                <input id="ach-title" placeholder="Название" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl">
+                <input id="ach-description" placeholder="Описание" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl">
+                <input id="ach-emoji" placeholder="Эмодзи" value="🏆" class="w-full bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl">
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="ach-rarity" class="bg-surface border border-border px-4 py-3 text-sm text-white outline-none focus:border-white/50 rounded-xl">
+                        <option value="common">Common</option>
+                        <option value="rare">Rare</option>
+                        <option value="unique">Unique</option>
+                        <option value="limited">Limited</option>
+                    </select>
+                    <input id="ach-points" type="number" placeholder="Очки" value="10" class="bg-surface border border-border px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-white/50 rounded-xl">
+                </div>
+                <button onclick="AdminApp.doCreateAchievement()" class="w-full bg-white text-black py-3 text-[10px] uppercase tracking-widest font-bold rounded-full hover:scale-105 transition-transform">Создать</button>
+            </div>
+        `);
+    }
+
+    async function doCreateAchievement() {
+        const id = document.getElementById('ach-id').value.trim();
+        const title = document.getElementById('ach-title').value.trim();
+        const description = document.getElementById('ach-description').value.trim();
+        const icon_emoji = document.getElementById('ach-emoji').value.trim();
+        const rarity = document.getElementById('ach-rarity').value;
+        const points = parseInt(document.getElementById('ach-points').value) || 10;
+        if (!id || !title) { toast('Заполните ID и название', 'error'); return; }
+        try {
+            if (Api.adminCreateAchievement) await Api.adminCreateAchievement({ id, title, description, icon_emoji, rarity, points });
+            toast('Ачивка создана 🏆', 'success');
+            hideModal();
+            loadAchievementsAdmin();
+        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    async function grantAchById(achId) {
+        const uid = prompt('Введите User ID для выдачи ачивки:');
+        if (!uid) return;
+        try {
+            if (Api.adminGrantAchievement) await Api.adminGrantAchievement(uid, achId);
+            toast('Ачивка выдана', 'success');
+        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    }
+
     // ========== INIT ==========
 
     function init() {
@@ -1346,6 +1733,48 @@ const AdminApp = (() => {
 
         document.getElementById('reset-all-limits-btn').addEventListener('click', async () => { await AdminApp.resetAllLimits(); });
 
+        // New section: Ban hammer
+        const addBanBtn = document.getElementById('add-ban-btn');
+        if (addBanBtn) addBanBtn.addEventListener('click', showBanForm);
+
+        // New section: Announcements
+        const addAnnBtn = document.getElementById('add-announcement-btn');
+        if (addAnnBtn) addAnnBtn.addEventListener('click', showAnnouncementForm);
+
+        // New section: Achievements
+        const addAchBtn = document.getElementById('add-achievement-btn');
+        if (addAchBtn) addAchBtn.addEventListener('click', showAchievementForm);
+
+        // Live logs filters
+        document.querySelectorAll('.admin-log-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.admin-log-filter').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLogFilter = btn.dataset.logFilter;
+            });
+        });
+
+        // Moderation filters
+        document.querySelectorAll('.admin-mod-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.admin-mod-filter').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentModFilter = btn.dataset.modFilter;
+                loadModeration();
+            });
+        });
+
+        // Start/stop live logs when switching sections
+        const origNavHandler = () => {};
+        document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sec = btn.getAttribute('data-section');
+                if (sec === 'live-logs') startLiveLogs();
+                else stopLiveLogs();
+                if (sec === 'moderation') loadModeration();
+            });
+        });
+
         checkAuth();
     }
 
@@ -1357,7 +1786,11 @@ const AdminApp = (() => {
         showAddResultForm, editResult, deleteResult,
         assignModerator, removeModerator,
         openProfileDetail, setRole, toggleVerified, updateCreatedAt,
-        grantAch, revokeAch, grantInvite
+        grantAch, revokeAch, grantInvite,
+        switchSection, openAddPrompt: showAddPromptForm, openAddInvite: () => document.getElementById('add-invite-btn')?.click(),
+        pinThread, deleteThread, unban, doBan,
+        doAnnouncement, deleteAnnouncement, editAnnouncement: () => toast('Редактирование в разработке'),
+        doCreateAchievement, grantAchById
     };
 })();
 

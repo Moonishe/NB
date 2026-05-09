@@ -1078,6 +1078,66 @@ const Api = (() => {
         return data;
     }
 
+    // ========== ADMIN EXTENSIONS ==========
+
+    async function adminGetAllThreads() {
+        const client = getClient();
+        if (!client) return [];
+        const { data, error } = await client.rpc('admin_get_all_threads').catch(() => client.from('forum_threads').select('id,title,author_id,author_nickname,is_pinned,is_locked,posts_count,created_at').order('created_at', { ascending: false }).limit(50));
+        if (error) return [];
+        return data || [];
+    }
+
+    async function adminGetBans() {
+        const client = getClient();
+        if (!client) return [];
+        const { data, error } = await client.from('bans').select('user_id,reason,created_at,expires_at').order('created_at', { ascending: false });
+        if (error) return [];
+        return data || [];
+    }
+
+    async function adminGetAnnouncements() {
+        const client = getClient();
+        if (!client) return [];
+        const { data, error } = await client.from('announcements').select('*').order('created_at', { ascending: false });
+        if (error) return [];
+        return data || [];
+    }
+
+    async function adminCreateAnnouncement(title, body) {
+        const client = getClient();
+        if (!client) throw new Error('Supabase not configured');
+        const { data, error } = await client.from('announcements').insert({ title, body }).select().single();
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    async function adminDeleteAnnouncement(id) {
+        const client = getClient();
+        if (!client) throw new Error('Supabase not configured');
+        const { error } = await client.from('announcements').delete().eq('id', id);
+        if (error) throw new Error(error.message);
+    }
+
+    async function adminCreateAchievement(ach) {
+        const client = getClient();
+        if (!client) throw new Error('Supabase not configured');
+        const { data, error } = await client.from('achievements_catalog').insert(ach).select().single();
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    async function adminBanUser(uid, reason, duration) {
+        const client = getClient();
+        if (!client) throw new Error('Supabase not configured');
+        let expiresAt = null;
+        if (duration !== 'forever') {
+            const ms = { '1h': 3600000, '1d': 86400000, '7d': 604800000, '30d': 2592000000 }[duration] || 604800000;
+            expiresAt = new Date(Date.now() + ms).toISOString();
+        }
+        return modBanUser(uid, reason, expiresAt);
+    }
+
     return {
         getPromptsByDifficulty, getAllPrompts, addPrompt, updatePrompt, deletePrompt,
         getAllModels, addModel, updateModel, deleteModel,
@@ -1107,6 +1167,9 @@ const Api = (() => {
         getUserRecentActivity, getUserThreads,
         getAchievementsCatalog, getUserAchievements,
         setShowcasedAchievements, checkAndGrantAchievements,
-        recordLogin
+        recordLogin,
+        adminGetAllThreads, adminGetBans, adminGetAnnouncements,
+        adminCreateAnnouncement, adminDeleteAnnouncement,
+        adminCreateAchievement, adminBanUser
     };
 })();
