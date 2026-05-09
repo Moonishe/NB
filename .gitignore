@@ -6,3 +6,23 @@ output/
 server.err.log
 server.out.log
 *.log
+
+# Secrets & environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Supabase CLI temp files
+supabase/.temp/
+supabase/.branches/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Build artifacts
+dist/
+build/
