@@ -1057,7 +1057,10 @@ const AuthApp = (() => {
         const widgetCheck = window.setInterval(() => {
             const iframe = container.querySelector('iframe');
             if (iframe) {
-                if (customBtn) customBtn.classList.remove('tg-btn-loading');
+                if (customBtn) {
+                    customBtn.classList.remove('tg-btn-loading');
+                    customBtn.style.display = 'none';
+                }
                 window.clearInterval(widgetCheck);
             } else if (--checksLeft <= 0) {
                 if (customBtn) customBtn.classList.remove('tg-btn-loading');
