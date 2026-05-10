@@ -901,16 +901,28 @@ const Api = (() => {
     async function getPublicProfile(userId) {
         const client = getClient();
         if (!client) throw new Error('Supabase not configured');
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(userId || ''))) {
+            throw new Error('Invalid profile user id');
+        }
         const { data, error } = await client.rpc('get_public_profile', { p_user_id: userId });
-        if (error) throw error;
+        if (error) {
+            console.error('[api] get_public_profile failed', error);
+            throw error;
+        }
         return data && data[0] ? data[0] : null;
     }
 
     async function getPublicProfileByUid(uid) {
         const client = getClient();
         if (!client) throw new Error('Supabase not configured');
+        if (!Number.isFinite(Number(uid))) {
+            throw new Error('Invalid profile uid');
+        }
         const { data, error } = await client.rpc('get_public_profile_by_uid', { p_uid: uid });
-        if (error) throw error;
+        if (error) {
+            console.error('[api] get_public_profile_by_uid failed', error);
+            throw error;
+        }
         return data && data[0] ? data[0] : null;
     }
 

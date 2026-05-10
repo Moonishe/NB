@@ -10,6 +10,72 @@
 -- ==========================================
 
 DROP FUNCTION IF EXISTS public.get_public_profile_by_uid(INTEGER);
+DROP FUNCTION IF EXISTS public.get_public_profile(UUID);
+CREATE OR REPLACE FUNCTION public.get_public_profile(p_user_id UUID)
+RETURNS TABLE (
+    user_id UUID,
+    uid INTEGER,
+    telegram_first_name TEXT,
+    telegram_last_name TEXT,
+    telegram_username TEXT,
+    telegram_photo_url TEXT,
+    bio TEXT,
+    is_moderator BOOLEAN,
+    is_verified BOOLEAN,
+    role TEXT,
+    created_at TIMESTAMPTZ,
+    threads_count BIGINT,
+    posts_count BIGINT,
+    reactions_given_count BIGINT,
+    achievement_points BIGINT,
+    achievements_count BIGINT,
+    showcased_achievements JSONB
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.user_id,
+        p.uid::INTEGER,
+        p.telegram_first_name::TEXT,
+        p.telegram_last_name::TEXT,
+        p.telegram_username::TEXT,
+        p.telegram_photo_url::TEXT,
+        p.bio::TEXT,
+        (COALESCE(p.role, 'member') IN ('moderator', 'stmoderator', 'admin'))::BOOLEAN,
+        COALESCE(p.is_verified, false)::BOOLEAN,
+        COALESCE(p.role, 'member')::TEXT,
+        p.created_at,
+        (SELECT COUNT(*)::BIGINT FROM forum_threads WHERE author_id = p.user_id AND is_deleted = false),
+        (SELECT COUNT(*)::BIGINT FROM forum_posts WHERE author_id = p.user_id AND is_deleted = false),
+        (SELECT COUNT(*)::BIGINT FROM post_reactions WHERE user_id = p.user_id),
+        (SELECT COALESCE(SUM(a.points), 0)::BIGINT FROM user_achievements ua JOIN achievements a ON a.id = ua.achievement_id WHERE ua.user_id = p.user_id),
+        (SELECT COUNT(*)::BIGINT FROM user_achievements WHERE user_id = p.user_id),
+        (
+            SELECT COALESCE(jsonb_agg(jsonb_build_object(
+                'id', a.id,
+                'title', a.title,
+                'icon_emoji', a.icon_emoji,
+                'rarity', a.rarity,
+                'points', a.points
+            ) ORDER BY a.sort_order), '[]'::jsonb)
+            FROM user_achievements ua
+            JOIN achievements a ON a.id = ua.achievement_id
+            WHERE ua.user_id = p.user_id AND ua.is_showcased = TRUE
+        )
+    FROM profiles p
+    WHERE p.user_id = p_user_id;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.get_public_profile(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_public_profile(UUID) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_public_profile(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_public_profile(UUID) TO service_role;
+
 CREATE OR REPLACE FUNCTION public.get_public_profile_by_uid(p_uid INTEGER)
 RETURNS TABLE (
     user_id UUID,
@@ -45,7 +111,26 @@ BEGIN
         RETURN;
     END IF;
 
-    RETURN QUERY SELECT * FROM get_public_profile(v_user_id);
+    RETURN QUERY
+    SELECT
+        gp.user_id,
+        gp.uid,
+        gp.telegram_first_name,
+        gp.telegram_last_name,
+        gp.telegram_username,
+        gp.telegram_photo_url,
+        gp.bio,
+        gp.is_moderator,
+        gp.is_verified,
+        gp.role,
+        gp.created_at,
+        gp.threads_count,
+        gp.posts_count,
+        gp.reactions_given_count,
+        gp.achievement_points,
+        gp.achievements_count,
+        gp.showcased_achievements
+    FROM public.get_public_profile(v_user_id) gp;
 END;
 $$;
 
