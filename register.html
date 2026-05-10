@@ -1339,6 +1339,14 @@
 
         <div data-view="account" class="hidden matte-card p-8">
 
+            <div class="auth-terminal-header" aria-hidden="true">
+
+                <span style="color:rgba(100,200,100,0.6)">Статус Аккаунта:</span>
+
+                <span id="account-status-label" style="color:rgba(100,200,100,0.7)">verified</span>
+
+            </div>
+
             <div class="text-center mb-6">
 
                 <div id="account-photo-placeholder" class="w-16 h-16 border border-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 bg-surface">
@@ -1393,6 +1401,12 @@
                 Профиль
 
             </a>
+
+            <button id="account-logout" class="btn-terminal btn-terminal-danger mt-3">
+
+                Выйти
+
+            </button>
 
         </div>
 

@@ -253,6 +253,17 @@ const AuthApp = (() => {
 
 
 
+    function setStatusLabel(verified) {
+
+        const el = document.getElementById('account-status-label');
+
+        if (!el) return;
+
+        el.textContent = verified ? 'verified' : 'not verified';
+
+        el.style.color = verified ? 'rgba(100,200,100,0.7)' : 'rgba(255,100,100,0.6)';
+
+    }
 
 
 
@@ -578,8 +589,10 @@ const AuthApp = (() => {
         // cyrillic в keep-regex не трогает, fallback в decodeText гарантирует финальный текст
         requestAnimationFrame(() => {
             document.querySelectorAll([
+                '[data-view="account"] .auth-terminal-header span',
                 '#account-name',
                 '#account-username',
+                '#account-logout',
                 '#account-profile-link'
             ].join(',')).forEach(el => {
                 el.textContent = el.dataset.text || el.dataset.decodeText || el.textContent.trim();
@@ -1055,11 +1068,13 @@ const AuthApp = (() => {
 
                 if (info.is_verified) {
 
+                    setStatusLabel(true);
 
                 } else {
 
                     showEl('account-unverified');
 
+                    setStatusLabel(false);
 
                 }
 
@@ -1116,6 +1131,7 @@ const AuthApp = (() => {
 
                     if (usernameEl && devInfo.telegram_username) { usernameEl.textContent = '@' + devInfo.telegram_username; usernameEl.classList.remove('hidden'); }
 
+                    setStatusLabel(true);
 
                     runAccountDecode();
 
@@ -1189,11 +1205,13 @@ const AuthApp = (() => {
 
         if (info.is_verified) {
 
+            setStatusLabel(true);
 
         } else {
 
             showEl('account-unverified');
 
+            setStatusLabel(false);
 
         }
 
@@ -1255,6 +1273,7 @@ const AuthApp = (() => {
 
         if (usernameEl) { usernameEl.textContent = '@' + devInfo.telegram_username; usernameEl.classList.remove('hidden'); }
 
+        setStatusLabel(true);
 
         showSuccessBadge();
 
@@ -1371,6 +1390,58 @@ devBtn.addEventListener('click', activateDevLogin);
         setAuthMode('login', false);
 
         runInitialDecode();
+
+
+
+        const logoutBtn = document.getElementById('account-logout');
+
+        if (logoutBtn) logoutBtn.addEventListener('click', async () => {
+
+            localStorage.removeItem('nb_dev_session');
+
+            localStorage.removeItem('nb_auth_cache');
+
+            await Api.logout();
+
+            // Reset decode flags so re-login re-triggers hackerDecode
+
+            document.querySelectorAll('[data-view] *').forEach(el => {
+
+                el._decodeFinal = undefined;
+
+                el._decodeRunning = false;
+
+                el._decoded = false;
+
+            });
+
+            showView('auth');
+
+            hideEl('account-verified');
+
+            hideEl('account-unverified');
+
+            hideEl('account-username');
+
+            hideEl('account-photo');
+
+            showEl('account-photo-placeholder');
+
+            hideEl('new-user-badge');
+
+            resetInviteState();
+
+            const nameEl = document.getElementById('account-name');
+
+            if (nameEl) nameEl.textContent = '';
+
+            const usernameEl = document.getElementById('account-username');
+
+            if (usernameEl) usernameEl.textContent = '';
+
+            runInitialDecode();
+
+        });
 
 
 

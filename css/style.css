@@ -22847,10 +22847,6 @@ span.ach-rarity-limited.ach-rarity-badge {
     }
 }
 
-[data-view="account"] > .auth-terminal-header,
-[data-view="account"] #account-logout {
-    display: none !important;
-}
 
 .profile-sidebar > .profile-invited-users {
     width: 100%;
