@@ -754,7 +754,7 @@ function decodeInviteAscii(code) {
             if (tokenBox._inviteGenFadeTimer) { clearTimeout(tokenBox._inviteGenFadeTimer); tokenBox._inviteGenFadeTimer = null; }
             const wasGenerating = tokenBox.classList.contains('invite-generating');
             if (wasGenerating) tokenBox.classList.add('invite-gen-fading');
-            tokenBox.classList.remove('invite-copy-burst', 'invite-copy-box-burst', 'invite-copy-settling', 'invite-copy-restoring', 'invite-copy-assembling', 'invite-border-reappearing', 'invite-copy-wave', 'invite-copy-success');
+            tokenBox.classList.remove('invite-copy-burst', 'invite-copy-box-burst', 'invite-copy-settling', 'invite-copy-restoring', 'invite-copy-assembling', 'invite-border-reappearing', 'invite-copy-wave');
             if (tokenBox._inviteBorderTimer) { clearTimeout(tokenBox._inviteBorderTimer); tokenBox._inviteBorderTimer = null; }
             void tokenBox.offsetWidth;
             tokenBox.classList.add('invite-copy-wave');
@@ -3712,13 +3712,6 @@ function decodeInviteAscii(code) {
                 setTimeout(() => {
 
                     copyBtn.classList.remove('is-copying');
-                    const tokenBox = asciiEl ? asciiEl.closest('.profile-invite-token-box') : null;
-                    if (copySucceeded && tokenBox) {
-                        tokenBox.classList.remove('invite-copy-success');
-                        void tokenBox.offsetWidth;
-                        tokenBox.classList.add('invite-copy-success');
-                        setTimeout(() => tokenBox.classList.remove('invite-copy-success'), 720);
-                    }
 
                     copyBtn.classList.remove('is-copy-error');
 
