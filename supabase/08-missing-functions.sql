@@ -76,6 +76,24 @@ GRANT EXECUTE ON FUNCTION public.get_public_profile(UUID) TO anon;
 GRANT EXECUTE ON FUNCTION public.get_public_profile(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_public_profile(UUID) TO service_role;
 
+DROP FUNCTION IF EXISTS public.resolve_user_id_by_uid(INTEGER);
+CREATE OR REPLACE FUNCTION public.resolve_user_id_by_uid(p_uid INTEGER)
+RETURNS UUID
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT user_id
+    FROM profiles
+    WHERE uid = p_uid
+    LIMIT 1;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.resolve_user_id_by_uid(INTEGER) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.resolve_user_id_by_uid(INTEGER) TO anon;
+GRANT EXECUTE ON FUNCTION public.resolve_user_id_by_uid(INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.resolve_user_id_by_uid(INTEGER) TO service_role;
+
 CREATE OR REPLACE FUNCTION public.get_public_profile_by_uid(p_uid INTEGER)
 RETURNS TABLE (
     user_id UUID,

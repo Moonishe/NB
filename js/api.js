@@ -906,7 +906,12 @@ const Api = (() => {
         }
         const { data, error } = await client.rpc('get_public_profile', { p_user_id: userId });
         if (error) {
-            console.error('[api] get_public_profile failed', error);
+            console.error('[api] get_public_profile failed', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
             throw error;
         }
         return data && data[0] ? data[0] : null;
@@ -918,9 +923,28 @@ const Api = (() => {
         if (!Number.isFinite(Number(uid))) {
             throw new Error('Invalid profile uid');
         }
-        const { data, error } = await client.rpc('get_public_profile_by_uid', { p_uid: uid });
+        const { data: userId, error: resolveError } = await client.rpc('resolve_user_id_by_uid', { p_uid: Number(uid) });
+        if (resolveError) {
+            console.error('[api] resolve_user_id_by_uid failed', {
+                message: resolveError.message,
+                details: resolveError.details,
+                hint: resolveError.hint,
+                code: resolveError.code
+            });
+            throw resolveError;
+        }
+        if (!userId) return null;
+
+        const { data, error } = await client.rpc('get_public_profile', { p_user_id: userId });
         if (error) {
-            console.error('[api] get_public_profile_by_uid failed', error);
+            console.error('[api] get_public_profile_by_uid failed', {
+                uid,
+                userId,
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
             throw error;
         }
         return data && data[0] ? data[0] : null;
