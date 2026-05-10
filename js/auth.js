@@ -901,6 +901,7 @@ const AuthApp = (() => {
 
     async function handleTelegramAuth(user) {
         if (isProcessing) return;
+        if (tgCallbackMuted) return;
 
         if (user && user.auth_date) {
             const authAge = Math.floor(Date.now() / 1000) - Number(user.auth_date);
@@ -1028,6 +1029,8 @@ const AuthApp = (() => {
 
     }
 
+    let tgCallbackMuted = false;
+
     function createTelegramScript(container) {
         const botUsername = window.TELEGRAM_BOT_USERNAME;
         if (!botUsername) return false;
@@ -1058,7 +1061,9 @@ const AuthApp = (() => {
     function reloadTelegramWidget() {
         const container = resetTelegramWidgetContainer();
         if (!container) return;
+        tgCallbackMuted = true;
         setTimeout(() => createTelegramScript(container), 400);
+        setTimeout(() => { tgCallbackMuted = false; }, 3000);
     }
 
     function showTelegramRefreshButton() {
