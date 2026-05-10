@@ -3574,51 +3574,13 @@ function decodeInviteAscii(code) {
 
 
 
-        const statusLabel = userInfo.is_verified
-
-            ? (userInfo.verified_by_name
-
-                ? `<span style="color:rgba(100,200,100,0.7)" data-decode>verified</span> <span class="opacity-30" data-decode>:: @${escapeHtml(userInfo.verified_by_name)}</span>`
-
-                : '<span style="color:rgba(100,200,100,0.7)" data-decode>verified</span>')
-
-            : '<span style="color:rgba(255,100,100,0.6)" data-decode>not verified</span>';
-
-
-
         return `
 
             <div class="profile-account-card role-${role}">
 
-                <div class="auth-terminal-header" aria-hidden="true">
-
-                    <span style="color:rgba(100,200,100,0.6)" data-decode>Статус Аккаунта:</span>
-
-                    <span>${statusLabel}</span>
-
-                </div>
-
-
-
                 ${inviteHtml}
 
-
-
-                <div class="profile-account-actions">
-
-
-
-                    <button id="account-logout" class="forum-cancel-btn" data-decode style="border-color:rgba(255,60,60,0.15);color:rgba(255,100,100,0.5)">Выйти</button>
-
-
-
-                </div>
-
-
-
             </div>
-
-
 
         `;
 
@@ -3800,49 +3762,7 @@ function decodeInviteAscii(code) {
 
 
 
-
-
-
-
-        const logoutBtn = document.getElementById('account-logout');
-
-
-
-        if (logoutBtn) {
-
-
-
-            logoutBtn.addEventListener('click', async () => {
-
-
-
-                localStorage.removeItem('nb_dev_session');
-
-
-
-                await Api.logout();
-
-
-
-                window.location.href = './';
-
-
-
-            });
-
-
-
-        }
-
-
-
     }
-
-
-
-
-
-
 
     async function copyTextToClipboard(text) {
 

@@ -22776,3 +22776,73 @@ span.ach-rarity-limited.ach-rarity-badge {
     font-size: 11px;
     color: rgba(255,255,255,0.28);
 }
+
+.profile-account-card {
+    padding: 14px 22px;
+    margin-top: 12px;
+    border-radius: 18px;
+}
+
+.profile-account-card .profile-account-invite-quota {
+    min-height: 30px;
+    padding: 7px 11px;
+}
+
+.profile-account-card .profile-account-invite-card {
+    margin-top: 10px;
+    padding: 11px;
+    border-radius: 13px;
+}
+
+.profile-account-card .profile-account-invite-card-head {
+    padding-bottom: 7px;
+}
+
+.profile-account-card .profile-account-invite-token {
+    padding: 9px 0 6px;
+}
+
+.profile-account-card .profile-invite-token-box {
+    min-height: 92px;
+    margin-top: 8px;
+    padding: 11px 10px;
+    border-radius: 11px;
+}
+
+.profile-account-card .profile-invite-token-box .invite-code-ascii {
+    font-size: 11px;
+    line-height: 1.02;
+}
+
+.profile-account-card .profile-account-invite-foot {
+    margin-top: 7px;
+    padding-top: 7px;
+}
+
+.profile-account-card .profile-account-invite-actions {
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.profile-account-card .profile-account-invite-actions .profile-invite-copy-btn,
+.profile-account-card .profile-account-invite-actions .profile-invite-primary-btn,
+.profile-account-card .profile-account-invite-none .forum-cancel-btn {
+    min-height: 31px;
+    padding: 7px 10px;
+}
+
+@media (max-width: 520px) {
+    .profile-account-card {
+        padding: 12px 14px;
+        border-radius: 16px;
+    }
+
+    .profile-account-card .profile-invite-token-box {
+        min-height: 86px;
+        padding: 10px 8px;
+    }
+
+    .profile-account-card .profile-invite-token-box .invite-code-ascii {
+        font-size: 9px;
+    }
+}
