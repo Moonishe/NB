@@ -641,7 +641,24 @@ const Api = (() => {
         if (fields.telegram_last_name !== undefined) params.p_telegram_last_name = fields.telegram_last_name;
         if (fields.telegram_username !== undefined) params.p_telegram_username = fields.telegram_username;
         if (fields.telegram_photo_url !== undefined) params.p_telegram_photo_url = fields.telegram_photo_url;
+        if (fields.username !== undefined) params.p_username = fields.username;
         const { data, error } = await client.rpc('admin_update_user_profile', params);
+        if (error) throw error;
+        return data;
+    }
+
+    async function requestUsernameChange(username) {
+        const client = getClient();
+        if (!client) throw new Error('Supabase not configured');
+        const { data, error } = await client.rpc('request_username_change', { p_username: username });
+        if (error) throw error;
+        return data;
+    }
+
+    async function adminApproveUsername(userId, approve) {
+        const client = getClient();
+        if (!client) throw new Error('Supabase not configured');
+        const { data, error } = await client.rpc('admin_approve_username', { p_user_id: userId, p_approve: approve });
         if (error) throw error;
         return data;
     }
@@ -1199,6 +1216,7 @@ const Api = (() => {
         adminResetUserInviteLimit, adminResetAllInviteLimits, adminDeleteUser,
         adminSetUserRole, adminGrantAchievement, adminRevokeAchievement,
         adminUpdateUserProfile, adminGenerateInviteForUser, adminGetUserDetail,
+        requestUsernameChange, adminApproveUsername,
         getForumCategories, getForumThreads, getForumThreadsCount,
         getForumThreadPosts, getForumThreadPostsCount, getForumThread,
         createForumThread, createForumPost, updateForumPost, updateForumThread,

@@ -3371,7 +3371,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const titleName = cleanText(profileData.telegram_first_name, 30) || cleanText(profileData.telegram_username, 30) || 'Профиль';
+        const titleName = cleanText(profileData.telegram_first_name, 30) || cleanText(profileData.username || profileData.telegram_username, 30) || 'Профиль';
 
 
 

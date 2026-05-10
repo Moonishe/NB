@@ -933,8 +933,8 @@ const AdminApp = (() => {
         if (profilesData.length === 0) { container.innerHTML = '<p class="text-gray-500 text-xs uppercase tracking-widest">Нет пользователей</p>'; return; }
         const modUserIds = new Set(moderatorsData.map(m => m.user_id));
         container.innerHTML = profilesData.map(p => {
-            const name = p.telegram_first_name || p.telegram_last_name ? [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') : (p.telegram_username || '');
-            const username = p.telegram_username ? '@' + p.telegram_username : '';
+            const name = p.telegram_first_name || p.telegram_last_name ? [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') : (p.username || p.telegram_username || '');
+            const username = (p.username || p.telegram_username) ? '@' + (p.username || p.telegram_username) : '';
             const verified = p.is_verified ? '<span class="ml-2 text-xs text-green-400/60">Верифицирован</span>' : '<span class="ml-2 text-xs text-red-400/60">Не верифицирован</span>';
             const modLabel = modUserIds.has(p.user_id) ? '<span class="admin-mod-badge ml-2">MOD</span>' : '';
             const inviteColor = p.has_generated_invite ? 'text-yellow-400/60' : 'text-green-400/60';
@@ -965,7 +965,7 @@ const AdminApp = (() => {
             const statusText = i.max_uses === null ? (i.use_count > 0 ? 'Используется' : 'Свободен') : (i.use_count >= i.max_uses ? 'Исчерпан' : `${i.use_count}/${i.max_uses}`);
             const statusColor = (i.max_uses !== null && i.use_count >= i.max_uses) ? 'text-red-400/60' : (i.use_count > 0 ? 'text-yellow-400/60' : 'text-green-400/60');
             const createdBy = !i.is_admin_code && i.created_by ? profilesData.find(p => p.user_id === i.created_by) : null;
-            const createdByLabel = i.is_admin_code ? 'Админ' : (createdBy ? (createdBy.telegram_username ? '@' + createdBy.telegram_username : (createdBy.email || '—')) : '—');
+            const createdByLabel = i.is_admin_code ? 'Админ' : (createdBy ? ((createdBy.username || createdBy.telegram_username) ? '@' + (createdBy.username || createdBy.telegram_username) : (createdBy.email || '—')) : '—');
             return `
             <div class="admin-prompt-card flex justify-between items-start gap-4">
                 <div class="flex-1">
@@ -1000,7 +1000,7 @@ const AdminApp = (() => {
 
     async function deleteUser(userId) {
         const profile = profilesData.find(p => p.user_id === userId);
-        const label = profile ? (profile.telegram_username ? '@' + profile.telegram_username : (profile.email || userId.slice(0, 8))) : userId.slice(0, 8);
+        const label = profile ? ((profile.username || profile.telegram_username) ? '@' + (profile.username || profile.telegram_username) : (profile.email || userId.slice(0, 8))) : userId.slice(0, 8);
         if (!confirm(`Удалить ${label}?`)) return;
         try { await Api.adminDeleteUser(userId); await loadProfiles(); } catch (err) { alert('Ошибка: ' + err.message); }
     }
@@ -1025,9 +1025,9 @@ const AdminApp = (() => {
         container.innerHTML = moderatorsData.map(m => {
             const name = profilesData.find(p => p.user_id === m.user_id);
             const displayName = name
-                ? [name.telegram_first_name, name.telegram_last_name].filter(Boolean).join(' ') || name.telegram_username || '—'
+                ? [name.telegram_first_name, name.telegram_last_name].filter(Boolean).join(' ') || name.username || name.telegram_username || '—'
                 : '—';
-            const tgLabel = m.telegram_username ? `@${escapeHtml(m.telegram_username)}` : `ID: ${escapeHtml(m.telegram_id || '').slice(0, 10)}...`;
+            const tgLabel = (m.telegram_username || (name && (name.username || name.telegram_username))) ? `@${escapeHtml(m.telegram_username || (name ? (name.username || name.telegram_username) : ''))}` : `ID: ${escapeHtml(m.telegram_id || '').slice(0, 10)}...`;
             const assignedAt = m.created_at ? new Date(m.created_at).toLocaleDateString('ru') : '—';
             return `
                 <div class="admin-prompt-card flex justify-between items-start gap-4">
@@ -1054,8 +1054,8 @@ const AdminApp = (() => {
             return;
         }
         container.innerHTML = candidates.map(p => {
-            const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.telegram_username || 'Без имени';
-            const tgLabel = p.telegram_username ? `@${escapeHtml(p.telegram_username)}` : '';
+            const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.username || p.telegram_username || 'Без имени';
+            const tgLabel = (p.username || p.telegram_username) ? `@${escapeHtml(p.username || p.telegram_username)}` : '';
             return `
                 <div class="admin-prompt-card flex justify-between items-center gap-4">
                     <div>
@@ -1113,7 +1113,7 @@ const AdminApp = (() => {
             const q = profilesSearchQuery.toLowerCase();
             filtered = profilesData.filter(p => {
                 const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ').toLowerCase();
-                const uname = (p.telegram_username || '').toLowerCase();
+                const uname = ((p.username || p.telegram_username) || '').toLowerCase();
                 const email = (p.email || '').toLowerCase();
                 return name.includes(q) || uname.includes(q) || email.includes(q) || (p.user_id || '').includes(q);
             });
@@ -1123,7 +1123,7 @@ const AdminApp = (() => {
             return;
         }
         container.innerHTML = filtered.map(p => {
-            const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.telegram_username || 'Без имени';
+            const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.username || p.telegram_username || 'Без имени';
             const role = p.role || 'member';
             const rc = ROLE_COLORS[role] || ROLE_COLORS.member;
             const verified = p.is_verified ? '<span class="text-green-400/60 text-[9px] ml-1">✓</span>' : '<span class="text-red-400/40 text-[9px] ml-1">✗</span>';
@@ -1132,7 +1132,7 @@ const AdminApp = (() => {
                 <div class="flex-1">
                     <span class="text-gray-200 font-bold">${escapeHtml(name)}</span>${verified}
                     <span class="ml-2 text-xs ${rc} border px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">${escapeHtml(role)}</span>
-                    ${p.telegram_username ? `<span class="text-gray-400 ml-2 text-xs">@${escapeHtml(p.telegram_username)}</span>` : ''}
+                    ${(p.username || p.telegram_username) ? `<span class="text-gray-400 ml-2 text-xs">@${escapeHtml(p.username || p.telegram_username)}</span>` : ''}
                     <span class="text-xs text-gray-500 block mt-1">ID: ${p.user_id ? p.user_id.slice(0, 8) + '...' : '—'} | Рег: ${p.created_at ? new Date(p.created_at).toLocaleDateString('ru') : '—'}</span>
                 </div>
                 <span class="text-gray-500 text-[9px] uppercase tracking-widest">открыть →</span>
@@ -1152,7 +1152,7 @@ const AdminApp = (() => {
         const role = p.role || 'member';
         const allRoles = ['admin', 'stmoderator', 'moderator', 'beta', 'alpha', 'member'];
         const roleOptions = allRoles.map(r => `<option value="${r}" ${r === role ? 'selected' : ''}>${r}</option>`).join('');
-        const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.telegram_username || 'Без имени';
+        const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.username || p.telegram_username || 'Без имени';
         const regDate = p.created_at ? new Date(p.created_at).toISOString().slice(0, 16) : '';
 
         const achChips = achs.length > 0 ? achs.map(a => `
@@ -1182,6 +1182,20 @@ const AdminApp = (() => {
                     <p class="text-sm mb-2 ${p.is_verified ? 'text-green-400' : 'text-red-400'}">${p.is_verified ? 'Верифицирован' : 'Не верифицирован'}</p>
                     <button type="button" class="w-full text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.toggleVerified('${userId}', ${!p.is_verified})">${p.is_verified ? 'Снять верификацию' : 'Верифицировать'}</button>
                 </div>
+            </div>
+
+            <div class="border border-border p-4 rounded-xl mb-4">
+                <p class="text-[9px] uppercase tracking-widest text-gray-500 mb-2">Никнейм</p>
+                <p class="text-sm mb-2 text-white">${p.username ? '@' + escapeHtml(p.username) : '<span class="text-gray-500">Не задан</span>'}</p>
+                ${p.pending_username ? `<p class="text-xs text-yellow-400 mb-2">Запрошен: @${escapeHtml(p.pending_username)}</p>
+                <div class="flex gap-2">
+                    <button type="button" class="flex-1 text-[10px] uppercase tracking-widest border border-green-500/30 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 transition-colors rounded-lg text-green-400" onclick="AdminApp.approveUsername('${userId}', true)">Одобрить</button>
+                    <button type="button" class="flex-1 text-[10px] uppercase tracking-widest border border-red-500/30 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 transition-colors rounded-lg text-red-400" onclick="AdminApp.approveUsername('${userId}', false)">Отклонить</button>
+                </div>` : `
+                <div class="flex gap-2">
+                    <input id="pd-username" type="text" value="${escapeHtml(p.username || '')}" placeholder="@ник" class="flex-1 bg-surface border border-border px-3 py-2 text-xs text-white outline-none focus:border-white/50 rounded-xl">
+                    <button type="button" class="text-[10px] uppercase tracking-widest border border-white/15 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-lg" onclick="AdminApp.updateUsername('${userId}')">Сохранить</button>
+                </div>`}
             </div>
 
             <div class="border border-border p-4 rounded-xl mb-4">
@@ -1263,6 +1277,26 @@ const AdminApp = (() => {
         try {
             const r = await Api.adminUpdateUserProfile(userId, { created_at: new Date(val).toISOString() });
             if (!r || !r.ok) { alert('Не удалось'); return; }
+            await loadProfiles();
+            await openProfileDetail(userId);
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    async function approveUsername(userId, approve) {
+        try {
+            const r = await Api.adminApproveUsername(userId, approve);
+            if (!r || !r.ok) { alert('Не удалось: ' + (r && r.reason ? r.reason : '')); return; }
+            await loadProfiles();
+            await openProfileDetail(userId);
+        } catch (err) { alert('Ошибка: ' + err.message); }
+    }
+
+    async function updateUsername(userId) {
+        const val = document.getElementById('pd-username').value.trim();
+        if (!val) { alert('Введите ник'); return; }
+        try {
+            const r = await Api.adminUpdateUserProfile(userId, { username: val });
+            if (!r || !r.ok) { alert('Не удалось: ' + (r && r.reason ? r.reason : '')); return; }
             await loadProfiles();
             await openProfileDetail(userId);
         } catch (err) { alert('Ошибка: ' + err.message); }
@@ -1367,7 +1401,7 @@ const AdminApp = (() => {
             // Recent events from profiles (latest signups)
             const recent = [...(profiles || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 8);
             events.innerHTML = recent.map(p => {
-                const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.telegram_username || 'User';
+                const name = [p.telegram_first_name, p.telegram_last_name].filter(Boolean).join(' ') || p.username || p.telegram_username || 'User';
                 const date = p.created_at ? formatDateForDisplay(p.created_at.split('T')[0]) : '';
                 return `<div class="flex justify-between items-center py-1 border-b border-white/5">
                     <span class="text-xs opacity-60">${escapeHtml(name)}</span>
@@ -1395,7 +1429,7 @@ const AdminApp = (() => {
                 const profiles = await Api.adminGetProfiles().catch(() => []);
                 if (profiles.length > 0) {
                     const latest = profiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-                    const name = [latest.telegram_first_name, latest.telegram_last_name].filter(Boolean).join(' ') || latest.telegram_username;
+                    const name = [latest.telegram_first_name, latest.telegram_last_name].filter(Boolean).join(' ') || latest.username || latest.telegram_username;
                     if (name) addLogEntry('auth', `${escapeHtml(name)} — новый пользователь`);
                 }
             } catch {}
@@ -1825,7 +1859,7 @@ const AdminApp = (() => {
         manageModelParams, addParamValue, deleteParamValue, deleteParam,
         showAddResultForm, editResult, deleteResult,
         assignModerator, removeModerator,
-        openProfileDetail, setRole, toggleVerified, updateCreatedAt,
+        openProfileDetail, setRole, toggleVerified, updateCreatedAt, approveUsername, updateUsername,
         grantAch, revokeAch, grantInvite,
         switchSection, openAddPrompt: showAddPromptForm, openAddInvite: () => document.getElementById('add-invite-btn')?.click(),
         pinThread, deleteThread, unban, doBan,
