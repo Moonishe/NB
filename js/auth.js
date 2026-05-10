@@ -413,6 +413,11 @@ const AuthApp = (() => {
 
         if (!target.trim()) return;
 
+        // FIX: если текст уже совпадает с target и не анимируется — не запускать повторно
+        // Это предотвращает ситуацию когда runAccountDecode вызывается 2-3 раза подряд
+        // (из cache → из session), перебивая анимацию и оставляя шум
+        if (el._decodeFinal === target && !el._decodeRunning && el.textContent === target) return;
+
         if (el._decodeFinal === target && el._decodeRunning) return;
 
         el._decodeFinal = target;
@@ -468,7 +473,14 @@ const AuthApp = (() => {
 
         function step(now) {
 
-            if (!el.isConnected || el._decodeToken !== token) return;
+            if (!el.isConnected) return;
+
+            // FIX: если токен перебит — принудительно завершаем старую анимацию финальным текстом
+            // раньше просто выходили без финализации, оставляя шум (█▌▐)
+            if (el._decodeToken !== token) {
+                // Не трогаем текст — новая анимация уже управляет элементом
+                return;
+            }
 
             const t = Math.min((now - t0) / duration, 1);
 
@@ -488,10 +500,12 @@ const AuthApp = (() => {
 
         requestAnimationFrame(step);
 
-        // FIX: дважды — safety net на случай перебивания новой анимацией или отключения RAF
+        // FIX: БЕЗУСЛОВНЫЙ fallback — ставим финальный текст если _decodeFinal всё ещё target
+        // (новая анимация не стартовала с другим target). Даже если токен перебит — значит
+        // запустилась новая анимация с тем же target, и она своим setTimeout'ом тоже финализирует
         setTimeout(() => {
 
-            if (el.isConnected && el._decodeToken === token) {
+            if (el.isConnected && el._decodeFinal === target) {
 
                 el.textContent = target;
 
@@ -499,13 +513,7 @@ const AuthApp = (() => {
 
             }
 
-        }, duration + 150);
-        // Дополнительный безусловный fallback — если токен перебит, но текст всё равно должен быть финальным
-        setTimeout(() => {
-            if (el.isConnected && el._decodeFinal === target) {
-                el.textContent = target;
-            }
-        }, duration + 400);
+        }, duration + 200);
 
     }
 
