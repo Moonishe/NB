@@ -1001,6 +1001,10 @@ const AuthApp = (() => {
 
                 showError('auth-error', err.message || 'Ошибка аутентификации');
 
+                if (err.status === 401) {
+                    reloadTelegramWidget();
+                }
+
             }
 
         } finally {
@@ -1013,6 +1017,26 @@ const AuthApp = (() => {
 
         }
 
+    }
+
+    function reloadTelegramWidget() {
+        const container = document.getElementById('tg-widget-container');
+        if (!container) return;
+        const oldIframe = container.querySelector('iframe');
+        const oldScript = container.querySelector('script[src*="telegram-widget"]');
+        if (oldIframe) oldIframe.remove();
+        if (oldScript) oldScript.remove();
+        const botUsername = window.TELEGRAM_BOT_USERNAME;
+        if (!botUsername) return;
+        const s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://telegram.org/js/telegram-widget.js?22&t=' + Date.now();
+        s.setAttribute('data-telegram-login', botUsername);
+        s.setAttribute('data-size', 'large');
+        s.setAttribute('data-radius', '8');
+        s.setAttribute('data-userpic', 'false');
+        s.setAttribute('data-onauth', 'onTelegramAuth(user)');
+        container.appendChild(s);
     }
 
 
