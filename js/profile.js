@@ -771,9 +771,9 @@ function decodeInviteAscii(code) {
         const total = spans.length;
         const fs = parseFloat(getComputedStyle(spans[0]).fontSize) || 8;
         const isMobile = fs < 7;
-        const STAGGER = isMobile ? 14 : 20;
-        const FLASH_DUR = 70;
-        const totalDuration = total * STAGGER + FLASH_DUR + 160;
+        const STAGGER = isMobile ? 4 : 6;
+        const FLASH_DUR = 20;
+        const totalDuration = total * STAGGER + FLASH_DUR + 50;
 
         /* Get role accent color from CSS variable */
         let roleColor = '';
@@ -3713,9 +3713,9 @@ function decodeInviteAscii(code) {
 
                 hackerDecodeStable(copyBtn, copySucceeded ? 'copied' : 'failed', 220);
 
-                const minCopyDuration = Math.max(waveDuration, copySucceeded ? 520 : 720);
+                const minCopyDuration = Math.max(waveDuration, copySucceeded ? 150 : 210);
 
-                const resetDelay = Math.max(520, minCopyDuration - (performance.now() - copyStart));
+                const resetDelay = Math.max(150, minCopyDuration - (performance.now() - copyStart));
 
                 setTimeout(() => {
 
