@@ -4530,7 +4530,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            ${preview ? `<p>${preview}</p>` : ''}
+                            ${preview ? '<p>' + preview + '</p>' : ''}
 
 
 
@@ -4540,7 +4540,7 @@ function decodeInviteAscii(code) {
 
                         </div>
 
-{{ ... }
+                    </a>`;
 
                 });
 
@@ -4622,13 +4622,13 @@ function decodeInviteAscii(code) {
 
 
 
-                const invitedNameRaw = [invited.telegram_first_name, invited.telegram_last_name].filter(Boolean).join(' ') || invited.username || invited.telegram_username || `UID ${invited.uid}`;
+                const invitedNameRaw = [invited.telegram_first_name, invited.telegram_last_name].filter(Boolean).join(' ') || invited.username || invited.telegram_username || ('UID ' + invited.uid);
 
                 const invitedName = escapeHtml(cleanText(invitedNameRaw, 40));
 
                 const invitedDisplayUname = invited.username || invited.telegram_username || '';
 
-                const invitedUsername = invitedDisplayUname ? `@${escapeHtml(cleanText(invitedDisplayUname, 32))}` : `#${escapeHtml(invited.uid || '')}`;
+                const invitedUsername = invitedDisplayUname ? ('@' + escapeHtml(cleanText(invitedDisplayUname, 32))) : ('#' + escapeHtml(invited.uid || ''));
 
                 const invitedPhoto = invited.telegram_photo_url ? (invited.telegram_photo_url.startsWith('/') ? 'https://t.me' + invited.telegram_photo_url : invited.telegram_photo_url) : '';
 
@@ -4638,7 +4638,7 @@ function decodeInviteAscii(code) {
 
 
 
-                    <span class="profile-activity-mark">${invitedPhoto ? `<img src="${escapeHtml(invitedPhoto)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover" onerror="this.style.display='none'">` : '👤'}</span>
+                    <span class="profile-activity-mark">${invitedPhoto ? '<img src="' + escapeHtml(invitedPhoto) + '" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover" onerror="this.style.display=\'none\'">' : '👤'}</span>
 
 
 
