@@ -933,14 +933,13 @@ canvas#ascii-canvas {
 
 
 .nav-admin-shortcut {
-    width: 38px;
-    height: 38px;
+    width: auto;
+    height: auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.04);
+    border: 0;
+    background: transparent;
     color: rgba(255,255,255,0.72);
     font: 900 15px/1 'Geist Mono', 'Courier New', monospace;
     letter-spacing: 0;
@@ -951,8 +950,6 @@ canvas#ascii-canvas {
 
 .nav-admin-shortcut:hover {
     color: #fff;
-    border-color: rgba(255,255,255,0.38);
-    background: rgba(255,255,255,0.08);
     text-shadow: 0 0 10px rgba(255,255,255,0.35), 0 0 20px rgba(255,255,255,0.1);
     transform: translateY(-1px);
 }
