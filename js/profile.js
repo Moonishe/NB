@@ -816,8 +816,8 @@ function decodeInviteAscii(code) {
                 if (!highlighted[i]) {
                     highlighted[i] = 1;
                     if (roleColor) el.style.color = roleColor;
-                    el.style.filter = 'brightness(2.4)';
-                    el.style.textShadow = '0 0 10px ' + (roleColor || 'rgba(255,255,255,0.5)') + ', 0 0 22px ' + (roleColor || 'rgba(255,255,255,0.25)');
+                    el.style.filter = 'brightness(3.2)';
+                    el.style.textShadow = '0 0 12px ' + (roleColor || 'rgba(255,255,255,0.7)') + ', 0 0 28px ' + (roleColor || 'rgba(255,255,255,0.4)') + ', 0 0 48px ' + (roleColor || 'rgba(255,255,255,0.15)');
                 }
 
                 const sinceHit = elapsed - hitAt;
