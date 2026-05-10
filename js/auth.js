@@ -555,29 +555,11 @@ const AuthApp = (() => {
 
 
     function runAccountDecode() {
-
-        requestAnimationFrame(() => {
-
-            decodeTextGroup([
-
-                '[data-view="account"] .auth-terminal-header span',
-
-                '#account-name',
-
-                '#account-username',
-
-                '#account-logout',
-                // FIX: убраны '[data-view="account"] a' — захватывал ссылки типа "Профиль"
-                // и анимировал их текст, что давало артефакты вроде "ПРОФИЛ4"
-                '#account-profile-link'
-
-            ]);
-
-        });
-
+        // FIX: убрана decode-анимация на карточке аккаунта — скрамбл ломал
+        // кириллицу и смешанный текст (АЖЧАХКДФ, ПРОФЛЯН, ВЫЙFU, Ж ЦGA)
+        // Статичная информация не нуждается в анимации
+        return;
     }
-
-
 
     let _inviteDecodeRaf = 0;
 
