@@ -902,6 +902,15 @@ const AuthApp = (() => {
     async function handleTelegramAuth(user) {
         if (isProcessing) return;
 
+        if (user && user.auth_date) {
+            const authAge = Math.floor(Date.now() / 1000) - Number(user.auth_date);
+            if (isNaN(authAge) || authAge > 300) {
+                showError('auth-error', 'Telegram-подтверждение устарело. Нажмите кнопку обновления ниже ↻');
+                showTelegramRefreshButton();
+                return;
+            }
+        }
+
         if (authMode === 'register') {
             const code = document.getElementById('invite-code').value.trim().toUpperCase();
             if (!code) {
@@ -1049,7 +1058,7 @@ const AuthApp = (() => {
     function reloadTelegramWidget() {
         const container = resetTelegramWidgetContainer();
         if (!container) return;
-        createTelegramScript(container);
+        setTimeout(() => createTelegramScript(container), 400);
     }
 
     function showTelegramRefreshButton() {
@@ -1064,6 +1073,11 @@ const AuthApp = (() => {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
                 hideError('auth-error');
+                const inner = container.querySelector('.tg-custom-btn');
+                if (inner) {
+                    inner.innerHTML = '<span class="animate-pulse">Загрузка виджета…</span>';
+                    inner.style.pointerEvents = 'none';
+                }
                 reloadTelegramWidget();
             }, { once: true });
         }
