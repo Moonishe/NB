@@ -429,10 +429,11 @@ const AuthApp = (() => {
 
         // Don't lock dimensions — it causes layout jumps when chars change width
 
-        // FIX: только нейтральные ASCII-символы для скрамбла — кириллица в keep чтобы не заменялась
-        const chars = 'ABCDEFGHKNOPRSTUVXYZ023456789░▒▓';
+        // FIX: только визуальный шум (блоки) для скрамбла — если анимация оборвётся на полпути,
+        // не останется артефактов типа "ПРОФИЛ4", "ТЯ", "ВЫЙFU" (замены букв на буквы/цифры)
+        const chars = '░▒▓█▀▄▌▐';
 
-        // FIX: добавлена кириллица в keep — иначе кирилл. буквы скрамблились в случайные символы (ТЯ, ПРОФИЛ#)
+        // FIX: добавлена кириллица в keep — иначе кирилл. буквы скрамблились в случайные символы
         const keep = /[\s.\-:,/@()\u0400-\u04FF]/;
 
         const t0 = performance.now();
@@ -487,6 +488,7 @@ const AuthApp = (() => {
 
         requestAnimationFrame(step);
 
+        // FIX: дважды — safety net на случай перебивания новой анимацией или отключения RAF
         setTimeout(() => {
 
             if (el.isConnected && el._decodeToken === token) {
@@ -498,6 +500,12 @@ const AuthApp = (() => {
             }
 
         }, duration + 150);
+        // Дополнительный безусловный fallback — если токен перебит, но текст всё равно должен быть финальным
+        setTimeout(() => {
+            if (el.isConnected && el._decodeFinal === target) {
+                el.textContent = target;
+            }
+        }, duration + 400);
 
     }
 
@@ -555,10 +563,17 @@ const AuthApp = (() => {
 
 
     function runAccountDecode() {
-        // FIX: убрана decode-анимация на карточке аккаунта — скрамбл ломал
-        // кириллицу и смешанный текст (АЖЧАХКДФ, ПРОФЛЯН, ВЫЙFU, Ж ЦGA)
-        // Статичная информация не нуждается в анимации
-        return;
+        // FIX: анимация скрамблит текст только визуальным шумом (блоки),
+        // cyrillic в keep-regex не трогает, fallback в decodeText гарантирует финальный текст
+        requestAnimationFrame(() => {
+            decodeTextGroup([
+                '[data-view="account"] .auth-terminal-header span',
+                '#account-name',
+                '#account-username',
+                '#account-logout',
+                '#account-profile-link'
+            ]);
+        });
     }
 
     let _inviteDecodeRaf = 0;
