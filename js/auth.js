@@ -901,16 +901,6 @@ const AuthApp = (() => {
 
     async function handleTelegramAuth(user) {
         if (isProcessing) return;
-        if (tgCallbackMuted) return;
-
-        if (user && user.auth_date) {
-            const authAge = Math.floor(Date.now() / 1000) - Number(user.auth_date);
-            if (isNaN(authAge) || authAge > 300) {
-                showError('auth-error', 'Telegram-подтверждение устарело. Нажмите кнопку обновления ниже ↻');
-                showTelegramRefreshButton();
-                return;
-            }
-        }
 
         if (authMode === 'register') {
             const code = document.getElementById('invite-code').value.trim().toUpperCase();
@@ -1029,11 +1019,26 @@ const AuthApp = (() => {
 
     }
 
-    let tgCallbackMuted = false;
+    const telegramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.9 4.6 18.7 19.7c-.2 1-.8 1.2-1.6.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.4-4.9 8.9-8c.4-.4-.1-.6-.6-.2l-11 6.9-4.7-1.5c-1-.3-1-1 .2-1.5L20.7 3.4c.9-.3 1.6.2 1.2 1.2Z"/></svg>';
+
+    function showTelegramWidgetFallback(container, message, className = 'tg-widget-state') {
+        if (!container) return;
+        const customBtn = container.querySelector('.tg-custom-btn');
+        if (customBtn) customBtn.style.display = 'none';
+        const fb = document.createElement('div');
+        fb.className = className;
+        fb.innerHTML = telegramIcon + '<span>' + message + '</span>';
+        container.appendChild(fb);
+    }
 
     function createTelegramScript(container) {
         const botUsername = window.TELEGRAM_BOT_USERNAME;
         if (!botUsername) return false;
+        const customBtn = container.querySelector('.tg-custom-btn');
+        if (customBtn) {
+            customBtn.style.display = '';
+            customBtn.classList.add('tg-btn-loading');
+        }
         const s = document.createElement('script');
         s.async = true;
         s.src = 'https://telegram.org/js/telegram-widget.js?22&t=' + Date.now();
@@ -1042,7 +1047,25 @@ const AuthApp = (() => {
         s.setAttribute('data-radius', '8');
         s.setAttribute('data-userpic', 'false');
         s.setAttribute('data-onauth', 'onTelegramAuth(user)');
+        s.onerror = () => {
+            if (customBtn) customBtn.classList.remove('tg-btn-loading');
+            showTelegramWidgetFallback(container, 'Telegram widget не загружен');
+        };
         container.appendChild(s);
+
+        let checksLeft = 15;
+        const widgetCheck = window.setInterval(() => {
+            const iframe = container.querySelector('iframe');
+            if (iframe) {
+                if (customBtn) customBtn.classList.remove('tg-btn-loading');
+                window.clearInterval(widgetCheck);
+            } else if (--checksLeft <= 0) {
+                if (customBtn) customBtn.classList.remove('tg-btn-loading');
+                showTelegramWidgetFallback(container, 'Telegram widget не отображается');
+                window.clearInterval(widgetCheck);
+            }
+        }, 300);
+
         return true;
     }
 
@@ -1061,9 +1084,7 @@ const AuthApp = (() => {
     function reloadTelegramWidget() {
         const container = resetTelegramWidgetContainer();
         if (!container) return;
-        tgCallbackMuted = true;
-        setTimeout(() => createTelegramScript(container), 400);
-        setTimeout(() => { tgCallbackMuted = false; }, 3000);
+        createTelegramScript(container);
     }
 
     function showTelegramRefreshButton() {
@@ -1078,14 +1099,25 @@ const AuthApp = (() => {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
                 hideError('auth-error');
-                const inner = container.querySelector('.tg-custom-btn');
-                if (inner) {
-                    inner.innerHTML = '<span class="animate-pulse">Загрузка виджета…</span>';
-                    inner.style.pointerEvents = 'none';
-                }
                 reloadTelegramWidget();
             }, { once: true });
         }
+    }
+
+    function initTelegramWidget() {
+        const container = document.getElementById('tg-widget-container');
+        if (!container) return;
+        const host = window.location.hostname;
+        const isLocal = !host || host === 'localhost' || host === '127.0.0.1' || host === '::1';
+        if (isLocal) {
+            showTelegramWidgetFallback(container, 'Telegram доступен только на домене бота', 'tg-local-fallback');
+            return;
+        }
+        if (!window.TELEGRAM_BOT_USERNAME) {
+            showTelegramWidgetFallback(container, 'Telegram bot не настроен');
+            return;
+        }
+        createTelegramScript(container);
     }
 
 
@@ -1389,6 +1421,7 @@ const AuthApp = (() => {
 
 
 window.onTelegramAuth = handleTelegramAuth;
+initTelegramWidget();
 
 function renderTurnstile() {
     try {
