@@ -317,6 +317,13 @@
         dropdownOpen = true;
         if (!dropdownEl) dropdownEl = createDropdown();
 
+        // FIX: обновляем href ссылки на профиль при каждом открытии —
+        // при первом создании uid мог ещё не быть загружен из API
+        const profileLink = dropdownEl.querySelector('#nav-dropdown-profile');
+        if (profileLink && userBtn && userBtn.dataset.uid) {
+            profileLink.href = 'profile/' + userBtn.dataset.uid;
+        }
+
         const anchor = document.getElementById('nav-actions') || userBtn;
         const rect = anchor.getBoundingClientRect();
         dropdownEl.style.top = (rect.bottom + 4) + 'px';
@@ -399,7 +406,7 @@
                 try {
                     const dev = JSON.parse(devRaw);
                     const name = safeDisplayName(dev) || 'Dev';
-                    showUserMenu(name, dev.role);
+                    showUserMenu(name, dev.role, dev.uid);
                     return;
                 } catch {}
             }
