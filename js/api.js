@@ -426,6 +426,18 @@ const Api = (() => {
         return !!data;
     }
 
+    function getTelegramAuthErrorMessage(result, status) {
+        const raw = result && result.error ? String(result.error) : '';
+        if (result && result.needs_invite) return 'Для регистрации нужен инвайт-код. Введите код выше и попробуйте снова 🤨';
+        if (/инвайт|invite/i.test(raw)) return 'Инвайт-код недействителен или уже использован 🤨';
+        if (/captcha/i.test(raw)) return 'Проверка капчи не пройдена. Обновите капчу и попробуйте снова';
+        if (/too many/i.test(raw) || status === 429) return 'Слишком много попыток. Подождите пару минут и попробуйте снова';
+        if (/invalid telegram authentication/i.test(raw) || status === 401) return 'Telegram-подтверждение устарело. Откройте виджет ещё раз';
+        if (/forbidden origin/i.test(raw) || status === 403) return 'Домен не разрешён для Telegram-регистрации';
+        if (status >= 500) return 'Сервер регистрации временно не ответил. Попробуйте ещё раз через минуту 🤨';
+        return raw || 'Ошибка аутентификации';
+    }
+
     async function telegramAuth(authData, inviteCode, turnstileToken) {
         const supabaseUrl = window.SUPABASE_URL;
         const anonKey = window.SUPABASE_ANON_KEY;
@@ -458,8 +470,10 @@ const Api = (() => {
         }
 
         if (!response.ok) {
-            const err = new Error(result.error || 'Authentication failed');
+            const err = new Error(getTelegramAuthErrorMessage(result, response.status));
             err.needsInvite = result.needs_invite || false;
+            err.status = response.status;
+            err.serverError = result.error || '';
             throw err;
         }
 

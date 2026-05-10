@@ -16,6 +16,8 @@ RETURNS TABLE (
     bio TEXT,
     is_moderator BOOLEAN,
     is_verified BOOLEAN,
+    is_banned BOOLEAN,
+    ban_expires TIMESTAMPTZ,
     role TEXT,
     created_at TIMESTAMPTZ,
     threads_count BIGINT,
@@ -44,6 +46,8 @@ AS $$
         p.bio::TEXT,
         (COALESCE(p.role, 'member') IN ('moderator', 'stmoderator', 'admin'))::BOOLEAN,
         COALESCE(p.is_verified, false)::BOOLEAN,
+        COALESCE(ban_state.is_banned, false)::BOOLEAN,
+        ban_state.ban_expires::TIMESTAMPTZ,
         COALESCE(p.role, 'member')::TEXT,
         p.created_at::TIMESTAMPTZ,
         COALESCE(ft.threads_count, 0)::BIGINT,
@@ -55,6 +59,16 @@ AS $$
         COALESCE(iuc.invited_users_count, 0)::BIGINT,
         COALESCE(iu.invited_users, '[]'::JSONB)::JSONB
     FROM public.profiles p
+    LEFT JOIN LATERAL (
+        SELECT true AS is_banned, uma.expires_at AS ban_expires
+        FROM public.user_mod_actions uma
+        WHERE uma.user_id = p.user_id
+          AND uma.action_type = 'ban'
+          AND uma.is_active = true
+          AND (uma.expires_at IS NULL OR uma.expires_at > now())
+        ORDER BY uma.created_at DESC
+        LIMIT 1
+    ) ban_state ON true
     LEFT JOIN LATERAL (
         SELECT COUNT(*)::BIGINT AS threads_count
         FROM public.forum_threads ft
@@ -108,22 +122,26 @@ AS $$
             'telegram_last_name', invited.telegram_last_name,
             'telegram_username', invited.telegram_username,
             'username', invited.username,
-            'telegram_photo_url', invited.telegram_photo_url
-        ) ORDER BY invited.uid), '[]'::JSONB) AS invited_users
+            'telegram_photo_url', invited.telegram_photo_url,
+            'created_at', invited.created_at,
+            'used_at', invited.used_at
+        ) ORDER BY invited.used_at DESC NULLS LAST), '[]'::JSONB) AS invited_users
         FROM (
-            SELECT DISTINCT
+            SELECT DISTINCT ON (ip.user_id)
                 ip.user_id,
                 ip.uid,
                 ip.telegram_first_name,
                 ip.telegram_last_name,
                 ip.telegram_username,
                 ip.username,
-                ip.telegram_photo_url
+                ip.telegram_photo_url,
+                ip.created_at,
+                icu.used_at
             FROM public.invite_codes ic
             JOIN public.invite_code_uses icu ON icu.invite_code_id = ic.id
             JOIN public.profiles ip ON ip.user_id = icu.user_id
             WHERE ic.created_by = p.user_id
-            ORDER BY ip.uid
+            ORDER BY ip.user_id, icu.used_at DESC
             LIMIT 12
         ) invited
     ) iu ON true
@@ -144,6 +162,8 @@ RETURNS TABLE (
     bio TEXT,
     is_moderator BOOLEAN,
     is_verified BOOLEAN,
+    is_banned BOOLEAN,
+    ban_expires TIMESTAMPTZ,
     role TEXT,
     created_at TIMESTAMPTZ,
     threads_count BIGINT,

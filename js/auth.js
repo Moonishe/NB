@@ -57,7 +57,11 @@ const AuthApp = (() => {
 
         const el = document.getElementById(id);
 
-        if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+        if (el) {
+            el.textContent = msg;
+            el.classList.remove('hidden');
+            el.classList.toggle('auth-error-card', id === 'auth-error');
+        }
 
     }
 
@@ -67,7 +71,10 @@ const AuthApp = (() => {
 
         const el = document.getElementById(id);
 
-        if (el) el.classList.add('hidden');
+        if (el) {
+            el.classList.add('hidden');
+            el.classList.remove('auth-error-card');
+        }
 
     }
 
@@ -984,7 +991,7 @@ const AuthApp = (() => {
 
             if (err.needsInvite) {
 
-                showError('auth-error', 'Для регистрации нужен инвайт-код. Введите код выше и попробуйте снова.');
+                showError('auth-error', err.message || 'Для регистрации нужен инвайт-код. Введите код выше и попробуйте снова 🤨');
 
                 const inviteSection = document.getElementById('invite-section');
 

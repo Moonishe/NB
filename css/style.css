@@ -932,6 +932,35 @@ canvas#ascii-canvas {
 
 
 
+.nav-admin-shortcut {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.58);
+    font: 700 12px/1 'Geist Mono', monospace;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.nav-admin-shortcut:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.32);
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-1px);
+}
+
+.nav-admin-shortcut.hidden {
+    display: none;
+}
+
+
+
 .nav-user-dropdown-float {
 
 
@@ -4034,6 +4063,95 @@ canvas#ascii-canvas {
 
 
 .forum-error { color: rgba(255,100,100,0.5); }
+
+
+
+.profile-unknown-card {
+    max-width: 520px;
+    margin: 88px auto 0;
+    padding: 34px 28px 30px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08), transparent 48%), linear-gradient(180deg, rgba(12,12,12,0.96), rgba(5,5,5,0.94));
+    box-shadow: 0 24px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+    text-align: center;
+}
+
+.profile-unknown-sticker {
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    font-size: 36px;
+    filter: grayscale(1);
+}
+
+.profile-unknown-kicker,
+.profile-unknown-title,
+.profile-unknown-text {
+    margin: 0;
+}
+
+.profile-unknown-kicker {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    color: rgba(255,255,255,0.24);
+}
+
+.profile-unknown-title {
+    margin-top: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    color: rgba(255,255,255,0.9);
+}
+
+.profile-unknown-text {
+    margin-top: 12px;
+    color: rgba(255,255,255,0.42);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.profile-unknown-text a {
+    color: rgba(255,255,255,0.78);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.profile-unknown-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.profile-unknown-primary {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.74);
+}
+
+
+.profile-banned-card {
+    border-color: rgba(248,113,113,0.18);
+    background: radial-gradient(circle at 50% 0%, rgba(127,29,29,0.18), transparent 48%), linear-gradient(180deg, rgba(12,12,12,0.96), rgba(5,5,5,0.94));
+}
+
+.profile-banned-sticker {
+    color: rgba(248,113,113,0.84);
+    border-color: rgba(248,113,113,0.18);
+    background: rgba(127,29,29,0.14);
+    filter: none;
+}
+
 
 
 

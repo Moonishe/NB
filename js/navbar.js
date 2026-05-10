@@ -100,6 +100,7 @@
                 <a href="register" id="nav-auth-link" class="nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity" style="${hasSession ? 'display:none' : ''}">Войти</a>
             </div>
             <div id="nav-actions" class="flex items-center gap-2">
+                <a href="admin/index.html" id="nav-admin-shortcut" class="hidden nav-admin-shortcut" aria-label="Админка" title="Админка">A</a>
                 <div id="nav-notif-wrap" class="${hasSession ? 'relative' : 'hidden relative'}">
                     <button id="nav-notif-btn" class="flex items-center justify-center w-10 h-10 opacity-40 hover:opacity-100 transition-opacity" aria-label="Уведомления">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -402,9 +403,12 @@
         if (userMenuWrap) userMenuWrap.classList.remove('hidden');
         const notifWrap = document.getElementById('nav-notif-wrap');
         if (notifWrap) notifWrap.classList.remove('hidden');
+        const adminShortcut = document.getElementById('nav-admin-shortcut');
+        if (adminShortcut) adminShortcut.classList.toggle('hidden', role !== 'admin');
         setDisplayName(name);
         // FIX: сохраняем uid в dataset кнопки, чтобы createDropdown мог его использовать
         if (uid && userBtn) userBtn.dataset.uid = String(uid);
+        if (userBtn) userBtn.dataset.role = role || '';
         if (role === 'admin') {
             const adminLink = document.getElementById('nav-dropdown-admin');
             if (adminLink) adminLink.style.display = '';

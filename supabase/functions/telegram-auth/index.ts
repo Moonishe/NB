@@ -385,12 +385,12 @@ Deno.serve(async (req: Request) => {
         }
       })
 
-      if (createError || !newUser) {
+      if (createError || !newUser?.user?.id) {
         console.error('telegram-auth create user failed', createError)
         return jsonResponse({ error: 'Internal server error' }, 500)
       }
 
-      targetUserId = newUser.id
+      targetUserId = newUser.user.id
       createdAuthUser = true
     }
 

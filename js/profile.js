@@ -2216,6 +2216,11 @@ function decodeInviteAscii(code) {
                 history.replaceState(null, '', cleanPath);
             }
 
+            if (profileData.is_banned) {
+                renderBannedProfile();
+                return;
+            }
+
 
 
             if (!profileData.achievement_points) profileData.achievement_points = 0;
@@ -4632,6 +4637,8 @@ function decodeInviteAscii(code) {
 
                 const invitedPhoto = invited.telegram_photo_url ? (invited.telegram_photo_url.startsWith('/') ? 'https://t.me' + invited.telegram_photo_url : invited.telegram_photo_url) : '';
 
+                const joinedAt = invited.used_at ? formatDate(invited.used_at) : (invited.created_at ? formatDate(invited.created_at) : '');
+
 
 
                 html += `<a class="profile-activity-item" href="${getProfileHref(invited.uid, invited.user_id)}">
@@ -4650,7 +4657,7 @@ function decodeInviteAscii(code) {
 
 
 
-                        <p>${invitedUsername}</p>
+                        <p>${invitedUsername}${joinedAt ? ' <span class="profile-activity-time">' + escapeHtml(joinedAt) + '</span>' : ''}</p>
 
 
 
@@ -5526,34 +5533,21 @@ function decodeInviteAscii(code) {
 
 
 
+        const unknownEmojis = ['🤨', '😳', '🫣', '😲', '🤯', '😵', '😮', '🙀', '👀', '🧐', '😶'];
+        const sticker = unknownEmojis[Math.floor(Math.random() * unknownEmojis.length)];
+        const title = !userInfo ? 'Нужен вход' : 'Профиль не найден';
+        const text = !userInfo ? '<a href="register">Войдите</a>, чтобы просмотреть профиль' : 'Такого профиля нет или ссылка устарела';
         main.innerHTML = `
-
-
-
-            <div class="forum-empty">
-
-
-
-                ${!userInfo ? '<a href="register">Войдите</a> чтобы просмотреть профиль' : 'Профиль не найден'}
-
-
-
-            </div>
-
-
-
-            <div class="profile-back">
-
-
-
-                <a href="forum" class="forum-cancel-btn">&larr; На форум</a>
-
-
-
-            </div>
-
-
-
+            <section class="profile-unknown-card" aria-live="polite">
+                <div class="profile-unknown-sticker">${sticker}</div>
+                <p class="profile-unknown-kicker">UNKNOWN PROFILE</p>
+                <h1 class="profile-unknown-title">${title}</h1>
+                <p class="profile-unknown-text">${text}</p>
+                <div class="profile-unknown-actions">
+                    <a href="forum" class="forum-cancel-btn">&larr; На форум</a>
+                    ${!userInfo ? '<a href="register" class="forum-cancel-btn profile-unknown-primary">Войти</a>' : ''}
+                </div>
+            </section>
         `;
 
 
@@ -5563,6 +5557,41 @@ function decodeInviteAscii(code) {
 
 
 
+
+
+
+    function renderBannedProfile() {
+
+
+
+        const main = document.getElementById('profile-main');
+
+
+
+        if (!main) return;
+
+
+
+        const displayNameRaw = (typeof safeDisplayName === 'function') ? safeDisplayName(profileData) : [cleanText(profileData.telegram_first_name, 50), cleanText(profileData.telegram_last_name, 50)].filter(Boolean).join(' ');
+        const displayName = displayNameRaw && displayNameRaw !== 'User' ? escapeHtml(cleanText(displayNameRaw, 50)) : '';
+        const banExpires = profileData.ban_expires ? formatDate(profileData.ban_expires) : '';
+        const bannedEmojis = ['🤣', '🤭', '🥳', '😂'];
+        const sticker = bannedEmojis[Math.floor(Math.random() * bannedEmojis.length)];
+        main.innerHTML = `
+            <section class="profile-unknown-card profile-banned-card" aria-live="polite">
+                <div class="profile-unknown-sticker profile-banned-sticker">${sticker}</div>
+                <p class="profile-unknown-kicker">BANNED USER</p>
+                <h1 class="profile-unknown-title">Пользователь забанен</h1>
+                <p class="profile-unknown-text">${displayName ? `${displayName} временно недоступен.` : 'Этот профиль временно недоступен.'}${banExpires ? ` Блокировка до ${escapeHtml(banExpires)}.` : ''}</p>
+                <div class="profile-unknown-actions">
+                    <a href="forum" class="forum-cancel-btn">&larr; На форум</a>
+                </div>
+            </section>
+        `;
+
+
+
+    }
 
 
 
