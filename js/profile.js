@@ -2982,8 +2982,6 @@ function decodeInviteAscii(code) {
 
                             ${accountStatusHtml}
 
-                            ${invitedUsersHtml}
-
 
 
                         </div>
@@ -3115,6 +3113,8 @@ function decodeInviteAscii(code) {
 
 
                     ${accountSection}
+
+                    ${invitedUsersHtml}
 
 
 
