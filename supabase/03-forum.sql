@@ -1837,8 +1837,8 @@ BEGIN
     VALUES (
         NEW.id,
         NEW.email,
-        (v_telegram_id IS NOT NULL),
-        CASE WHEN v_telegram_id IS NULL THEN v_invite_code ELSE NULL END,
+        false,
+        v_invite_code,
         v_telegram_id,
         'member'
     );

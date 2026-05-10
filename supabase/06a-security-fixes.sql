@@ -160,8 +160,7 @@ BEGIN
     VALUES (v_invite_id, auth.uid());
 
     UPDATE profiles
-    SET is_verified = true,
-        used_invite_code_id = v_invite_id,
+    SET used_invite_code_id = v_invite_id,
         pending_invite_code = NULL
     WHERE user_id = auth.uid();
 

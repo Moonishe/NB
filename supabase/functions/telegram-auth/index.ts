@@ -264,12 +264,12 @@ Deno.serve(async (req: Request) => {
 
     const { data: byTgId } = await adminClient
       .from('profiles')
-      .select('user_id, is_verified')
+      .select('user_id, is_verified, used_invite_code_id')
       .eq('telegram_id', telegramId)
       .maybeSingle()
 
     if (byTgId) {
-      if (byTgId.is_verified) {
+      if (byTgId.is_verified || byTgId.used_invite_code_id) {
         existingUserId = byTgId.user_id
       } else {
         pendingAuthUserId = byTgId.user_id
@@ -280,12 +280,12 @@ Deno.serve(async (req: Request) => {
     if (!existingUserId && !pendingAuthUserId) {
       const { data: byEmail } = await adminClient
         .from('profiles')
-        .select('user_id, telegram_id, is_verified')
+        .select('user_id, telegram_id, is_verified, used_invite_code_id')
         .eq('email', email)
         .maybeSingle()
 
       if (byEmail) {
-        if (byEmail.is_verified) {
+        if (byEmail.is_verified || byEmail.used_invite_code_id) {
           existingUserId = byEmail.user_id
           if (!byEmail.telegram_id) {
             await adminClient
@@ -314,6 +314,10 @@ Deno.serve(async (req: Request) => {
           console.error('telegram-auth session retry failed', retry.error)
           return jsonResponse({ error: 'Internal server error' }, 500)
         }
+        await adminClient
+          .from('profiles')
+          .update({ telegram_id: telegramId, ...tgProfile })
+          .eq('user_id', existingUserId)
         return jsonResponse({
           access_token: retry.data.session.access_token,
           refresh_token: retry.data.session.refresh_token,
@@ -361,7 +365,8 @@ Deno.serve(async (req: Request) => {
       const { error: updateAuthError } = await adminClient.auth.admin.updateUserById(targetUserId, {
         password,
         user_metadata: {
-          invite_code: inviteCodeUpper
+          invite_code: inviteCodeUpper,
+          telegram_id: telegramId
         }
       })
 
@@ -375,7 +380,8 @@ Deno.serve(async (req: Request) => {
         password,
         email_confirm: true,
         user_metadata: {
-          invite_code: inviteCodeUpper
+          invite_code: inviteCodeUpper,
+          telegram_id: telegramId
         }
       })
 
@@ -441,7 +447,7 @@ Deno.serve(async (req: Request) => {
       .upsert({
         user_id: targetUserId,
         email,
-        is_verified: true,
+        is_verified: false,
         telegram_id: telegramId,
         ...tgProfile,
         used_invite_code_id: inviteId,

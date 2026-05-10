@@ -574,13 +574,17 @@ const AuthApp = (() => {
         // FIX: анимация скрамблит текст только визуальным шумом (блоки),
         // cyrillic в keep-regex не трогает, fallback в decodeText гарантирует финальный текст
         requestAnimationFrame(() => {
-            decodeTextGroup([
+            document.querySelectorAll([
                 '[data-view="account"] .auth-terminal-header span',
                 '#account-name',
                 '#account-username',
                 '#account-logout',
                 '#account-profile-link'
-            ]);
+            ].join(',')).forEach(el => {
+                el.textContent = el.dataset.text || el.dataset.decodeText || el.textContent.trim();
+                el._decodeRunning = false;
+                el._decodeFinal = el.textContent;
+            });
         });
     }
 

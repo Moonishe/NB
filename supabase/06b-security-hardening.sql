@@ -1,4 +1,4 @@
-﻿-- ============================================
+-- ============================================
 -- BUNDLE 6B: CANONICAL SECURITY HARDENING
 -- Run LAST, after 06a
 -- ============================================
@@ -604,13 +604,11 @@ BEGIN
 
     IF v_existing_invite_id IS NOT NULL THEN
         UPDATE public.profiles
-        SET is_verified = true,
-            used_invite_code_id = v_existing_invite_id,
+        SET used_invite_code_id = v_existing_invite_id,
             pending_invite_code = NULL
         WHERE user_id = p_user_id
           AND (
-              is_verified IS DISTINCT FROM true
-              OR used_invite_code_id IS DISTINCT FROM v_existing_invite_id
+              used_invite_code_id IS DISTINCT FROM v_existing_invite_id
               OR pending_invite_code IS NOT NULL
           );
 
@@ -643,13 +641,11 @@ BEGIN
 
     IF NOT FOUND THEN
         UPDATE public.profiles
-        SET is_verified = true,
-            used_invite_code_id = v_invite.id,
+        SET used_invite_code_id = v_invite.id,
             pending_invite_code = NULL
         WHERE user_id = p_user_id
           AND (
-              is_verified IS DISTINCT FROM true
-              OR used_invite_code_id IS DISTINCT FROM v_invite.id
+              used_invite_code_id IS DISTINCT FROM v_invite.id
               OR pending_invite_code IS NOT NULL
           );
 
@@ -671,8 +667,7 @@ BEGIN
     WHERE id = v_invite.id;
 
     UPDATE public.profiles
-    SET is_verified = true,
-        used_invite_code_id = v_invite.id,
+    SET used_invite_code_id = v_invite.id,
         pending_invite_code = NULL
     WHERE user_id = p_user_id;
 

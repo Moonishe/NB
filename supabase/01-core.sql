@@ -239,8 +239,7 @@ BEGIN
     END IF;
 
     UPDATE profiles
-    SET is_verified = true,
-        used_invite_code_id = v_invite_id,
+    SET used_invite_code_id = v_invite_id,
         pending_invite_code = NULL
     WHERE user_id = auth.uid();
 
@@ -457,8 +456,8 @@ BEGIN
     VALUES (
         NEW.id,
         NEW.email,
-        (v_telegram_id IS NOT NULL),
-        CASE WHEN v_telegram_id IS NULL THEN v_invite_code ELSE NULL END,
+        false,
+        v_invite_code,
         v_telegram_id
     );
     RETURN NEW;
@@ -803,8 +802,8 @@ BEGIN
     VALUES (
         NEW.id,
         NEW.email,
-        (v_telegram_id IS NOT NULL),
-        CASE WHEN v_telegram_id IS NULL THEN v_invite_code ELSE NULL END,
+        false,
+        v_invite_code,
         v_telegram_id
     );
     RETURN NEW;
@@ -1445,8 +1444,7 @@ BEGIN
     VALUES (v_invite_id, auth.uid());
 
     UPDATE profiles
-    SET is_verified = true,
-        used_invite_code_id = v_invite_id,
+    SET used_invite_code_id = v_invite_id,
         pending_invite_code = NULL
     WHERE user_id = auth.uid();
 
