@@ -22091,11 +22091,13 @@ span.ach-rarity-limited.ach-rarity-badge {
 
 .profile-account-invite-actions .profile-invite-copy-btn.is-copying {
 
-    border-color: rgba(var(--profile-account-rgb),0.36);
+    border-color: rgba(var(--profile-account-rgb),0.52);
 
-    background: rgba(var(--profile-account-rgb),0.08);
+    background: rgba(var(--profile-account-rgb),0.14);
 
-    color: rgba(235,255,246,0.82);
+    color: rgba(235,255,246,0.92);
+
+    box-shadow: 0 0 14px rgba(var(--profile-account-rgb),0.18), inset 0 0 8px rgba(var(--profile-account-rgb),0.08);
 
 }
 

@@ -771,9 +771,9 @@ function decodeInviteAscii(code) {
         const total = spans.length;
         const fs = parseFloat(getComputedStyle(spans[0]).fontSize) || 8;
         const isMobile = fs < 7;
-        const STAGGER = isMobile ? 25 : 35;
-        const FLASH_DUR = 120;
-        const totalDuration = total * STAGGER + FLASH_DUR + 300;
+        const STAGGER = isMobile ? 14 : 20;
+        const FLASH_DUR = 70;
+        const totalDuration = total * STAGGER + FLASH_DUR + 160;
 
         /* Get role accent color from CSS variable */
         let roleColor = '';
@@ -816,8 +816,8 @@ function decodeInviteAscii(code) {
                 if (!highlighted[i]) {
                     highlighted[i] = 1;
                     if (roleColor) el.style.color = roleColor;
-                    el.style.filter = 'brightness(1.8)';
-                    el.style.textShadow = '0 0 6px ' + (roleColor || 'rgba(255,255,255,0.3)');
+                    el.style.filter = 'brightness(2.4)';
+                    el.style.textShadow = '0 0 10px ' + (roleColor || 'rgba(255,255,255,0.5)') + ', 0 0 22px ' + (roleColor || 'rgba(255,255,255,0.25)');
                 }
 
                 const sinceHit = elapsed - hitAt;
@@ -3713,7 +3713,7 @@ function decodeInviteAscii(code) {
 
                 hackerDecodeStable(copyBtn, copySucceeded ? 'copied' : 'failed', 220);
 
-                const minCopyDuration = Math.max(waveDuration, copySucceeded ? 860 : 1080);
+                const minCopyDuration = Math.max(waveDuration, copySucceeded ? 520 : 720);
 
                 const resetDelay = Math.max(520, minCopyDuration - (performance.now() - copyStart));
 
