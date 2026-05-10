@@ -10,7 +10,21 @@
         var match = path.match(/^(.*?)\/profile\/uid-(\d+)$/);
         if (match) {
             var base = match[1]; // e.g. /NB or ""
-            window.location.replace(base + '/profile.html?uid=' + encodeURIComponent(match[2]));
+            fetch(base + '/profile.html', { credentials: 'same-origin' })
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Profile fallback failed');
+                    return response.text();
+                })
+                .then(function(html) {
+                    var baseHref = (base || '') + '/';
+                    html = html.replace(/<head([^>]*)>/i, '<head$1><base href="' + baseHref.replace(/"/g, '&quot;') + '">');
+                    document.open();
+                    document.write(html);
+                    document.close();
+                })
+                .catch(function() {
+                    window.location.replace(base + '/');
+                });
             return;
         }
         // Fallback: strip everything and go home
