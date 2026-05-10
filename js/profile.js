@@ -23,6 +23,7 @@ const ProfileModule = (() => {
 
 
     let editingBio = false;
+    let editingUsername = false;
 
 
 
@@ -2746,15 +2747,30 @@ function decodeInviteAscii(code) {
 
 
 
-        const username = profileData.telegram_username ? `@${escapeHtml(cleanText(profileData.telegram_username, 32))}` : '';
-
-
+        const displayUsername = profileData.username || profileData.telegram_username || '';
+        const username = displayUsername ? `@${escapeHtml(cleanText(displayUsername, 32))}` : '';
+        const hasPendingUsername = !!profileData.pending_username;
+        const pendingUsernameText = hasPendingUsername ? `@${escapeHtml(cleanText(profileData.pending_username, 32))}` : '';
 
         const telegramUrl = profileData.telegram_username ? `https://t.me/${encodeURIComponent(profileData.telegram_username)}` : '';
 
-
-
         const bioText = profileData.bio ? escapeHtml(cleanText(profileData.bio, 400)) : (isOwnProfile ? 'Расскажите о себе...' : '');
+
+        const usernameDisplay = isOwnProfile && !editingUsername
+            ? `<div class="profile-username-display" id="username-display">
+                ${username ? `<span class="profile-username-text">${username}</span>` : '<span class="profile-username-placeholder text-gray-500">Без ника</span>'}
+                ${hasPendingUsername ? `<span class="profile-pending-badge text-yellow-400 text-xs ml-2">(${pendingUsernameText} на рассмотрении)</span>` : ''}
+                <button class="profile-bio-edit-btn ml-2" id="btn-edit-username">Ред.</button>
+               </div>`
+            : editingUsername
+                ? `<div class="profile-username-edit">
+                    <input id="username-input" type="text" maxlength="32" class="forum-textarea" style="min-height:auto;height:auto;padding:8px 12px;resize:none;" value="${escapeHtml(profileData.pending_username || profileData.username || profileData.telegram_username || '')}" placeholder="Введите ник...">
+                    <div class="profile-bio-edit-actions mt-2">
+                        <button id="btn-save-username" class="forum-submit-btn">Сохранить</button>
+                        <button id="btn-cancel-username" class="forum-cancel-btn">Отмена</button>
+                    </div>
+                   </div>`
+                : (username ? `<p class="profile-username">${username}</p>` : '');
 
 
 
@@ -2878,9 +2894,10 @@ function decodeInviteAscii(code) {
         const invitedUsersCount = Number(profileData.invited_users_count || invitedUsers.length || 0);
         const invitedUsersHtml = invitedUsersCount > 0
             ? `<div class="profile-invited-users"><div class="profile-invited-users-head"><span>Приглашённые</span><strong>${invitedUsersCount}</strong></div><div class="profile-invited-users-list">${invitedUsers.map(invited => {
-                const invitedNameRaw = [invited.telegram_first_name, invited.telegram_last_name].filter(Boolean).join(' ') || invited.telegram_username || `UID ${invited.uid}`;
+                const invitedNameRaw = [invited.telegram_first_name, invited.telegram_last_name].filter(Boolean).join(' ') || invited.username || invited.telegram_username || `UID ${invited.uid}`;
                 const invitedName = escapeHtml(cleanText(invitedNameRaw, 40));
-                const invitedUsername = invited.telegram_username ? `@${escapeHtml(cleanText(invited.telegram_username, 32))}` : `#${escapeHtml(invited.uid || '')}`;
+                const invitedDisplayUname = invited.username || invited.telegram_username || '';
+                const invitedUsername = invitedDisplayUname ? `@${escapeHtml(cleanText(invitedDisplayUname, 32))}` : `#${escapeHtml(invited.uid || '')}`;
                 const invitedPhoto = invited.telegram_photo_url ? (invited.telegram_photo_url.startsWith('/') ? 'https://t.me' + invited.telegram_photo_url : invited.telegram_photo_url) : '';
                 return `<a class="profile-invited-user" href="${getProfileHref(invited.uid, invited.user_id)}">${invitedPhoto ? `<img src="${escapeHtml(invitedPhoto)}" alt="" onerror="this.style.display='none'">` : '<span class="profile-invited-user-avatar"></span>'}<span><strong>${invitedName}</strong><em>${invitedUsername}</em></span></a>`;
             }).join('')}</div></div>`
@@ -2974,7 +2991,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            ${username ? `<p class="profile-username">${username}</p>` : ''}
+                            ${usernameDisplay}
 
 
 
@@ -3478,11 +3495,6 @@ function decodeInviteAscii(code) {
 
                     <div class="profile-account-invite-card profile-account-invite-has">
 
-                        <div class="profile-account-invite-card-head">
-
-                            <span class="profile-account-invite-card-kicker" data-decode>invite.token</span>
-
-                        </div>
 
                         <div class="profile-account-invite-token profile-invite-token-box">
 
@@ -3528,11 +3540,6 @@ function decodeInviteAscii(code) {
 
                     <div class="profile-account-invite-card profile-account-invite-none">
 
-                        <div class="profile-account-invite-card-head">
-
-                            <span class="profile-account-invite-card-kicker" data-decode>invite.token</span>
-
-                        </div>
 
                         <p class="profile-account-invite-empty" data-decode>Generate a short-lived invite token.</p>
 
@@ -4030,11 +4037,6 @@ function decodeInviteAscii(code) {
 
                     <div class="profile-account-invite-card profile-account-invite-has">
 
-                        <div class="profile-account-invite-card-head">
-
-                            <span class="profile-account-invite-card-kicker" data-decode>invite.token</span>
-
-                        </div>
 
                         <div class="profile-account-invite-token profile-invite-token-box">
 
@@ -4240,9 +4242,41 @@ function decodeInviteAscii(code) {
 
 
 
+        // Username editing
+        const editUsernameBtn = document.getElementById('btn-edit-username');
+        if (editUsernameBtn) {
+            editUsernameBtn.addEventListener('click', () => {
+                editingUsername = true;
+                renderProfile();
+            });
+        }
 
+        const saveUsernameBtn = document.getElementById('btn-save-username');
+        if (saveUsernameBtn) {
+            saveUsernameBtn.addEventListener('click', async () => {
+                const val = document.getElementById('username-input').value.trim();
+                if (!val) { alert('Введите ник'); return; }
+                try {
+                    const result = await Api.requestUsernameChange(val);
+                    if (result && result.ok) {
+                        profileData.pending_username = result.pending_username || val;
+                        editingUsername = false;
+                        renderProfile();
+                        alert('Запрос на смену ника отправлен. Ожидайте подтверждения администратора.');
+                    } else {
+                        alert('Не удалось: ' + (result && result.reason ? result.reason : 'ошибка'));
+                    }
+                } catch (err) { alert('Ошибка: ' + err.message); }
+            });
+        }
 
-
+        const cancelUsernameBtn = document.getElementById('btn-cancel-username');
+        if (cancelUsernameBtn) {
+            cancelUsernameBtn.addEventListener('click', () => {
+                editingUsername = false;
+                renderProfile();
+            });
+        }
 
         // Tab switching
 
