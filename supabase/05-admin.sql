@@ -36,7 +36,7 @@ BEGIN
 
     LOOP
         v_attempt := v_attempt + 1;
-        v_code := upper(encode(gen_random_bytes(6), 'hex'));
+        v_code := upper(encode(gen_random_bytes(4), 'hex'));
 
         BEGIN
             INSERT INTO public.invite_codes (code, created_by, is_admin_code, max_uses, use_count, expires_at)
@@ -92,7 +92,7 @@ BEGIN
 
     LOOP
         v_attempt := v_attempt + 1;
-        v_code := upper(encode(gen_random_bytes(6), 'hex'));
+        v_code := upper(encode(gen_random_bytes(4), 'hex'));
 
         BEGIN
             INSERT INTO public.invite_codes (code, created_by, is_admin_code, max_uses, use_count, expires_at)

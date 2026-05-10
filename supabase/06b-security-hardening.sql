@@ -104,7 +104,7 @@ BEGIN
         WHERE row_num > 1
     LOOP
         LOOP
-            v_new_code := upper(encode(gen_random_bytes(6), 'hex'));
+            v_new_code := upper(encode(gen_random_bytes(4), 'hex'));
 
             EXIT WHEN NOT EXISTS (
                 SELECT 1
@@ -841,7 +841,7 @@ BEGIN
 
     LOOP
         v_attempt := v_attempt + 1;
-        v_new_code := upper(encode(gen_random_bytes(6), 'hex'));
+        v_new_code := upper(encode(gen_random_bytes(4), 'hex'));
 
         BEGIN
             INSERT INTO public.invite_codes (
@@ -923,7 +923,7 @@ BEGIN
 
     LOOP
         v_attempt := v_attempt + 1;
-        v_code := upper(encode(gen_random_bytes(6), 'hex'));
+        v_code := upper(encode(gen_random_bytes(4), 'hex'));
 
         BEGIN
             INSERT INTO public.invite_codes (
@@ -2344,7 +2344,7 @@ BEGIN
 
     LOOP
         v_attempt := v_attempt + 1;
-        v_code := upper(encode(gen_random_bytes(6), 'hex'));
+        v_code := upper(encode(gen_random_bytes(4), 'hex'));
 
         BEGIN
             INSERT INTO public.invite_codes (code, created_by, is_admin_code, max_uses, use_count)

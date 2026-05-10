@@ -251,6 +251,177 @@ REVOKE EXECUTE ON FUNCTION public.check_first_model_rate_achievement(UUID) FROM 
 GRANT EXECUTE ON FUNCTION public.check_first_model_rate_achievement(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.check_first_model_rate_achievement(UUID) TO service_role;
 
+DROP FUNCTION IF EXISTS public.generate_user_invite_code();
+CREATE OR REPLACE FUNCTION public.generate_user_invite_code()
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+    v_user_id UUID := auth.uid();
+    v_role TEXT;
+    v_max INTEGER;
+    v_active_count INTEGER;
+    v_oldest_unused_id UUID;
+    v_new_code TEXT;
+    v_invite_id UUID;
+    v_attempt INTEGER := 0;
+BEGIN
+    IF v_user_id IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    PERFORM pg_advisory_xact_lock(
+        hashtext('public.generate_user_invite_code'),
+        hashtext(v_user_id::text)
+    );
+
+    SELECT p.role
+    INTO v_role
+    FROM public.profiles AS p
+    WHERE p.user_id = v_user_id
+      AND p.is_verified = true
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RETURN NULL;
+    END IF;
+
+    DELETE FROM public.invite_codes
+    WHERE created_by = v_user_id
+      AND is_admin_code = false
+      AND expires_at IS NOT NULL
+      AND expires_at <= now()
+      AND COALESCE(use_count, 0) = 0;
+
+    UPDATE public.profiles
+    SET generated_invite_code_id = (
+            SELECT ic.id
+            FROM public.invite_codes AS ic
+            WHERE ic.created_by = v_user_id
+              AND ic.is_admin_code = false
+              AND (ic.expires_at IS NULL OR ic.expires_at > now())
+              AND (ic.max_uses IS NULL OR COALESCE(ic.use_count, 0) < ic.max_uses)
+            ORDER BY ic.created_at DESC, ic.id DESC
+            LIMIT 1
+        ),
+        has_generated_invite = EXISTS (
+            SELECT 1
+            FROM public.invite_codes AS ic
+            WHERE ic.created_by = v_user_id
+              AND ic.is_admin_code = false
+              AND (ic.expires_at IS NULL OR ic.expires_at > now())
+              AND (ic.max_uses IS NULL OR COALESCE(ic.use_count, 0) < ic.max_uses)
+        )
+    WHERE user_id = v_user_id;
+
+    v_max := COALESCE(public.get_invite_max(v_role), 1);
+
+    SELECT COUNT(*)
+    INTO v_active_count
+    FROM public.invite_codes
+    WHERE created_by = v_user_id
+      AND is_admin_code = false
+      AND (expires_at IS NULL OR expires_at > now())
+      AND (max_uses IS NULL OR COALESCE(use_count, 0) < max_uses);
+
+    IF v_active_count >= v_max THEN
+        SELECT id
+        INTO v_oldest_unused_id
+        FROM public.invite_codes
+        WHERE created_by = v_user_id
+          AND is_admin_code = false
+          AND COALESCE(use_count, 0) = 0
+          AND (expires_at IS NULL OR expires_at > now())
+        ORDER BY created_at ASC, id ASC
+        LIMIT 1
+        FOR UPDATE SKIP LOCKED;
+
+        IF v_oldest_unused_id IS NULL THEN
+            RETURN NULL;
+        END IF;
+
+        DELETE FROM public.invite_codes
+        WHERE id = v_oldest_unused_id;
+    END IF;
+
+    LOOP
+        v_attempt := v_attempt + 1;
+        v_new_code := upper(encode(gen_random_bytes(4), 'hex'));
+
+        BEGIN
+            INSERT INTO public.invite_codes (
+                code,
+                created_by,
+                is_admin_code,
+                max_uses,
+                use_count,
+                expires_at
+            )
+            VALUES (
+                v_new_code,
+                v_user_id,
+                false,
+                1,
+                0,
+                now() + interval '5 minutes'
+            )
+            RETURNING id INTO v_invite_id;
+
+            EXIT;
+        EXCEPTION
+            WHEN unique_violation THEN
+                IF v_attempt >= 8 THEN
+                    RAISE EXCEPTION 'failed to generate a unique invite code after % attempts', v_attempt;
+                END IF;
+        END;
+    END LOOP;
+
+    UPDATE public.profiles
+    SET has_generated_invite = true,
+        generated_invite_code_id = v_invite_id
+    WHERE user_id = v_user_id;
+
+    RETURN v_new_code;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.generate_user_invite_code() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.generate_user_invite_code() FROM anon;
+GRANT EXECUTE ON FUNCTION public.generate_user_invite_code() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.generate_user_invite_code() TO service_role;
+
+DO $$
+DECLARE
+    v_row RECORD;
+    v_new_code TEXT;
+BEGIN
+    PERFORM set_config('search_path', 'public, extensions', true);
+
+    FOR v_row IN
+        SELECT id
+        FROM public.invite_codes
+        WHERE code IS NOT NULL
+          AND length(code) <> 8
+          AND COALESCE(use_count, 0) = 0
+    LOOP
+        LOOP
+            v_new_code := upper(encode(gen_random_bytes(4), 'hex'));
+            EXIT WHEN NOT EXISTS (
+                SELECT 1
+                FROM public.invite_codes
+                WHERE code = v_new_code
+            );
+        END LOOP;
+
+        UPDATE public.invite_codes
+        SET code = v_new_code
+        WHERE id = v_row.id;
+    END LOOP;
+END;
+$$;
+
 -- ==========================================
 -- FIX 4: admin_generate_invite_code — поднять TTL лимит
 -- Было: LEAST(604800, ...) = макс 7 дней
@@ -286,7 +457,7 @@ BEGIN
 
     LOOP
         v_attempt := v_attempt + 1;
-        v_code := upper(encode(gen_random_bytes(6), 'hex'));
+        v_code := upper(encode(gen_random_bytes(4), 'hex'));
 
         BEGIN
             INSERT INTO public.invite_codes (code, created_by, is_admin_code, max_uses, use_count, expires_at)
