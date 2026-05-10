@@ -2890,6 +2890,14 @@ BEGIN
         LEFT JOIN public.forum_threads ft3 ON ft3.id = fp3.thread_id
         WHERE pr.user_id = p_user_id
     )
+    UNION ALL
+    (
+        SELECT 'invite'::TEXT, p.uid::INTEGER, NULL::TEXT, NULL::INTEGER, COALESCE(NULLIF(TRIM(p.telegram_first_name || ' ' || COALESCE(p.telegram_last_name, '')), ''), p.username, p.telegram_username, 'UID ' || p.uid)::TEXT, NULL::TEXT, icu.used_at
+        FROM public.invite_code_uses icu
+        JOIN public.invite_codes ic ON ic.id = icu.invite_code_id
+        JOIN public.profiles p ON p.user_id = icu.user_id
+        WHERE ic.created_by = p_user_id
+    )
     ORDER BY 7 DESC
     LIMIT v_limit OFFSET v_offset;
 END;

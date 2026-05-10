@@ -1641,6 +1641,21 @@ BEGIN
         LEFT JOIN forum_threads ft3 ON ft3.id = fp3.thread_id
         WHERE pr.user_id = p_user_id
     )
+    UNION ALL
+    (
+        SELECT
+            'invite'::TEXT AS activity_type,
+            p.uid::INTEGER AS thread_id,
+            NULL::TEXT AS thread_title,
+            NULL::INTEGER AS post_id,
+            COALESCE(NULLIF(TRIM(p.telegram_first_name || ' ' || COALESCE(p.telegram_last_name, '')), ''), p.username, p.telegram_username, 'UID ' || p.uid)::TEXT AS preview,
+            NULL::TEXT AS emoji,
+            icu.used_at AS created_at
+        FROM invite_code_uses icu
+        JOIN invite_codes ic ON ic.id = icu.invite_code_id
+        JOIN profiles p ON p.user_id = icu.user_id
+        WHERE ic.created_by = p_user_id
+    )
     ORDER BY created_at DESC
     LIMIT p_limit OFFSET p_offset;
 END;

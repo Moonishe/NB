@@ -22779,6 +22779,15 @@ span.ach-rarity-limited.ach-rarity-badge {
     color: rgba(255,255,255,0.28);
 }
 
+.profile-invited-tab-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.06);
+}
+
 .profile-account-card {
     padding: 14px 22px;
     margin-top: 12px;

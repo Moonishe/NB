@@ -2890,19 +2890,6 @@ function decodeInviteAscii(code) {
             ? '<div class="profile-account-status profile-account-status-verified"><span>Статус аккаунта</span><strong>VERIFIED</strong></div>'
             : '<div class="profile-account-status profile-account-status-unverified"><span>Статус аккаунта</span><strong>NOT VERIFIED</strong></div>';
 
-        const invitedUsers = Array.isArray(profileData.invited_users) ? profileData.invited_users : [];
-        const invitedUsersCount = Number(profileData.invited_users_count || invitedUsers.length || 0);
-        const invitedUsersHtml = invitedUsersCount > 0
-            ? `<div class="profile-invited-users"><div class="profile-invited-users-head"><span>Приглашённые</span><strong>${invitedUsersCount}</strong></div><div class="profile-invited-users-list">${invitedUsers.map(invited => {
-                const invitedNameRaw = [invited.telegram_first_name, invited.telegram_last_name].filter(Boolean).join(' ') || invited.username || invited.telegram_username || `UID ${invited.uid}`;
-                const invitedName = escapeHtml(cleanText(invitedNameRaw, 40));
-                const invitedDisplayUname = invited.username || invited.telegram_username || '';
-                const invitedUsername = invitedDisplayUname ? `@${escapeHtml(cleanText(invitedDisplayUname, 32))}` : `#${escapeHtml(invited.uid || '')}`;
-                const invitedPhoto = invited.telegram_photo_url ? (invited.telegram_photo_url.startsWith('/') ? 'https://t.me' + invited.telegram_photo_url : invited.telegram_photo_url) : '';
-                return `<a class="profile-invited-user" href="${getProfileHref(invited.uid, invited.user_id)}">${invitedPhoto ? `<img src="${escapeHtml(invitedPhoto)}" alt="" onerror="this.style.display='none'">` : '<span class="profile-invited-user-avatar"></span>'}<span><strong>${invitedName}</strong><em>${invitedUsername}</em></span></a>`;
-            }).join('')}</div></div>`
-            : '<div class="profile-invited-users profile-invited-users-empty"><div class="profile-invited-users-head"><span>Приглашённые</span><strong>0</strong></div><p>Пока никого не пригласил</p></div>';
-
         const showcaseRowHtml = showcased.length > 0
 
 
@@ -3131,8 +3118,6 @@ function decodeInviteAscii(code) {
 
                     ${accountSection}
 
-                    ${invitedUsersHtml}
-
 
 
                 </aside>
@@ -3200,6 +3185,10 @@ function decodeInviteAscii(code) {
 
 
                         <button class="profile-tab" data-tab="achievements" type="button">Достижения</button>
+
+
+
+                        <button class="profile-tab" data-tab="invited" type="button">Приглашенные</button>
 
 
 
@@ -4178,9 +4167,11 @@ function decodeInviteAscii(code) {
 
 
 
-                try {
+                try 
 
 
+
+                {
 
                     await Api.updateProfileBio(bio);
 
@@ -4218,13 +4209,17 @@ function decodeInviteAscii(code) {
 
 
 
-        if (cancelBtn) {
+        if (cancelBtn) 
 
 
 
-            cancelBtn.addEventListener('click', () => {
+        {
+
+            cancelBtn.addEventListener('click', () => 
 
 
+
+            {
 
                 editingBio = false;
 
@@ -4282,13 +4277,17 @@ function decodeInviteAscii(code) {
 
 
 
-        document.querySelectorAll('.profile-tab[data-tab]').forEach(tab => {
+        document.querySelectorAll('.profile-tab[data-tab]').forEach(tab => 
 
 
 
-            tab.addEventListener('click', () => {
+        {
+
+            tab.addEventListener('click', () => 
 
 
+
+            {
 
                 document.querySelectorAll('.profile-tab[data-tab]').forEach(t => t.classList.remove('profile-tab-active'));
 
@@ -4318,9 +4317,11 @@ function decodeInviteAscii(code) {
 
 
 
-        document.querySelectorAll('.profile-showcase-item').forEach(item => {
+        document.querySelectorAll('.profile-showcase-item').forEach(item => 
 
 
+
+        {
 
             const label = item.querySelector('.profile-showcase-label');
 
@@ -4338,9 +4339,11 @@ function decodeInviteAscii(code) {
 
 
 
-            item.addEventListener('mouseenter', () => {
+            item.addEventListener('mouseenter', () => 
 
 
+
+            {
 
                 hackerDecode(label, originalText);
 
@@ -4354,9 +4357,11 @@ function decodeInviteAscii(code) {
 
 
 
-            item.addEventListener('mouseleave', () => {
+            item.addEventListener('mouseleave', () => 
 
 
+
+            {
 
                 label.textContent = originalText;
 
@@ -4386,9 +4391,11 @@ function decodeInviteAscii(code) {
 
 
 
-    async function loadTabContent(tabName) {
+    async function loadTabContent(tabName) 
 
 
+
+    {
 
         const container = document.getElementById('profile-tab-content');
 
@@ -4406,9 +4413,11 @@ function decodeInviteAscii(code) {
 
 
 
-        if (tabName === 'achievements') {
+        if (tabName === 'achievements') 
 
 
+
+        {
 
             renderAchievementsTab(container);
 
@@ -4430,9 +4439,11 @@ function decodeInviteAscii(code) {
 
 
 
-        if (tabName === 'activity') {
+        if (tabName === 'activity') 
 
 
+
+        {
 
             activityOffset = 0;
 
@@ -4462,25 +4473,31 @@ function decodeInviteAscii(code) {
 
 
 
-        if (tabName === 'threads') {
+        if (tabName === 'threads') 
 
 
+
+        {
 
             container.innerHTML = '<div class="forum-loading">Загрузка тредов...</div>';
 
 
 
-            try {
+            try 
 
 
+
+            {
 
                 const threads = await Api.getUserThreads(profileUserId, 20, 0);
 
 
 
-                if (!threads || threads.length === 0) {
+                if (!threads || threads.length === 0) 
 
 
+
+                {
 
                     container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">Нет созданных тредов</p></div>';
 
@@ -4502,11 +4519,17 @@ function decodeInviteAscii(code) {
 
 
 
-                threads.forEach(t => {
+                threads.forEach(t => 
 
 
+
+                {
 
                     const href = `forum#thread/${t.id}`;
+
+
+
+
 
 
 
@@ -4514,11 +4537,23 @@ function decodeInviteAscii(code) {
 
 
 
+
+
+
+
                     const cat = t.category_name ? escapeHtml(t.category_name) : '';
 
 
 
+
+
+
+
                     const date = formatDate(t.created_at);
+
+
+
+
 
 
 
@@ -4558,6 +4593,10 @@ function decodeInviteAscii(code) {
 
 
 
+
+
+
+
                 html += '</div></section>';
 
 
@@ -4566,9 +4605,11 @@ function decodeInviteAscii(code) {
 
 
 
-            } catch {
+            } catch 
 
 
+
+            {
 
                 container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">Ошибка загрузки</p></div>';
 
@@ -4590,21 +4631,71 @@ function decodeInviteAscii(code) {
 
 
 
+
+
+
+
+        if (tabName === 'invited') 
+
+
+
+        {
+
+            renderInvitedTab(container);
+
+            animateTabContent(container);
+
+            return;
+
+        }
+
+
+
+
+
+
+
     }
 
 
 
 
+    function renderInvitedTab(container) {
+        const invitedUsers = Array.isArray(profileData.invited_users) ? profileData.invited_users : [];
+        const invitedUsersCount = Number(profileData.invited_users_count || invitedUsers.length || 0);
+        if (invitedUsersCount === 0) {
+            container.innerHTML = '<section class="profile-card profile-activity-card"><h3 class="profile-section-title">Приглашенные</h3><p class="profile-empty-tab">Пока никого не пригласил</p></section>';
+            return;
+        }
+        let html = '<section class="profile-card profile-activity-card"><h3 class="profile-section-title">Приглашенные</h3><div class="profile-activity-list">';
+        invitedUsers.forEach(invited => {
+            const invitedNameRaw = [invited.telegram_first_name, invited.telegram_last_name].filter(Boolean).join(' ') || invited.username || invited.telegram_username || `UID ${invited.uid}`;
+            const invitedName = escapeHtml(cleanText(invitedNameRaw, 40));
+            const invitedDisplayUname = invited.username || invited.telegram_username || '';
+            const invitedUsername = invitedDisplayUname ? `@${escapeHtml(cleanText(invitedDisplayUname, 32))}` : `#${escapeHtml(invited.uid || '')}`;
+            const invitedPhoto = invited.telegram_photo_url ? (invited.telegram_photo_url.startsWith('/') ? 'https://t.me' + invited.telegram_photo_url : invited.telegram_photo_url) : '';
+            html += `<a class="profile-activity-item" href="${getProfileHref(invited.uid, invited.user_id)}">` +
+                (invitedPhoto ? `<img src="${escapeHtml(invitedPhoto)}" alt="" class="profile-invited-tab-avatar" onerror="this.style.display='none'">` : '<span class="profile-activity-mark">🤝</span>') +
+                `<div><strong>${invitedName}</strong><p>${invitedUsername}</p></div></a>`;
+        });
+        html += '</div></section>';
+        container.innerHTML = html;
+    }
 
 
 
-    function animateTabContent(container) {
+
+    function animateTabContent(container) 
 
 
 
-        requestAnimationFrame(() => {
+    {
+
+        requestAnimationFrame(() => 
 
 
+
+        {
 
             container.classList.add('profile-tab-content-animated');
 
@@ -4630,9 +4721,11 @@ function decodeInviteAscii(code) {
 
 
 
-    function renderAchievementsTab(container) {
+    function renderAchievementsTab(container) 
 
 
+
+    {
 
         const ownedMap = new Map();
 
@@ -4646,9 +4739,11 @@ function decodeInviteAscii(code) {
 
 
 
-        const categories = {
+        const categories = 
 
 
+
+        {
 
             starter: { label: 'Стартовые', order: 0 },
 
@@ -4678,9 +4773,11 @@ function decodeInviteAscii(code) {
 
 
 
-        achievementsCatalog.forEach(a => {
+        achievementsCatalog.forEach(a => 
 
 
+
+        {
 
             if (!grouped[a.category]) grouped[a.category] = [];
 
@@ -4738,9 +4835,11 @@ function decodeInviteAscii(code) {
 
 
 
-        if (isOwnProfile) {
+        if (isOwnProfile) 
 
 
+
+        {
 
             html += `<div class="ach-showcase-hint">Нажмите в† чтобы показать достижение у аватарки</div>`;
 
@@ -4754,9 +4853,11 @@ function decodeInviteAscii(code) {
 
 
 
-        Object.entries(categories).forEach(([catKey, catMeta]) => {
+        Object.entries(categories).forEach(([catKey, catMeta]) => 
 
 
+
+        {
 
             const items = grouped[catKey];
 
@@ -4786,9 +4887,11 @@ function decodeInviteAscii(code) {
 
 
 
-            items.forEach(a => {
+            items.forEach(a => 
 
 
+
+            {
 
                 const owned = ownedMap.get(a.id);
 
@@ -4835,7 +4938,6 @@ function decodeInviteAscii(code) {
 
 
                             ${isOwned ? `<span class="ach-date">${formatDate(owned.unlocked_at)}</span>` : ''}
-
 
 
                         </div>`;
@@ -4970,17 +5072,23 @@ function decodeInviteAscii(code) {
 
 
 
-        if (isOwnProfile) {
+        if (isOwnProfile) 
 
 
 
-            container.querySelectorAll('.ach-showcase-btn').forEach(btn => {
+        {
+
+            container.querySelectorAll('.ach-showcase-btn').forEach(btn => 
 
 
 
-                btn.addEventListener('click', (e) => {
+            {
+
+                btn.addEventListener('click', (e) => 
 
 
+
+                {
 
                     e.stopPropagation();
 
@@ -5010,9 +5118,11 @@ function decodeInviteAscii(code) {
 
 
 
-    async function toggleShowcase(achievementId) {
+    async function toggleShowcase(achievementId) 
 
 
+
+    {
 
         const currentShowcased = userAchievements.filter(a => a.is_showcased).map(a => a.achievement_id);
 
@@ -5026,29 +5136,37 @@ function decodeInviteAscii(code) {
 
 
 
-        if (currentShowcased.includes(achievementId)) {
+        if (currentShowcased.includes(achievementId)) 
 
 
+
+        {
 
             newShowcased = currentShowcased.filter(id => id !== achievementId);
 
 
 
-        } else {
+        } else 
 
 
 
-            if (currentShowcased.length >= 3) {
+        {
+
+            if (currentShowcased.length >= 3) 
 
 
+
+            {
 
                 newShowcased = [...currentShowcased.slice(1), achievementId];
 
 
 
-            } else {
+            } else 
 
 
+
+            {
 
                 newShowcased = [...currentShowcased, achievementId];
 
@@ -5066,23 +5184,31 @@ function decodeInviteAscii(code) {
 
 
 
-        try {
+        try 
 
 
+
+        {
 
             await Api.setShowcasedAchievements(newShowcased);
 
 
 
-            userAchievements.forEach(a => {
+            userAchievements.forEach(a => 
 
 
+
+            {
 
                 a.is_showcased = newShowcased.includes(a.achievement_id);
 
 
 
             });
+
+
+
+
 
 
 
@@ -5122,13 +5248,19 @@ function decodeInviteAscii(code) {
 
 
 
+
+
+
+
             renderProfile();
 
 
 
-        } catch (err) {
+        } catch (err) 
 
 
+
+        {
 
             alert('Ошибка: ' + (err.message || 'Не удалось обновить'));
 
@@ -5146,9 +5278,11 @@ function decodeInviteAscii(code) {
 
 
 
-    async function renderActivityFeed(container, offset) {
+    async function renderActivityFeed(container, offset) 
 
 
+
+    {
 
         if (activityLoading) return;
 
@@ -5158,9 +5292,11 @@ function decodeInviteAscii(code) {
 
 
 
-        if (offset === 0) {
+        if (offset === 0) 
 
 
+
+        {
 
             container.innerHTML = '<div class="forum-loading">Загрузка активности...</div>';
 
@@ -5174,9 +5310,11 @@ function decodeInviteAscii(code) {
 
 
 
-        try {
+        try 
 
 
+
+        {
 
             const items = await Api.getUserRecentActivity(profileUserId, activityLimit, offset);
 
@@ -5186,9 +5324,11 @@ function decodeInviteAscii(code) {
 
 
 
-            if (offset === 0 && (!items || items.length === 0)) {
+            if (offset === 0 && (!items || items.length === 0)) 
 
 
+
+            {
 
                 container.innerHTML = '<div class="profile-card"><p class="profile-empty-tab">Нет активности на форуме</p></div>';
 
@@ -5214,9 +5354,11 @@ function decodeInviteAscii(code) {
 
 
 
-            items.forEach(item => {
+            items.forEach(item => 
 
 
+
+            {
 
                 const type = item.activity_type;
 
@@ -5226,11 +5368,11 @@ function decodeInviteAscii(code) {
 
 
 
-                const title = escapeHtml(cleanText(item.thread_title || '', 80));
-
-
-
                 if (type === 'thread') { icon = '📝'; actionText = 'Создал тред'; href = `forum#thread/${item.thread_id}`; }
+
+
+
+
 
 
 
@@ -5238,11 +5380,31 @@ function decodeInviteAscii(code) {
 
 
 
+
+
+
+
                 else if (type === 'reaction') { icon = item.emoji || '👍'; actionText = 'Поставил реакцию'; href = `forum#thread/${item.thread_id}`; }
 
 
 
+
+
+
+
+                else if (type === 'invite') { icon = '🤝'; actionText = 'Пригласил пользователя'; href = `profile?uid=${item.thread_id}`; }
+
+
+
+
+
+
+
                 const preview = escapeHtml(cleanText(item.preview || '', 100));
+
+
+
+
 
 
 
