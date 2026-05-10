@@ -36,7 +36,6 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-    RETURN QUERY
     SELECT
         p.user_id,
         p.uid::INTEGER,
@@ -48,26 +47,59 @@ BEGIN
         (COALESCE(p.role, 'member') IN ('moderator', 'stmoderator', 'admin'))::BOOLEAN,
         COALESCE(p.is_verified, false)::BOOLEAN,
         COALESCE(p.role, 'member')::TEXT,
-        p.created_at,
-        (SELECT COUNT(*)::BIGINT FROM forum_threads WHERE author_id = p.user_id AND is_deleted = false),
-        (SELECT COUNT(*)::BIGINT FROM forum_posts WHERE author_id = p.user_id AND is_deleted = false),
-        (SELECT COUNT(*)::BIGINT FROM post_reactions WHERE user_id = p.user_id),
-        (SELECT COALESCE(SUM(a.points), 0)::BIGINT FROM user_achievements ua JOIN achievements a ON a.id = ua.achievement_id WHERE ua.user_id = p.user_id),
-        (SELECT COUNT(*)::BIGINT FROM user_achievements WHERE user_id = p.user_id),
-        (
-            SELECT COALESCE(jsonb_agg(jsonb_build_object(
-                'id', a.id,
-                'title', a.title,
-                'icon_emoji', a.icon_emoji,
-                'rarity', a.rarity,
-                'points', a.points
-            ) ORDER BY a.sort_order), '[]'::jsonb)
-            FROM user_achievements ua
-            JOIN achievements a ON a.id = ua.achievement_id
-            WHERE ua.user_id = p.user_id AND ua.is_showcased = TRUE
-        )
+        p.created_at
+    INTO
+        user_id,
+        uid,
+        telegram_first_name,
+        telegram_last_name,
+        telegram_username,
+        telegram_photo_url,
+        bio,
+        is_moderator,
+        is_verified,
+        role,
+        created_at
     FROM profiles p
     WHERE p.user_id = p_user_id;
+
+    IF NOT FOUND THEN
+        RETURN;
+    END IF;
+
+    SELECT COUNT(*)::BIGINT INTO threads_count
+    FROM forum_threads
+    WHERE author_id = p_user_id AND is_deleted = false;
+
+    SELECT COUNT(*)::BIGINT INTO posts_count
+    FROM forum_posts
+    WHERE author_id = p_user_id AND is_deleted = false;
+
+    SELECT COUNT(*)::BIGINT INTO reactions_given_count
+    FROM post_reactions
+    WHERE post_reactions.user_id = p_user_id;
+
+    SELECT COALESCE(SUM(a.points), 0)::BIGINT INTO achievement_points
+    FROM user_achievements ua
+    JOIN achievements a ON a.id = ua.achievement_id
+    WHERE ua.user_id = p_user_id;
+
+    SELECT COUNT(*)::BIGINT INTO achievements_count
+    FROM user_achievements
+    WHERE user_achievements.user_id = p_user_id;
+
+    SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'id', a.id,
+        'title', a.title,
+        'icon_emoji', a.icon_emoji,
+        'rarity', a.rarity,
+        'points', a.points
+    ) ORDER BY a.sort_order), '[]'::jsonb) INTO showcased_achievements
+    FROM user_achievements ua
+    JOIN achievements a ON a.id = ua.achievement_id
+    WHERE ua.user_id = p_user_id AND ua.is_showcased = TRUE;
+
+    RETURN NEXT;
 END;
 $$;
 
