@@ -20,7 +20,7 @@ RETURNS TABLE (
     created_at TIMESTAMPTZ,
     threads_count BIGINT,
     posts_count BIGINT,
-    reactions_given_count BIGINT,
+    reactions_received_count BIGINT,
     achievement_points BIGINT,
     achievements_count BIGINT,
     showcased_achievements JSONB,
@@ -48,7 +48,7 @@ AS $$
         p.created_at::TIMESTAMPTZ,
         COALESCE(ft.threads_count, 0)::BIGINT,
         COALESCE(fp.posts_count, 0)::BIGINT,
-        COALESCE(pr.reactions_given_count, 0)::BIGINT,
+        COALESCE(pr.reactions_received_count, 0)::BIGINT,
         COALESCE(ua.achievement_points, 0)::BIGINT,
         COALESCE(uc.achievements_count, 0)::BIGINT,
         COALESCE(sa.showcased_achievements, '[]'::JSONB)::JSONB,
@@ -66,9 +66,10 @@ AS $$
         WHERE fp.author_id = p.user_id AND fp.is_deleted = false
     ) fp ON true
     LEFT JOIN LATERAL (
-        SELECT COUNT(*)::BIGINT AS reactions_given_count
+        SELECT COUNT(*)::BIGINT AS reactions_received_count
         FROM public.post_reactions pr
-        WHERE pr.user_id = p.user_id
+        JOIN public.forum_posts fp ON fp.id = pr.post_id AND fp.is_deleted = false
+        WHERE fp.author_id = p.user_id
     ) pr ON true
     LEFT JOIN LATERAL (
         SELECT COALESCE(SUM(a.points), 0)::BIGINT AS achievement_points
@@ -147,7 +148,7 @@ RETURNS TABLE (
     created_at TIMESTAMPTZ,
     threads_count BIGINT,
     posts_count BIGINT,
-    reactions_given_count BIGINT,
+    reactions_received_count BIGINT,
     achievement_points BIGINT,
     achievements_count BIGINT,
     showcased_achievements JSONB,
