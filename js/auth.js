@@ -429,9 +429,11 @@ const AuthApp = (() => {
 
         // Don't lock dimensions — it causes layout jumps when chars change width
 
-        const chars = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯabcdefghknoprstuvxyz023456789#@%&░▒▓'; // FIX: добавлена кириллица — без неё кирилл. буквы заменялись на цифры/символы (ПРОФИЛ4)
+        // FIX: только нейтральные ASCII-символы для скрамбла — кириллица в keep чтобы не заменялась
+        const chars = 'ABCDEFGHKNOPRSTUVXYZ023456789░▒▓';
 
-        const keep = /[\s.\-:,/@()]/;
+        // FIX: добавлена кириллица в keep — иначе кирилл. буквы скрамблились в случайные символы (ТЯ, ПРОФИЛ#)
+        const keep = /[\s.\-:,/@()\u0400-\u04FF]/;
 
         const t0 = performance.now();
 
