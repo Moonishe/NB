@@ -942,14 +942,38 @@ const Api = (() => {
         }
         const { data, error } = await client.rpc('get_public_profile_by_uid', { p_uid: Number(uid) });
         if (error) {
-            console.error('[api] get_public_profile_by_uid failed', {
+            console.warn('[api] get_public_profile_by_uid failed, falling back to resolve_user_id_by_uid', {
                 uid,
                 message: error.message,
                 details: error.details,
                 hint: error.hint,
                 code: error.code
             });
-            throw error;
+            const { data: userId, error: resolveError } = await client.rpc('resolve_user_id_by_uid', { p_uid: Number(uid) });
+            if (resolveError) {
+                console.error('[api] resolve_user_id_by_uid failed', {
+                    uid,
+                    message: resolveError.message,
+                    details: resolveError.details,
+                    hint: resolveError.hint,
+                    code: resolveError.code
+                });
+                throw resolveError;
+            }
+            if (!userId) return null;
+            const { data: fallbackData, error: fallbackError } = await client.rpc('get_public_profile', { p_user_id: userId });
+            if (fallbackError) {
+                console.error('[api] get_public_profile fallback failed', {
+                    uid,
+                    userId,
+                    message: fallbackError.message,
+                    details: fallbackError.details,
+                    hint: fallbackError.hint,
+                    code: fallbackError.code
+                });
+                throw fallbackError;
+            }
+            return fallbackData && fallbackData[0] ? fallbackData[0] : null;
         }
         return data && data[0] ? data[0] : null;
     }
