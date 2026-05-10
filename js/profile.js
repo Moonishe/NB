@@ -1655,12 +1655,20 @@ function decodeInviteAscii(code) {
 
 
 
+        const query = new URLSearchParams(window.location.search);
+        const queryUid = query.get('uid');
+        const queryId = query.get('id');
+
         const pathParts = window.location.pathname.split('/').filter(Boolean);
         const lastPart = pathParts[pathParts.length - 1];
         const isProfilePage = lastPart === 'profile' || pathParts[pathParts.length - 2] === 'profile';
         let requestedId = null;
         let requestedUid = null;
-        if (isProfilePage && lastPart !== 'profile') {
+        if (queryUid && /^\d+$/.test(queryUid)) {
+            requestedUid = parseInt(queryUid, 10);
+        } else if (queryId) {
+            requestedId = queryId;
+        } else if (isProfilePage && lastPart !== 'profile') {
             if (/^\d+$/.test(lastPart)) {
                 requestedUid = parseInt(lastPart, 10);
             } else {

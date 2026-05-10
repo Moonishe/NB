@@ -262,7 +262,7 @@
     function createDropdown() {
         // FIX: info не существует в этом scope — берём uid из dataset кнопки
         const uid = (userBtn && userBtn.dataset.uid) ? userBtn.dataset.uid : '';
-        const profileHref = uid ? 'profile/' + uid : 'register';
+        const profileHref = uid ? 'profile.html?uid=' + encodeURIComponent(uid) : 'register';
         const el = document.createElement('div');
         el.id = 'nav-user-dropdown';
         el.className = 'nav-user-dropdown-float';
@@ -321,7 +321,7 @@
         // при первом создании uid мог ещё не быть загружен из API
         const profileLink = dropdownEl.querySelector('#nav-dropdown-profile');
         if (profileLink && userBtn && userBtn.dataset.uid) {
-            profileLink.href = 'profile/' + userBtn.dataset.uid;
+            profileLink.href = 'profile.html?uid=' + encodeURIComponent(userBtn.dataset.uid);
         }
 
         const anchor = document.getElementById('nav-actions') || userBtn;

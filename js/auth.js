@@ -1065,7 +1065,7 @@ const AuthApp = (() => {
                 }
 
                 const profileLink = document.getElementById('account-profile-link');
-                if (profileLink && info.uid) profileLink.href = 'profile/' + info.uid;
+                if (profileLink && info.uid) profileLink.href = 'profile.html?uid=' + encodeURIComponent(info.uid);
 
                 runAccountDecode();
 
@@ -1202,7 +1202,7 @@ const AuthApp = (() => {
         }
 
         const profileLink = document.getElementById('account-profile-link');
-        if (profileLink && info.uid) profileLink.href = 'profile/' + info.uid;
+        if (profileLink && info.uid) profileLink.href = 'profile.html?uid=' + encodeURIComponent(info.uid);
 
         runAccountDecode();
     }

@@ -202,7 +202,7 @@ const ForumModule = (() => {
 
 
 
-            if (uid) return `<a href="profile/${uid}" class="forum-mention">@${username}</a>`;
+            if (uid) return `<a href="profile.html?uid=${encodeURIComponent(uid)}" class="forum-mention">@${username}</a>`;
 
 
 
@@ -406,7 +406,7 @@ const ForumModule = (() => {
 
 
 
-        const href = (info.author_id && info.author_uid) ? `profile/${info.author_uid}` : (info.author_id ? `profile/${info.author_id}` : '#');
+        const href = info.author_uid ? `profile.html?uid=${encodeURIComponent(info.author_uid)}` : (info.author_id ? `profile.html?id=${encodeURIComponent(info.author_id)}` : '#');
 
 
 
@@ -1301,7 +1301,7 @@ const ForumModule = (() => {
             // FIX: убран лишний getPublicProfile запрос — данные автора уже есть в объекте thread
             // (author_username, author_first_name, author_photo_url возвращаются из get_forum_threads RPC)
             const authorHref = thread.author_id
-                ? (thread.author_uid ? `profile/${thread.author_uid}` : `profile/${thread.author_id}`)
+                ? (thread.author_uid ? `profile.html?uid=${encodeURIComponent(thread.author_uid)}` : `profile.html?id=${encodeURIComponent(thread.author_id)}`)
                 : '#';
             const authorPhoto = thread.author_photo_url
                 ? (thread.author_photo_url.startsWith('/') ? 'https://t.me' + thread.author_photo_url : thread.author_photo_url)
@@ -2722,7 +2722,7 @@ const ForumModule = (() => {
 
 
 
-            <a href="profile/${profile.uid || userId}" class="forum-popover-link">Открыть профиль</a>
+            <a href="${profile.uid ? `profile.html?uid=${encodeURIComponent(profile.uid)}` : `profile.html?id=${encodeURIComponent(userId)}`}" class="forum-popover-link">Открыть профиль</a>
 
 
 
