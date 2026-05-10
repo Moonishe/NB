@@ -1002,7 +1002,7 @@ const AuthApp = (() => {
                 showError('auth-error', err.message || 'Ошибка аутентификации');
 
                 if (err.status === 401) {
-                    reloadTelegramWidget();
+                    showTelegramRefreshButton();
                 }
 
             }
@@ -1019,15 +1019,9 @@ const AuthApp = (() => {
 
     }
 
-    function reloadTelegramWidget() {
-        const container = document.getElementById('tg-widget-container');
-        if (!container) return;
-        const oldIframe = container.querySelector('iframe');
-        const oldScript = container.querySelector('script[src*="telegram-widget"]');
-        if (oldIframe) oldIframe.remove();
-        if (oldScript) oldScript.remove();
+    function createTelegramScript(container) {
         const botUsername = window.TELEGRAM_BOT_USERNAME;
-        if (!botUsername) return;
+        if (!botUsername) return false;
         const s = document.createElement('script');
         s.async = true;
         s.src = 'https://telegram.org/js/telegram-widget.js?22&t=' + Date.now();
@@ -1037,6 +1031,42 @@ const AuthApp = (() => {
         s.setAttribute('data-userpic', 'false');
         s.setAttribute('data-onauth', 'onTelegramAuth(user)');
         container.appendChild(s);
+        return true;
+    }
+
+    function resetTelegramWidgetContainer() {
+        const container = document.getElementById('tg-widget-container');
+        if (!container) return null;
+        container.innerHTML = `
+            <div class="tg-custom-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
+                <span id="tg-custom-btn-text">${authMode === 'register' ? 'Регистрация' : 'Войти'}</span><span> через Telegram</span>
+            </div>
+        `;
+        return container;
+    }
+
+    function reloadTelegramWidget() {
+        const container = resetTelegramWidgetContainer();
+        if (!container) return;
+        createTelegramScript(container);
+    }
+
+    function showTelegramRefreshButton() {
+        const container = document.getElementById('tg-widget-container');
+        if (!container) return;
+        container.innerHTML = `
+            <button type="button" class="tg-custom-btn" id="tg-refresh-auth-btn">
+                <span>↻</span><span>Обновить Telegram-подтверждение</span>
+            </button>
+        `;
+        const refreshBtn = document.getElementById('tg-refresh-auth-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                hideError('auth-error');
+                reloadTelegramWidget();
+            }, { once: true });
+        }
     }
 
 
