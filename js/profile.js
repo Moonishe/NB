@@ -5368,6 +5368,10 @@ function decodeInviteAscii(code) {
 
 
 
+                const title = escapeHtml(cleanText(item.thread_title || '', 80));
+
+
+
                 if (type === 'thread') { icon = '📝'; actionText = 'Создал тред'; href = `forum#thread/${item.thread_id}`; }
 
 
