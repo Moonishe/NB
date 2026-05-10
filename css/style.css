@@ -939,19 +939,21 @@ canvas#ascii-canvas {
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.14);
     background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.58);
-    font: 700 12px/1 'Geist Mono', monospace;
-    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.72);
+    font: 900 15px/1 'Geist Mono', 'Courier New', monospace;
+    letter-spacing: 0;
     text-decoration: none;
-    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    text-shadow: 0 0 6px rgba(255,255,255,0.15);
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, text-shadow 0.2s ease;
 }
 
 .nav-admin-shortcut:hover {
     color: #fff;
-    border-color: rgba(255,255,255,0.32);
+    border-color: rgba(255,255,255,0.38);
     background: rgba(255,255,255,0.08);
+    text-shadow: 0 0 10px rgba(255,255,255,0.35), 0 0 20px rgba(255,255,255,0.1);
     transform: translateY(-1px);
 }
 
