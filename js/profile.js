@@ -859,7 +859,7 @@ function decodeInviteAscii(code) {
 
 
 
-        first_post: 'assets/achievements/first_post.png',
+        // first_post removed — achievement deleted from DB in 04-achievements.sql
 
 
 

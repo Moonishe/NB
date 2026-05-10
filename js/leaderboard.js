@@ -1312,23 +1312,7 @@ const LeaderboardModule = (() => {
         }
     }
 
-    function hackerDecodeClassic(el, target) {
-        const g = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        const len = target.length; let rev = 0, tick = 0;
-        el.textContent = target; const h = el.offsetHeight;
-        el.style.height = h + 'px'; el.style.overflow = 'hidden';
-        let lastTime = 0; let rafId = 0;
-        function step(now) {
-            if (now - lastTime < 35) { rafId = requestAnimationFrame(step); return; }
-            lastTime = now;
-            let o = ''; for (let i = 0; i < len; i++) o += i < rev ? target[i] : target[i] === ' ' ? ' ' : g[Math.floor(Math.random() * g.length)];
-            el.textContent = o; tick++; if (tick % 3 === 0) rev++;
-            if (rev > len) { el.textContent = target; el.style.height = ''; el.style.overflow = ''; return; }
-            rafId = requestAnimationFrame(step);
-        }
-        rafId = requestAnimationFrame(step);
-        pendingTimeouts.push({ _raf: true, id: rafId });
-    }
+    // hackerDecodeClassic removed — dead code, was never called
 
     function hackerDecodeShort(el, target) {
         if (!el || !el.isConnected) return;

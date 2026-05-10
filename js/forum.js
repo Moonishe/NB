@@ -130,7 +130,7 @@ const ForumModule = (() => {
 
 
 
-        let s = str.replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g, '');
+        let s = str.replace(/[\u0000-\u001F\u007F-\u009F\u00AD\u061C\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g, '');
 
 
 
@@ -1298,96 +1298,29 @@ const ForumModule = (() => {
 
             const isMod = isModerator();
 
-
-
-
-
-
-
-            let authorInfo = null;
-
-
-
-            if (thread.author_id) {
-
-
-
-                try { authorInfo = await Api.getPublicProfile(thread.author_id); } catch { authorInfo = null; }
-
-
-
-            }
-
-
-
-            const authorPhoto = authorInfo && authorInfo.telegram_photo_url
-
-
-
-                ? (authorInfo.telegram_photo_url.startsWith('/') ? 'https://t.me' + authorInfo.telegram_photo_url : authorInfo.telegram_photo_url)
-
-
-
+            // FIX: убран лишний getPublicProfile запрос — данные автора уже есть в объекте thread
+            // (author_username, author_first_name, author_photo_url возвращаются из get_forum_threads RPC)
+            const authorHref = thread.author_id
+                ? (thread.author_uid ? `profile/${thread.author_uid}` : `profile/${thread.author_id}`)
+                : '#';
+            const authorPhoto = thread.author_photo_url
+                ? (thread.author_photo_url.startsWith('/') ? 'https://t.me' + thread.author_photo_url : thread.author_photo_url)
                 : null;
-
-
-
-            const authorHref = thread.author_id ? `profile/${thread.author_id}` : '#';
-
-
-
+            const authorName = cleanText(
+                [thread.author_first_name, thread.author_last_name].filter(Boolean).join(' ') || thread.author_username || '',
+                50
+            ) || 'Аноним';
             const authorDisplay = {
-
-
-
-                name: authorInfo
-
-
-
-                    ? cleanText((typeof safeDisplayName === 'function') ? safeDisplayName(authorInfo) : ([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username), 50) || 'Аноним'
-
-
-
-                    : 'Удалённый пользователь',
-
-
-
+                name: authorName,
                 avatarHtml: authorPhoto
-
-
-
                     ? `<a href="${authorHref}"><img src="${escapeHtml(authorPhoto)}" class="forum-avatar" alt="" onerror="this.style.display='none'"></a>`
-
-
-
                     : `<a href="${authorHref}"><div class="forum-avatar-placeholder"></div></a>`,
-
-
-
-                modBadge: authorInfo && authorInfo.is_moderator ? '<span class="forum-mod-badge">MOD</span>' : '',
-
-
-
-                roleBadge: authorInfo && authorInfo.role ? getRoleBadgeHtml(authorInfo.role) : '',
-
-
-
-                uidBadge: authorInfo && authorInfo.uid != null ? `<span class="forum-uid-badge">UID #${authorInfo.uid}</span>` : '',
-
-
-
+                modBadge: thread.is_author_moderator ? '<span class="forum-mod-badge">MOD</span>' : '',
+                roleBadge: thread.author_role ? getRoleBadgeHtml(thread.author_role) : '',
+                uidBadge: thread.author_uid != null ? `<span class="forum-uid-badge">UID #${thread.author_uid}</span>` : '',
                 profileLink: thread.author_id
-
-
-
-                    ? `<a href="${authorHref}" class="forum-username">${escapeHtml(authorInfo ? cleanText((typeof safeDisplayName === 'function') ? safeDisplayName(authorInfo) : ([authorInfo.telegram_first_name, authorInfo.telegram_last_name].filter(Boolean).join(' ') || authorInfo.telegram_username), 50) || 'Аноним' : 'Удалённый пользователь')}</a>`
-
-
-
+                    ? `<a href="${authorHref}" class="forum-username">${escapeHtml(authorName)}</a>`
                     : '<span class="forum-username">Удалённый пользователь</span>'
-
-
-
             };
 
 

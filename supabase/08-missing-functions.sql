@@ -176,3 +176,126 @@ GRANT EXECUTE ON FUNCTION public.admin_generate_invite_code(INTEGER, INTEGER) TO
 
 -- Reload PostgREST schema cache
 NOTIFY pgrst, 'reload schema';
+
+-- ==========================================
+-- FIX 5: get_forum_threads — добавить author_role и author_uid
+-- В оригинале не возвращался author_role, поэтому бейджи BETA/ALPHA/ADMIN
+-- не показывались в карточках тредов и в detail view
+-- ==========================================
+
+DROP FUNCTION IF EXISTS public.get_forum_threads(INTEGER, INTEGER, INTEGER) CASCADE;
+CREATE OR REPLACE FUNCTION public.get_forum_threads(
+    p_category_id INTEGER DEFAULT NULL,
+    p_limit INTEGER DEFAULT 20,
+    p_offset INTEGER DEFAULT 0
+)
+RETURNS TABLE(
+    id INTEGER,
+    category_id INTEGER,
+    author_id UUID,
+    title TEXT,
+    content TEXT,
+    is_pinned BOOLEAN,
+    is_locked BOOLEAN,
+    posts_count INTEGER,
+    last_post_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ,
+    author_username TEXT,
+    author_first_name TEXT,
+    author_last_name TEXT,
+    author_photo_url TEXT,
+    is_author_moderator BOOLEAN,
+    category_name TEXT,
+    category_slug TEXT,
+    author_uid INTEGER,
+    author_role TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        ft.id, ft.category_id, ft.author_id, ft.title, ft.content,
+        ft.is_pinned, ft.is_locked, ft.posts_count,
+        ft.last_post_at, ft.created_at, ft.updated_at,
+        p.telegram_username,
+        p.telegram_first_name,
+        p.telegram_last_name,
+        p.telegram_photo_url,
+        EXISTS (SELECT 1 FROM moderators m WHERE m.user_id = ft.author_id),
+        fc.name,
+        fc.slug,
+        p.uid,
+        COALESCE(p.role, 'member')
+    FROM forum_threads ft
+    LEFT JOIN profiles p ON p.user_id = ft.author_id
+    LEFT JOIN forum_categories fc ON fc.id = ft.category_id
+    WHERE ft.is_deleted = false
+      AND (p_category_id IS NULL OR ft.category_id = p_category_id)
+    ORDER BY ft.is_pinned DESC, ft.last_post_at DESC NULLS LAST, ft.created_at DESC
+    LIMIT p_limit OFFSET p_offset;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_forum_threads(INTEGER, INTEGER, INTEGER) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_forum_threads(INTEGER, INTEGER, INTEGER) TO authenticated;
+
+-- ==========================================
+-- FIX 6: get_forum_thread_posts — добавить author_role
+-- ==========================================
+
+DROP FUNCTION IF EXISTS public.get_forum_thread_posts(INTEGER, INTEGER, INTEGER) CASCADE;
+CREATE OR REPLACE FUNCTION public.get_forum_thread_posts(
+    p_thread_id INTEGER,
+    p_limit INTEGER DEFAULT 25,
+    p_offset INTEGER DEFAULT 0
+)
+RETURNS TABLE(
+    id INTEGER,
+    thread_id INTEGER,
+    author_id UUID,
+    content TEXT,
+    is_deleted BOOLEAN,
+    edited_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ,
+    author_username TEXT,
+    author_first_name TEXT,
+    author_last_name TEXT,
+    author_photo_url TEXT,
+    is_author_moderator BOOLEAN,
+    author_uid INTEGER,
+    author_role TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        fp.id, fp.thread_id, fp.author_id, fp.content,
+        fp.is_deleted, fp.edited_at, fp.created_at,
+        p.telegram_username,
+        p.telegram_first_name,
+        p.telegram_last_name,
+        p.telegram_photo_url,
+        EXISTS (SELECT 1 FROM moderators m WHERE m.user_id = fp.author_id),
+        p.uid,
+        COALESCE(p.role, 'member')
+    FROM forum_posts fp
+    LEFT JOIN profiles p ON p.user_id = fp.author_id
+    WHERE fp.thread_id = p_thread_id
+      AND fp.is_deleted = false
+    ORDER BY fp.created_at ASC
+    LIMIT p_limit OFFSET p_offset;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_forum_thread_posts(INTEGER, INTEGER, INTEGER) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_forum_thread_posts(INTEGER, INTEGER, INTEGER) TO authenticated;
+
+-- Reload PostgREST schema cache
+NOTIFY pgrst, 'reload schema';
