@@ -30,6 +30,19 @@
 
     };
 
+
+    function getProfileBasePath() {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
+        return '';
+    }
+
+    function getProfileHref(uid, userId) {
+        if (uid !== undefined && uid !== null && String(uid) !== '') return getProfileBasePath() + '/profile/uid-' + encodeURIComponent(uid);
+        if (userId) return getProfileBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
+        return '#';
+    }
+
     const page = location.pathname.split('/').pop() || 'index.html';
     const isIndex = page === 'index.html' || page === '' || page === '/';
     const isForum = page === 'forum.html' || page === 'forum';
@@ -262,7 +275,7 @@
     function createDropdown() {
         // FIX: info не существует в этом scope — берём uid из dataset кнопки
         const uid = (userBtn && userBtn.dataset.uid) ? userBtn.dataset.uid : '';
-        const profileHref = uid ? 'profile.html?uid=' + encodeURIComponent(uid) : 'register';
+        const profileHref = uid ? getProfileHref(uid) : 'register';
         const el = document.createElement('div');
         el.id = 'nav-user-dropdown';
         el.className = 'nav-user-dropdown-float';
@@ -321,7 +334,7 @@
         // при первом создании uid мог ещё не быть загружен из API
         const profileLink = dropdownEl.querySelector('#nav-dropdown-profile');
         if (profileLink && userBtn && userBtn.dataset.uid) {
-            profileLink.href = 'profile.html?uid=' + encodeURIComponent(userBtn.dataset.uid);
+            profileLink.href = getProfileHref(userBtn.dataset.uid);
         }
 
         const anchor = document.getElementById('nav-actions') || userBtn;

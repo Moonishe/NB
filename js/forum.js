@@ -73,6 +73,20 @@ const ForumModule = (() => {
     const usernameCache = new Map();
 
 
+    function getProfileBasePath() {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
+        return '';
+    }
+
+    function getProfileHref(uid, userId) {
+        if (uid !== undefined && uid !== null && String(uid) !== '') return getProfileBasePath() + '/profile/uid-' + encodeURIComponent(uid);
+        if (userId) return getProfileBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
+        return '#';
+    }
+
+
+
 
 
 
@@ -202,7 +216,7 @@ const ForumModule = (() => {
 
 
 
-            if (uid) return `<a href="profile.html?uid=${encodeURIComponent(uid)}" class="forum-mention">@${username}</a>`;
+            if (uid) return `<a href="${getProfileHref(uid)}" class="forum-mention">@${username}</a>`;
 
 
 
@@ -406,7 +420,7 @@ const ForumModule = (() => {
 
 
 
-        const href = info.author_uid ? `profile.html?uid=${encodeURIComponent(info.author_uid)}` : (info.author_id ? `profile.html?id=${encodeURIComponent(info.author_id)}` : '#');
+        const href = getProfileHref(info.author_uid, info.author_id);
 
 
 
@@ -1301,7 +1315,7 @@ const ForumModule = (() => {
             // FIX: убран лишний getPublicProfile запрос — данные автора уже есть в объекте thread
             // (author_username, author_first_name, author_photo_url возвращаются из get_forum_threads RPC)
             const authorHref = thread.author_id
-                ? (thread.author_uid ? `profile.html?uid=${encodeURIComponent(thread.author_uid)}` : `profile.html?id=${encodeURIComponent(thread.author_id)}`)
+                ? getProfileHref(thread.author_uid, thread.author_id)
                 : '#';
             const authorPhoto = thread.author_photo_url
                 ? (thread.author_photo_url.startsWith('/') ? 'https://t.me' + thread.author_photo_url : thread.author_photo_url)
@@ -2722,7 +2736,7 @@ const ForumModule = (() => {
 
 
 
-            <a href="${profile.uid ? `profile.html?uid=${encodeURIComponent(profile.uid)}` : `profile.html?id=${encodeURIComponent(userId)}`}" class="forum-popover-link">Открыть профиль</a>
+            <a href="${getProfileHref(profile.uid, userId)}" class="forum-popover-link">Открыть профиль</a>
 
 
 

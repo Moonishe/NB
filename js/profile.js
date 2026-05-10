@@ -66,6 +66,19 @@ const ProfileModule = (() => {
 
 
 
+
+    function getProfileHref(uid, userId) {
+        if (uid !== undefined && uid !== null && String(uid) !== '') return getBasePath() + '/profile/uid-' + encodeURIComponent(uid);
+        if (userId) return getBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
+        return '#';
+    }
+
+    function getBasePath() {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
+        return '';
+    }
+
     const _GLYPH = {
 
         'A':[' ███ ','█   █','█████','█   █','█   █'],
@@ -1662,9 +1675,12 @@ function decodeInviteAscii(code) {
         const pathParts = window.location.pathname.split('/').filter(Boolean);
         const lastPart = pathParts[pathParts.length - 1];
         const isProfilePage = lastPart === 'profile' || pathParts[pathParts.length - 2] === 'profile';
+        const pathUidMatch = window.location.pathname.match(/\/profile\/uid-(\d+)$/);
         let requestedId = null;
         let requestedUid = null;
-        if (queryUid && /^\d+$/.test(queryUid)) {
+        if (pathUidMatch) {
+            requestedUid = parseInt(pathUidMatch[1], 10);
+        } else if (queryUid && /^\d+$/.test(queryUid)) {
             requestedUid = parseInt(queryUid, 10);
         } else if (queryId) {
             requestedId = queryId;
@@ -2190,6 +2206,14 @@ function decodeInviteAscii(code) {
 
 
             if (profileUserUid && profileData.user_id) profileUserId = profileData.user_id;
+
+
+
+            if (profileUserUid && !window.location.pathname.match(/\/profile\/uid-\d+$/)) {
+                const base = window.location.pathname.replace(/\/profile.*$/, '') || '';
+                const cleanPath = base + '/profile/uid-' + profileUserUid + window.location.hash;
+                history.replaceState(null, '', cleanPath);
+            }
 
 
 
@@ -2846,6 +2870,22 @@ function decodeInviteAscii(code) {
 
 
 
+        const accountStatusHtml = profileData.is_verified
+            ? '<div class="profile-account-status profile-account-status-verified"><span>Статус аккаунта</span><strong>VERIFIED</strong></div>'
+            : '<div class="profile-account-status profile-account-status-unverified"><span>Статус аккаунта</span><strong>NOT VERIFIED</strong></div>';
+
+        const invitedUsers = Array.isArray(profileData.invited_users) ? profileData.invited_users : [];
+        const invitedUsersCount = Number(profileData.invited_users_count || invitedUsers.length || 0);
+        const invitedUsersHtml = invitedUsersCount > 0
+            ? `<div class="profile-invited-users"><div class="profile-invited-users-head"><span>Приглашённые</span><strong>${invitedUsersCount}</strong></div><div class="profile-invited-users-list">${invitedUsers.map(invited => {
+                const invitedNameRaw = [invited.telegram_first_name, invited.telegram_last_name].filter(Boolean).join(' ') || invited.telegram_username || `UID ${invited.uid}`;
+                const invitedName = escapeHtml(cleanText(invitedNameRaw, 40));
+                const invitedUsername = invited.telegram_username ? `@${escapeHtml(cleanText(invited.telegram_username, 32))}` : `#${escapeHtml(invited.uid || '')}`;
+                const invitedPhoto = invited.telegram_photo_url ? (invited.telegram_photo_url.startsWith('/') ? 'https://t.me' + invited.telegram_photo_url : invited.telegram_photo_url) : '';
+                return `<a class="profile-invited-user" href="${getProfileHref(invited.uid, invited.user_id)}">${invitedPhoto ? `<img src="${escapeHtml(invitedPhoto)}" alt="" onerror="this.style.display='none'">` : '<span class="profile-invited-user-avatar"></span>'}<span><strong>${invitedName}</strong><em>${invitedUsername}</em></span></a>`;
+            }).join('')}</div></div>`
+            : '<div class="profile-invited-users profile-invited-users-empty"><div class="profile-invited-users-head"><span>Приглашённые</span><strong>0</strong></div><p>Пока никого не пригласил</p></div>';
+
         const showcaseRowHtml = showcased.length > 0
 
 
@@ -2939,6 +2979,10 @@ function decodeInviteAscii(code) {
 
 
                             <p class="profile-joined">Дата регистрации: ${formatDate(profileData.created_at)}</p>
+
+                            ${accountStatusHtml}
+
+                            ${invitedUsersHtml}
 
 
 

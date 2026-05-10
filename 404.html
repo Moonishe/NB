@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <script>
+    (function() {
+        var path = window.location.pathname;
+        // Match /{optional_base}/profile/uid-{number}
+        var match = path.match(/^(.*?)\/profile\/uid-(\d+)$/);
+        if (match) {
+            var base = match[1]; // e.g. /NB or ""
+            window.location.replace(base + '/profile.html?uid=' + encodeURIComponent(match[2]));
+            return;
+        }
+        // Fallback: strip everything and go home
+        var home = path.split('/').slice(0, 2).join('/') || '/';
+        window.location.replace(home + '/');
+    })();
+    </script>
+</head>
+<body>Redirecting...</body>
+</html>

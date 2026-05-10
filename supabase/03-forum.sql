@@ -994,6 +994,8 @@ RETURNS TABLE(
     generated_code TEXT,
     invite_use_count INTEGER,
     bio TEXT,
+    role TEXT,
+    uid INTEGER,
     is_moderator BOOLEAN,
     is_banned BOOLEAN,
     is_muted BOOLEAN,
@@ -1019,6 +1021,8 @@ BEGIN
         ic.code AS generated_code,
         ic.use_count AS invite_use_count,
         p.bio,
+        COALESCE(p.role, 'member') AS role,
+        p.uid,
         EXISTS (SELECT 1 FROM moderators m WHERE m.user_id = p.user_id) AS is_moderator,
         EXISTS (
             SELECT 1 FROM user_mod_actions uma

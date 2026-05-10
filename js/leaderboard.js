@@ -17,6 +17,20 @@ const LeaderboardModule = (() => {
     let svgPreviewQueue = [];
     let svgPreviewQueueRunning = false;
     let pendingTimeouts = [];
+
+
+    function getProfileBasePath() {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
+        return '';
+    }
+
+    function getProfileHref(uid, userId) {
+        if (uid !== undefined && uid !== null && String(uid) !== '') return getProfileBasePath() + '/profile/uid-' + encodeURIComponent(uid);
+        if (userId) return getProfileBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
+        return '#';
+    }
+
     let ratingStats = new Map();
     let ratingEntries = new Map();
 
@@ -511,7 +525,7 @@ const LeaderboardModule = (() => {
             const role = normalizeRole(entry.rater_role);
             const nickname = entry.rater_nickname || entry.rater_uid || 'user';
             const uid = entry.rater_uid ? String(entry.rater_uid) : '';
-            const href = uid ? `profile.html?uid=${encodeURIComponent(uid)}` : '#';
+            const href = uid ? getProfileHref(uid) : '#';
             const rank = Number(entry.rating_rank) || idx + 1;
             const score = Number(entry.total_score);
             const scoreText = Number.isFinite(score) ? formatScore(score) : '—';

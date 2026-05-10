@@ -2,6 +2,20 @@ const AuthApp = (() => {
 
     let inviteCode = '';
 
+
+    function getProfileBasePath() {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
+        return '';
+    }
+
+    function getProfileHref(uid, userId) {
+        if (uid !== undefined && uid !== null && String(uid) !== '') return getProfileBasePath() + '/profile/uid-' + encodeURIComponent(uid);
+        if (userId) return getProfileBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
+        return '#';
+    }
+
+
     let isProcessing = false;
 
     let authMode = 'login';
@@ -1065,7 +1079,7 @@ const AuthApp = (() => {
                 }
 
                 const profileLink = document.getElementById('account-profile-link');
-                if (profileLink && info.uid) profileLink.href = 'profile.html?uid=' + encodeURIComponent(info.uid);
+                if (profileLink && info.uid) profileLink.href = getProfileHref(info.uid);
 
                 runAccountDecode();
 
@@ -1202,7 +1216,7 @@ const AuthApp = (() => {
         }
 
         const profileLink = document.getElementById('account-profile-link');
-        if (profileLink && info.uid) profileLink.href = 'profile.html?uid=' + encodeURIComponent(info.uid);
+        if (profileLink && info.uid) profileLink.href = getProfileHref(info.uid);
 
         runAccountDecode();
     }

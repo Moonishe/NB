@@ -29,7 +29,9 @@ RETURNS TABLE (
     reactions_given_count BIGINT,
     achievement_points BIGINT,
     achievements_count BIGINT,
-    showcased_achievements JSONB
+    showcased_achievements JSONB,
+    invited_users_count BIGINT,
+    invited_users JSONB
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -99,6 +101,35 @@ BEGIN
     JOIN achievements a ON a.id = ua.achievement_id
     WHERE ua.user_id = p_user_id AND ua.is_showcased = TRUE;
 
+    SELECT COUNT(DISTINCT icu.user_id)::BIGINT INTO invited_users_count
+    FROM invite_codes ic
+    JOIN invite_code_uses icu ON icu.invite_code_id = ic.id
+    WHERE ic.created_by = p_user_id;
+
+    SELECT COALESCE(jsonb_agg(jsonb_build_object(
+        'user_id', invited.user_id,
+        'uid', invited.uid,
+        'telegram_first_name', invited.telegram_first_name,
+        'telegram_last_name', invited.telegram_last_name,
+        'telegram_username', invited.telegram_username,
+        'telegram_photo_url', invited.telegram_photo_url
+    ) ORDER BY invited.uid), '[]'::jsonb) INTO invited_users
+    FROM (
+        SELECT DISTINCT
+            p.user_id,
+            p.uid,
+            p.telegram_first_name,
+            p.telegram_last_name,
+            p.telegram_username,
+            p.telegram_photo_url
+        FROM invite_codes ic
+        JOIN invite_code_uses icu ON icu.invite_code_id = ic.id
+        JOIN profiles p ON p.user_id = icu.user_id
+        WHERE ic.created_by = p_user_id
+        ORDER BY p.uid
+        LIMIT 12
+    ) invited;
+
     RETURN NEXT;
 END;
 $$;
@@ -144,7 +175,9 @@ RETURNS TABLE (
     reactions_given_count BIGINT,
     achievement_points BIGINT,
     achievements_count BIGINT,
-    showcased_achievements JSONB
+    showcased_achievements JSONB,
+    invited_users_count BIGINT,
+    invited_users JSONB
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -179,7 +212,9 @@ BEGIN
         gp.reactions_given_count,
         gp.achievement_points,
         gp.achievements_count,
-        gp.showcased_achievements
+        gp.showcased_achievements,
+        gp.invited_users_count,
+        gp.invited_users
     FROM public.get_public_profile(v_user_id) gp;
 END;
 $$;
