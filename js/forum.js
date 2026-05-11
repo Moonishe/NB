@@ -130,6 +130,18 @@ const ForumModule = (() => {
 
     }
 
+    function sanitizeTelegramPhotoUrl(value) {
+        if (!value) return '';
+        if (value.startsWith('/')) return value.startsWith('/i/userpic/') ? 'https://t.me' + value : '';
+        try {
+            const url = new URL(value);
+            const hostname = url.hostname.toLowerCase();
+            if (url.protocol !== 'https:') return '';
+            if (hostname === 't.me' || hostname.endsWith('.t.me') || hostname === 'telegram.org' || hostname.endsWith('.telegram.org')) return url.toString();
+        } catch (_) {}
+        return '';
+    }
+
 
 
 
@@ -396,15 +408,7 @@ const ForumModule = (() => {
 
 
 
-        const photo = info.author_photo_url
-
-
-
-            ? (info.author_photo_url.startsWith('/') ? 'https://t.me' + info.author_photo_url : info.author_photo_url)
-
-
-
-            : null;
+        const photo = sanitizeTelegramPhotoUrl(info.author_photo_url);
 
 
 
@@ -1317,9 +1321,7 @@ const ForumModule = (() => {
             const authorHref = thread.author_id
                 ? getProfileHref(thread.author_uid, thread.author_id)
                 : '#';
-            const authorPhoto = thread.author_photo_url
-                ? (thread.author_photo_url.startsWith('/') ? 'https://t.me' + thread.author_photo_url : thread.author_photo_url)
-                : null;
+            const authorPhoto = sanitizeTelegramPhotoUrl(thread.author_photo_url);
             const authorName = cleanText(
                 [thread.author_first_name, thread.author_last_name].filter(Boolean).join(' ') || thread.author_username || '',
                 50
@@ -1483,7 +1485,7 @@ const ForumModule = (() => {
 
 
 
-                    ? '<div class="forum-login-prompt"><a href="register">Войдите</a> чтобы отвечать в тредах</div>'
+                    ? '<div class="forum-login-prompt"><a href="auth">Войдите</a> чтобы отвечать в тредах</div>'
 
 
 
@@ -2652,15 +2654,7 @@ const ForumModule = (() => {
 
 
 
-        const photo = profile.telegram_photo_url
-
-
-
-            ? (profile.telegram_photo_url.startsWith('/') ? 'https://t.me' + profile.telegram_photo_url : profile.telegram_photo_url)
-
-
-
-            : null;
+        const photo = sanitizeTelegramPhotoUrl(profile.telegram_photo_url);
 
 
 
@@ -3544,7 +3538,7 @@ const ForumModule = (() => {
 
 
 
-                <div class="forum-empty">${!userInfo ? '<a href="register">Войдите</a> чтобы создавать треды' : 'У вас нет прав для создания тредов'}</div>
+                <div class="forum-empty">${!userInfo ? '<a href="auth">Войдите</a> чтобы создавать треды' : 'У вас нет прав для создания тредов'}</div>
 
 
 

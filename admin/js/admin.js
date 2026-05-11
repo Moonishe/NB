@@ -1430,7 +1430,7 @@ const AdminApp = (() => {
                 if (profiles.length > 0) {
                     const latest = profiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
                     const name = [latest.telegram_first_name, latest.telegram_last_name].filter(Boolean).join(' ') || latest.username || latest.telegram_username;
-                    if (name) addLogEntry('auth', `${escapeHtml(name)} — новый пользователь`);
+                    if (name) addLogEntry('auth', `${name} — новый пользователь`);
                 }
             } catch {}
         }, 5000);
@@ -1446,9 +1446,16 @@ const AdminApp = (() => {
         if (currentLogFilter !== 'all' && type !== currentLogFilter) return;
         const now = new Date();
         const time = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
+        const safeType = String(type || 'system').replace(/[^a-z0-9_-]/gi, '') || 'system';
         const entry = document.createElement('div');
+        const timeEl = document.createElement('span');
+        const textEl = document.createElement('span');
         entry.className = 'log-entry';
-        entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-type-${type}">${text}</span>`;
+        timeEl.className = 'log-time';
+        timeEl.textContent = `[${time}]`;
+        textEl.className = `log-type-${safeType}`;
+        textEl.textContent = ` ${text}`;
+        entry.append(timeEl, textEl);
         console.appendChild(entry);
         console.scrollTop = console.scrollHeight;
     }

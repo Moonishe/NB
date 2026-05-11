@@ -169,6 +169,40 @@ async function findAuthUserIdByEmail(adminClient: any, email: string): Promise<s
   return typeof data === 'string' && data ? data : null
 }
 
+async function isTelegramBlacklisted(adminClient: any, telegramId: string): Promise<boolean> {
+  const { data, error } = await adminClient
+    .from('telegram_blacklist')
+    .select('telegram_id')
+    .eq('telegram_id', telegramId)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (error) {
+    console.error('telegram-auth blacklist check failed', error)
+    throw new Error('Blacklist check failed')
+  }
+
+  return !!data
+}
+
+async function isUserBanned(adminClient: any, userId: string): Promise<boolean> {
+  const { data, error } = await adminClient
+    .from('user_mod_actions')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('action_type', 'ban')
+    .eq('is_active', true)
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+    .limit(1)
+
+  if (error) {
+    console.error('telegram-auth ban check failed', error)
+    throw new Error('Ban check failed')
+  }
+
+  return Array.isArray(data) && data.length > 0
+}
+
 Deno.serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req)
   const jsonResponse = makeJsonResponse(corsHeaders || { ...CORS_BASE_HEADERS })
@@ -250,6 +284,10 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Invalid Telegram authentication' }, 401)
     }
 
+    if (await isTelegramBlacklisted(adminClient, telegramId)) {
+      return jsonResponse({ error: 'Account is banned' }, 403)
+    }
+
     const password = generatePassword()
 
     const tgProfile = {
@@ -270,6 +308,9 @@ Deno.serve(async (req: Request) => {
       .maybeSingle()
 
     if (byTgId) {
+      if (await isUserBanned(adminClient, byTgId.user_id)) {
+        return jsonResponse({ error: 'Account is banned' }, 403)
+      }
       if (byTgId.is_verified || byTgId.used_invite_code_id) {
         existingUserId = byTgId.user_id
       } else {
@@ -286,6 +327,9 @@ Deno.serve(async (req: Request) => {
         .maybeSingle()
 
       if (byEmail) {
+        if (await isUserBanned(adminClient, byEmail.user_id)) {
+          return jsonResponse({ error: 'Account is banned' }, 403)
+        }
         if (byEmail.is_verified || byEmail.used_invite_code_id) {
           existingUserId = byEmail.user_id
           if (!byEmail.telegram_id) {
@@ -303,6 +347,9 @@ Deno.serve(async (req: Request) => {
 
     if (!existingUserId && !pendingAuthUserId) {
       pendingAuthUserId = await findAuthUserIdByEmail(adminClient, email)
+      if (pendingAuthUserId && await isUserBanned(adminClient, pendingAuthUserId)) {
+        return jsonResponse({ error: 'Account is banned' }, 403)
+      }
     }
 
     if (existingUserId) {

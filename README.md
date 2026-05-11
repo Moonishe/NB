@@ -111,7 +111,8 @@ npx serve .
 ├── voxel.html          ← Voxel бенчмарк
 ├── forum.html          ← Форум
 ├── profile.html        ← Профиль
-├── register.html       ← Авторизация
+├── auth.html           ← Авторизация
+├── register.html       ← Редирект → auth.html
 ├── admin/              ← Админ-панель
 ├── js/                 ← Фронтенд-модули
 ├── css/                ← Стили (dark terminal)

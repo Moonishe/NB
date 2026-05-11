@@ -43,6 +43,18 @@
         return '#';
     }
 
+    function sanitizeTelegramPhotoUrl(value) {
+        if (!value) return '';
+        if (value.startsWith('/')) return value.startsWith('/i/userpic/') ? 'https://t.me' + value : '';
+        try {
+            const url = new URL(value);
+            const hostname = url.hostname.toLowerCase();
+            if (url.protocol !== 'https:') return '';
+            if (hostname === 't.me' || hostname.endsWith('.t.me') || hostname === 'telegram.org' || hostname.endsWith('.telegram.org')) return url.toString();
+        } catch (_) {}
+        return '';
+    }
+
     const page = location.pathname.split('/').pop() || 'index.html';
     const isIndex = page === 'index.html' || page === '' || page === '/';
     const isForum = page === 'forum.html' || page === 'forum';
@@ -97,7 +109,7 @@
                     </div>
                 </div>
                 <a href="${forumHref}" class="nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold ${isForum ? 'opacity-100' : 'opacity-30 hover:opacity-100'} transition-opacity">Форум</a>
-                <a href="register" id="nav-auth-link" class="nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity" style="${hasSession ? 'display:none' : ''}">Войти</a>
+                <a href="auth" id="nav-auth-link" class="nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity" style="${hasSession ? 'display:none' : ''}">Войти</a>
             </div>
             <div id="nav-actions" class="flex items-center gap-2">
                 <a href="admin/index.html" id="nav-admin-shortcut" class="hidden nav-admin-shortcut" aria-label="Админка" title="Админка">A</a>
@@ -127,7 +139,7 @@
                 </div>
             </div>
             <a href="${forumHref}" class="mobile-nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold ${isForum ? 'opacity-100' : 'opacity-30 hover:opacity-100'} transition-opacity block py-2">Форум</a>
-            <a href="register" id="mobile-nav-auth-link" class="mobile-nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity block py-2" style="${hasSession ? 'display:none' : ''}">Войти</a>
+            <a href="auth" id="mobile-nav-auth-link" class="mobile-nav-link nav-scramble text-[10px] uppercase tracking-[0.2em] font-bold opacity-30 hover:opacity-100 transition-opacity block py-2" style="${hasSession ? 'display:none' : ''}">Войти</a>
         </div>
     </nav>`;
 
@@ -276,7 +288,7 @@
     function createDropdown() {
         // FIX: info не существует в этом scope — берём uid из dataset кнопки
         const uid = (userBtn && userBtn.dataset.uid) ? userBtn.dataset.uid : '';
-        const profileHref = uid ? getProfileHref(uid) : 'register';
+        const profileHref = uid ? getProfileHref(uid) : 'auth';
         const el = document.createElement('div');
         el.id = 'nav-user-dropdown';
         el.className = 'nav-user-dropdown-float';
@@ -443,9 +455,11 @@
                 const photoEl = document.getElementById('nav-user-photo');
                 const iconEl = document.getElementById('nav-user-icon');
                 if (photoEl) {
-                    const url = info.telegram_photo_url.startsWith('/') ? 'https://t.me' + info.telegram_photo_url : info.telegram_photo_url;
-                    photoEl.src = url;
-                    photoEl.classList.remove('hidden');
+                    const url = sanitizeTelegramPhotoUrl(info.telegram_photo_url);
+                    if (url) {
+                        photoEl.src = url;
+                        photoEl.classList.remove('hidden');
+                    }
                     photoEl.onerror = () => { photoEl.classList.add('hidden'); if (iconEl) iconEl.classList.remove('hidden'); };
                 }
                 if (iconEl && photoEl) iconEl.classList.add('hidden');

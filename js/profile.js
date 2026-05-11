@@ -1015,6 +1015,18 @@ function decodeInviteAscii(code) {
 
     }
 
+    function sanitizeTelegramPhotoUrl(value) {
+        if (!value) return '';
+        if (value.startsWith('/')) return value.startsWith('/i/userpic/') ? 'https://t.me' + value : '';
+        try {
+            const url = new URL(value);
+            const hostname = url.hostname.toLowerCase();
+            if (url.protocol !== 'https:') return '';
+            if (hostname === 't.me' || hostname.endsWith('.t.me') || hostname === 'telegram.org' || hostname.endsWith('.telegram.org')) return url.toString();
+        } catch (_) {}
+        return '';
+    }
+
 
 
 
@@ -2116,23 +2128,14 @@ function decodeInviteAscii(code) {
 
 
 
-                const url = userInfo.telegram_photo_url.startsWith('/')
+                const url = sanitizeTelegramPhotoUrl(userInfo.telegram_photo_url);
 
 
 
-                    ? 'https://t.me' + userInfo.telegram_photo_url
-
-
-
-                    : userInfo.telegram_photo_url;
-
-
-
-                photoEl.src = url;
-
-
-
-                photoEl.classList.remove('hidden');
+                if (url) {
+                    photoEl.src = url;
+                    photoEl.classList.remove('hidden');
+                }
 
 
 
@@ -2728,15 +2731,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const photo = profileData.telegram_photo_url
-
-
-
-            ? (profileData.telegram_photo_url.startsWith('/') ? 'https://t.me' + profileData.telegram_photo_url : profileData.telegram_photo_url)
-
-
-
-            : null;
+        const photo = sanitizeTelegramPhotoUrl(profileData.telegram_photo_url);
 
 
 
@@ -4635,7 +4630,7 @@ function decodeInviteAscii(code) {
 
                 const invitedUsername = invitedDisplayUname ? ('@' + escapeHtml(cleanText(invitedDisplayUname, 32))) : ('#' + escapeHtml(invited.uid || ''));
 
-                const invitedPhoto = invited.telegram_photo_url ? (invited.telegram_photo_url.startsWith('/') ? 'https://t.me' + invited.telegram_photo_url : invited.telegram_photo_url) : '';
+                const invitedPhoto = sanitizeTelegramPhotoUrl(invited.telegram_photo_url);
 
                 const joinedAt = invited.used_at ? formatDate(invited.used_at) : (invited.created_at ? formatDate(invited.created_at) : '');
 
@@ -5536,7 +5531,7 @@ function decodeInviteAscii(code) {
         const unknownEmojis = ['🤨', '😳', '🫣', '😲', '🤯', '😵', '😮', '🙀', '👀', '🧐', '😶'];
         const sticker = unknownEmojis[Math.floor(Math.random() * unknownEmojis.length)];
         const title = !userInfo ? 'Нужен вход' : 'Профиль не найден';
-        const text = !userInfo ? '<a href="register">Войдите</a>, чтобы просмотреть профиль' : 'Такого профиля нет или ссылка устарела';
+        const text = !userInfo ? '<a href="auth">Войдите</a>, чтобы просмотреть профиль' : 'Такого профиля нет или ссылка устарела';
         main.innerHTML = `
             <section class="profile-unknown-card" aria-live="polite">
                 <div class="profile-unknown-sticker">${sticker}</div>
@@ -5545,7 +5540,7 @@ function decodeInviteAscii(code) {
                 <p class="profile-unknown-text">${text}</p>
                 <div class="profile-unknown-actions">
                     <a href="forum" class="forum-cancel-btn">&larr; На форум</a>
-                    ${!userInfo ? '<a href="register" class="forum-cancel-btn profile-unknown-primary">Войти</a>' : ''}
+                    ${!userInfo ? '<a href="auth" class="forum-cancel-btn profile-unknown-primary">Войти</a>' : ''}
                 </div>
             </section>
         `;

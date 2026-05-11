@@ -53,6 +53,20 @@ const AuthApp = (() => {
 
     }
 
+    function sanitizeTelegramPhotoUrl(value) {
+        if (!value) return '';
+        if (value.startsWith('/')) return value.startsWith('/i/userpic/') ? 'https://t.me' + value : '';
+        try {
+            const url = new URL(value);
+            const hostname = url.hostname.toLowerCase();
+            if (url.protocol !== 'https:') return '';
+            if (hostname === 't.me' || hostname.endsWith('.t.me') || hostname === 'telegram.org' || hostname.endsWith('.telegram.org')) {
+                return url.toString();
+            }
+        } catch (_) {}
+        return '';
+    }
+
 
 
     function showError(id, msg) {
@@ -769,6 +783,8 @@ const AuthApp = (() => {
 
         }
 
+        const tgContainer = document.getElementById('tg-widget-container');
+        if (tgContainer) tgContainer.classList.remove('tg-auth-active');
         hideError('auth-error');
 
         if (!isRegister) {
@@ -914,6 +930,7 @@ const AuthApp = (() => {
 
     async function handleTelegramAuth(user) {
         if (isProcessing) return;
+        clearTimeout(_tgActiveTimer);
 
         if (authMode === 'register') {
             const code = document.getElementById('invite-code').value.trim().toUpperCase();
@@ -925,7 +942,7 @@ const AuthApp = (() => {
             }
         }
 
-        if (!turnstileToken) {
+        if (!turnstileToken && window.TURNSTILE_SITE_KEY) {
             showError('auth-error', 'Пройдите проверку капчи');
             return;
         }
@@ -953,7 +970,8 @@ const AuthApp = (() => {
         try {
 
             const result = await Api.telegramAuth(user, code || null, turnstileToken);
-
+            const containerAfter = document.getElementById('tg-widget-container');
+            if (containerAfter) containerAfter.classList.remove('tg-auth-active');
             await Api.setSession(result.access_token, result.refresh_token);
 
             const tgSvg = tgBtn ? tgBtn.querySelector('.tg-custom-btn svg') : null;
@@ -991,6 +1009,8 @@ const AuthApp = (() => {
             }
 
         } catch (err) {
+            const container = document.getElementById('tg-widget-container');
+            if (container) container.classList.remove('tg-auth-active');
             resetTurnstile();
 
             const tgSvgErr = tgBtn ? tgBtn.querySelector('.tg-custom-btn svg') : null;
@@ -1040,8 +1060,12 @@ const AuthApp = (() => {
         container.classList.remove('tg-widget-ready');
         container.querySelectorAll('.tg-widget-state, .tg-local-fallback').forEach(el => el.remove());
         const fb = document.createElement('div');
+        const icon = document.createElement('span');
+        const label = document.createElement('span');
         fb.className = className;
-        fb.innerHTML = telegramIcon + '<span>' + message + '</span>';
+        icon.innerHTML = telegramIcon;
+        label.textContent = message;
+        fb.append(icon, label);
         container.appendChild(fb);
     }
 
@@ -1052,6 +1076,32 @@ const AuthApp = (() => {
             hideError('auth-error');
             resetTurnstile();
             reloadTelegramWidget();
+        });
+    }
+
+    let _tgActiveTimer = 0;
+
+    function wireCustomButtonClick(container) {
+        const customBtn = container ? container.querySelector('.tg-custom-btn') : null;
+        if (!customBtn) return;
+        customBtn.addEventListener('click', () => {
+            if (authMode === 'register') {
+                const code = document.getElementById('invite-code').value.trim().toUpperCase();
+                if (!code) {
+                    showError('auth-error', 'Введите инвайт-код для регистрации');
+                    const inviteSection = document.getElementById('invite-section');
+                    if (inviteSection) inviteSection.classList.add('ring-1', 'ring-red-400/50');
+                    return;
+                }
+            }
+            hideError('auth-error');
+            container.classList.add('tg-auth-active');
+            clearTimeout(_tgActiveTimer);
+            _tgActiveTimer = setTimeout(() => {
+                if (container.classList.contains('tg-auth-active')) {
+                    container.classList.remove('tg-auth-active');
+                }
+            }, 15000);
         });
     }
 
@@ -1108,7 +1158,7 @@ const AuthApp = (() => {
             window.clearInterval(telegramWidgetTimer);
             telegramWidgetTimer = null;
         }
-        container.classList.remove('tg-widget-ready');
+        container.classList.remove('tg-widget-ready', 'tg-auth-active');
         container.innerHTML = `
             <div class="tg-custom-btn" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
@@ -1117,6 +1167,7 @@ const AuthApp = (() => {
             <button type="button" class="tg-widget-reset" data-tg-reset>Сбросить Telegram</button>
         `;
         wireTelegramReset(container);
+        wireCustomButtonClick(container);
         return container;
     }
 
@@ -1158,6 +1209,7 @@ const AuthApp = (() => {
             return;
         }
         wireTelegramReset(container);
+        wireCustomButtonClick(container);
         createTelegramScript(container);
     }
 
@@ -1201,19 +1253,21 @@ const AuthApp = (() => {
 
                 if (photoEl && info.telegram_photo_url) {
 
-                    const url = info.telegram_photo_url.startsWith('/')
+                    const url = sanitizeTelegramPhotoUrl(info.telegram_photo_url);
 
-                        ? 'https://t.me' + info.telegram_photo_url
+                    if (!url) {
+                        photoEl.classList.add('hidden');
+                    } else {
 
-                        : info.telegram_photo_url;
+                        photoEl.src = url;
 
-                    photoEl.src = url;
+                        photoEl.classList.remove('hidden');
 
-                    photoEl.classList.remove('hidden');
+                        const placeholder = document.getElementById('account-photo-placeholder');
 
-                    const placeholder = document.getElementById('account-photo-placeholder');
+                        if (placeholder) placeholder.classList.add('hidden');
 
-                    if (placeholder) placeholder.classList.add('hidden');
+                    }
 
                 }
 
@@ -1495,10 +1549,6 @@ showEl('dev-login-section');
 
 devBtn.addEventListener('click', activateDevLogin);
 
-                showEl('dev-login-section');
-
-                devBtn.addEventListener('click', activateDevLogin);
-
             }
 
         }
@@ -1554,6 +1604,10 @@ devBtn.addEventListener('click', activateDevLogin);
             localStorage.removeItem('nb_dev_session');
 
             localStorage.removeItem('nb_auth_cache');
+            sessionStorage.removeItem('nb_auth_cache');
+
+            const tgContainer = document.getElementById('tg-widget-container');
+            if (tgContainer) tgContainer.classList.remove('tg-auth-active');
 
             await Api.logout();
 
