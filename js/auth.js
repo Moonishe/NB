@@ -20,6 +20,8 @@ const AuthApp = (() => {
 
     let authMode = 'login';
     let turnstileToken = '';
+    let turnstileWidgetId = null;
+    let telegramWidgetTimer = null;
 
     const _DANGEROUS_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g;
 
@@ -899,6 +901,17 @@ const AuthApp = (() => {
         turnstileToken = '';
     }
 
+    function resetTurnstile() {
+        turnstileToken = '';
+        try {
+            if (window.turnstile && turnstileWidgetId !== null) {
+                window.turnstile.reset(turnstileWidgetId);
+            }
+        } catch (e) {
+            console.warn('Turnstile reset error:', e.message);
+        }
+    }
+
     async function handleTelegramAuth(user) {
         if (isProcessing) return;
 
@@ -978,6 +991,7 @@ const AuthApp = (() => {
             }
 
         } catch (err) {
+            resetTurnstile();
 
             const tgSvgErr = tgBtn ? tgBtn.querySelector('.tg-custom-btn svg') : null;
 
@@ -1001,7 +1015,7 @@ const AuthApp = (() => {
 
                 showError('auth-error', err.message || 'Ошибка аутентификации');
 
-                if (err.status === 401) {
+                if (err.status === 401 || err.status >= 500 || !err.status) {
                     showTelegramRefreshButton();
                 }
 
@@ -1023,17 +1037,29 @@ const AuthApp = (() => {
 
     function showTelegramWidgetFallback(container, message, className = 'tg-widget-state') {
         if (!container) return;
-        const customBtn = container.querySelector('.tg-custom-btn');
-        if (customBtn) customBtn.style.display = 'none';
+        container.classList.remove('tg-widget-ready');
+        container.querySelectorAll('.tg-widget-state, .tg-local-fallback').forEach(el => el.remove());
         const fb = document.createElement('div');
         fb.className = className;
         fb.innerHTML = telegramIcon + '<span>' + message + '</span>';
         container.appendChild(fb);
     }
 
+    function wireTelegramReset(container) {
+        const resetBtn = container ? container.querySelector('[data-tg-reset]') : null;
+        if (!resetBtn) return;
+        resetBtn.addEventListener('click', () => {
+            hideError('auth-error');
+            resetTurnstile();
+            reloadTelegramWidget();
+        });
+    }
+
     function createTelegramScript(container) {
         const botUsername = window.TELEGRAM_BOT_USERNAME;
         if (!botUsername) return false;
+        container.classList.remove('tg-widget-ready');
+        container.querySelectorAll('.tg-widget-state, .tg-local-fallback').forEach(el => el.remove());
         const customBtn = container.querySelector('.tg-custom-btn');
         if (customBtn) {
             customBtn.style.display = '';
@@ -1053,19 +1079,22 @@ const AuthApp = (() => {
         };
         container.appendChild(s);
 
-        let checksLeft = 15;
-        const widgetCheck = window.setInterval(() => {
+        if (telegramWidgetTimer) window.clearInterval(telegramWidgetTimer);
+        let checksLeft = 25;
+        telegramWidgetTimer = window.setInterval(() => {
             const iframe = container.querySelector('iframe');
-            if (iframe) {
+            if (iframe && iframe._ready) {
                 if (customBtn) {
                     customBtn.classList.remove('tg-btn-loading');
-                    customBtn.style.display = 'none';
                 }
-                window.clearInterval(widgetCheck);
+                container.classList.add('tg-widget-ready');
+                window.clearInterval(telegramWidgetTimer);
+                telegramWidgetTimer = null;
             } else if (--checksLeft <= 0) {
                 if (customBtn) customBtn.classList.remove('tg-btn-loading');
                 showTelegramWidgetFallback(container, 'Telegram widget не отображается');
-                window.clearInterval(widgetCheck);
+                window.clearInterval(telegramWidgetTimer);
+                telegramWidgetTimer = null;
             }
         }, 300);
 
@@ -1075,12 +1104,19 @@ const AuthApp = (() => {
     function resetTelegramWidgetContainer() {
         const container = document.getElementById('tg-widget-container');
         if (!container) return null;
+        if (telegramWidgetTimer) {
+            window.clearInterval(telegramWidgetTimer);
+            telegramWidgetTimer = null;
+        }
+        container.classList.remove('tg-widget-ready');
         container.innerHTML = `
             <div class="tg-custom-btn" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
                 <span id="tg-custom-btn-text">${authMode === 'register' ? 'Регистрация' : 'Войти'}</span><span> через Telegram</span>
             </div>
+            <button type="button" class="tg-widget-reset" data-tg-reset>Сбросить Telegram</button>
         `;
+        wireTelegramReset(container);
         return container;
     }
 
@@ -1095,13 +1131,14 @@ const AuthApp = (() => {
         if (!container) return;
         container.innerHTML = `
             <button type="button" class="tg-custom-btn" id="tg-refresh-auth-btn">
-                <span>↻</span><span>Обновить Telegram-подтверждение</span>
+                <span>↻</span><span>Попробовать снова</span>
             </button>
         `;
         const refreshBtn = document.getElementById('tg-refresh-auth-btn');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
                 hideError('auth-error');
+                resetTurnstile();
                 reloadTelegramWidget();
             }, { once: true });
         }
@@ -1120,6 +1157,7 @@ const AuthApp = (() => {
             showTelegramWidgetFallback(container, 'Telegram bot не настроен');
             return;
         }
+        wireTelegramReset(container);
         createTelegramScript(container);
     }
 
@@ -1433,7 +1471,7 @@ function renderTurnstile() {
             wrap.classList.remove('hidden');
             const container = wrap.querySelector('.cf-turnstile');
             if (container && !container.hasChildNodes()) {
-                turnstile.render(container, {
+                turnstileWidgetId = turnstile.render(container, {
                     sitekey: window.TURNSTILE_SITE_KEY,
                     callback: onTurnstile,
                     'expired-callback': onTurnstileExpired,

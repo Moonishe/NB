@@ -196,20 +196,21 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Missing auth data' }, 400)
     }
 
-    if (turnstile_token && typeof turnstile_token === 'string') {
-      const turnstileSecret = Deno.env.get('TURNSTILE_SECRET_KEY')
-      if (turnstileSecret) {
-        const formData = new URLSearchParams()
-        formData.set('secret', turnstileSecret)
-        formData.set('response', turnstile_token)
-        const cfRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-          method: 'POST',
-          body: formData,
-        })
-        const cfData = await cfRes.json()
-        if (!cfData.success) {
-          return jsonResponse({ error: 'Captcha verification failed' }, 400)
-        }
+    const turnstileSecret = Deno.env.get('TURNSTILE_SECRET_KEY')
+    if (turnstileSecret) {
+      if (!turnstile_token || typeof turnstile_token !== 'string') {
+        return jsonResponse({ error: 'Captcha verification failed' }, 400)
+      }
+      const formData = new URLSearchParams()
+      formData.set('secret', turnstileSecret)
+      formData.set('response', turnstile_token)
+      const cfRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        body: formData,
+      })
+      const cfData = await cfRes.json()
+      if (!cfData.success) {
+        return jsonResponse({ error: 'Captcha verification failed' }, 400)
       }
     }
 
