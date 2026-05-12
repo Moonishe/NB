@@ -36,7 +36,7 @@
     </script>
 
     <link rel="icon" type="image/png" href="logo2.png">
-    <link rel="stylesheet" href="css/style.css?v=83">
+    <link rel="stylesheet" href="css/style.css?v=84">
     <style>
         .tg-widget-container {
             position: relative;
@@ -114,6 +114,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
             margin-top: 8px;
             padding: 5px 8px;
             border: 1px dashed rgba(255,255,255,0.12);
@@ -124,10 +125,31 @@
             text-transform: uppercase;
             cursor: pointer;
             transition: color 0.18s ease, border-color 0.18s ease;
+            overflow: hidden;
         }
         .tg-widget-reset:hover {
             border-color: rgba(84,169,235,0.4);
             color: rgba(255,255,255,0.72);
+        }
+        .tg-widget-reset .tg-reset-icon {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .tg-widget-reset .tg-reset-icon svg {
+            width: 100%;
+            height: 100%;
+            color: #54a9eb;
+        }
+        @keyframes tg-reset-fly {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+            40% { transform: translate(20px, -10px) rotate(-15deg); opacity: 0; }
+            41% { transform: translate(-20px, 10px) rotate(15deg); opacity: 0; }
+            100% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+        }
+        .tg-widget-reset.tg-resetting .tg-reset-icon {
+            animation: tg-reset-fly 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
         .tg-custom-btn svg {
             width: 16px;
@@ -237,21 +259,29 @@
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             transform: translateY(-2px);
         }
+        /* Hackerdecode animation for auth mode buttons */
+        @keyframes auth-btn-decode-flash {
+            0% { text-shadow: 0 0 4px rgba(255,255,255,0.4); }
+            100% { text-shadow: none; }
+        }
+        .auth-mode-btn.decoding-active {
+            animation: auth-btn-decode-flash 0.4s ease-out;
+        }
         .invite-section-inner > * {
             opacity: 0;
             transform: translateY(6px);
             transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         }
         #invite-section.invite-visible .invite-section-inner > * {
-            opacity: 1;
+            opacity: 0.7;
             transform: translateY(0);
         }
         #invite-section.invite-visible .invite-section-inner > *:nth-child(1) { transition-delay: 0.08s; }
         #invite-section.invite-visible .invite-section-inner > *:nth-child(2) { transition-delay: 0.16s; }
         #invite-section.invite-visible .invite-section-inner > *:nth-child(3) { transition-delay: 0.24s; }
         #invite-section.invite-visible .invite-section-inner {
-            border-color: rgba(84,169,235,0.22);
-            box-shadow: 0 0 20px rgba(84,169,235,0.04);
+            border-color: rgba(255,255,255,0.08);
+            box-shadow: none;
             transition: border-color 0.5s ease, box-shadow 0.5s ease;
         }
     </style>
@@ -280,7 +310,7 @@
                                 <path d="M12 19h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                             </svg>
                         </div>
-                        <h2 id="auth-title" class="font-title text-lg uppercase tracking-widest text-shiny mb-2"><span id="auth-title-main" data-text="Вход">Вход</span></h2>
+                        <h2 id="auth-title" class="font-title text-xl tracking-widest text-shiny mb-2"><span id="auth-title-main" data-text="Вход">Вход</span></h2>
                         <p id="auth-subtitle" class="text-xs opacity-30"><span id="auth-subtitle-main" data-decode-text="Войдите">Войдите</span><span class="auth-subtitle-suffix"> через ваш <span id="auth-subtitle-telegram" class="tg-glow-text">Telegram</span> аккаунт</span></p>
                     </div>
 
@@ -306,7 +336,7 @@
                                 class="invite-input-terminal">
                             <span class="invite-cursor-line"></span>
                         </div>
-                        <p class="text-[11px] opacity-30 mt-3">Инвайт нужен только для первого входа нового пользователя.</p>
+                        <p class="text-[11px] opacity-30 mt-3" data-decode-text="Инвайт нужен только для первого входа нового пользователя.">Инвайт нужен только для первого входа нового пользователя.</p>
                         </div>
                     </div>
 
@@ -319,7 +349,7 @@
                             <svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
                             <span id="tg-custom-btn-text">Войти</span><span class="tg-btn-suffix"> через Telegram</span>
                         </div>
-                        <button type="button" class="tg-widget-reset" data-tg-reset>Сбросить Telegram</button>
+                        <button type="button" class="tg-widget-reset" data-tg-reset><span class="tg-reset-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/></svg></span>Сбросить Telegram</button>
                     </div>
 
                     <div id="auth-loading" class="hidden flex items-center justify-center gap-3 py-3">
@@ -383,7 +413,7 @@
 
     <script src="js/config.js?v=5"></script>
     <script src="js/api.js?v=8"></script>
-    <script src="js/auth.js?v=56"></script>
+    <script src="js/auth.js?v=57"></script>
     <script src="js/ascii-bg.js?v=1"></script>
 </body>
 </html>

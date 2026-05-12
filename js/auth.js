@@ -731,6 +731,12 @@ const AuthApp = (() => {
             const active = btn.dataset.authMode === authMode;
             btn.classList.toggle('active', active);
             btn.setAttribute('aria-selected', active ? 'true' : 'false');
+            // Hackerdecode animation on tab button text
+            if (animate) {
+                btn.classList.add('decoding-active');
+                setTimeout(() => btn.classList.remove('decoding-active'), 400);
+                decodeText(btn, btn.textContent.trim());
+            }
         });
 
         // Content slide transition
@@ -749,6 +755,14 @@ const AuthApp = (() => {
         if (inviteSection) {
             inviteSection.classList.toggle('invite-visible', isRegister);
             inviteSection.setAttribute('aria-hidden', isRegister ? 'false' : 'true');
+            // Trigger hackerdecode on invite section elements when switching to register
+            if (isRegister && animate) {
+                setTimeout(() => {
+                    inviteSection.querySelectorAll('[data-decode-text], .invite-access-label span').forEach(el => {
+                        decodeText(el, el.dataset.decodeText || el.textContent.trim());
+                    });
+                }, 150);
+            }
         }
 
         const titleMain = isRegister ? 'Регистрация' : 'Вход';
@@ -777,6 +791,17 @@ const AuthApp = (() => {
 
         if (subtitleSuffixEl) {
             subtitleSuffixEl.innerHTML = subtitleSuffix;
+            // Hackerdecode on the suffix text
+            if (animate) {
+                const suffixTextNode = subtitleSuffixEl.firstChild;
+                if (suffixTextNode && suffixTextNode.nodeType === 3) {
+                    // Create a span wrapper for the non-Telegram part to animate
+                    const wrapper = document.createElement('span');
+                    wrapper.textContent = suffixTextNode.textContent;
+                    suffixTextNode.replaceWith(wrapper);
+                    decodeText(wrapper, wrapper.textContent.trim());
+                }
+            }
         }
 
         const subtitleTelegramEl = document.getElementById('auth-subtitle-telegram');
@@ -795,6 +820,12 @@ const AuthApp = (() => {
             const btnLabel = isRegister ? 'Регистрация' : 'Войти';
             if (animate) decodeText(btnTextEl, btnLabel);
             else btnTextEl.textContent = btnLabel;
+        }
+
+        // Decode the button suffix text
+        const btnSuffix = document.querySelector('.tg-btn-suffix');
+        if (btnSuffix && animate) {
+            decodeText(btnSuffix, ' через Telegram');
         }
 
         const tgContainer = document.getElementById('tg-widget-container');
@@ -1113,6 +1144,9 @@ const AuthApp = (() => {
         const resetBtn = container ? container.querySelector('[data-tg-reset]') : null;
         if (!resetBtn) return;
         resetBtn.addEventListener('click', () => {
+            // Trigger fly-away-and-return animation on the plane icon
+            resetBtn.classList.add('tg-resetting');
+            setTimeout(() => resetBtn.classList.remove('tg-resetting'), 800);
             hideError('auth-error');
             resetTurnstile();
             reloadTelegramWidget();
@@ -1216,7 +1250,7 @@ const AuthApp = (() => {
                 <svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
                 <span id="tg-custom-btn-text">${authMode === 'register' ? 'Регистрация' : 'Войти'}</span><span> через Telegram</span>
             </div>
-            <button type="button" class="tg-widget-reset" data-tg-reset>Сбросить Telegram</button>
+            <button type="button" class="tg-widget-reset" data-tg-reset><span class="tg-reset-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/></svg></span>Сбросить Telegram</button>
         `;
         wireTelegramReset(container);
         wireCustomButtonClick(container);
