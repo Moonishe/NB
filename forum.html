@@ -1,242 +1,106 @@
 <!DOCTYPE html>
 
-
-
 <html lang="ru">
 
-
-
 <head>
-
-
 
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://rwtogupudmlgkqtbhgup.supabase.co https://api.github.com; frame-src https://oauth.telegram.org https://telegram.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
 
     <title>NeuroBench - Forum</title>
 
-
-
     <script>window.__NB_TITLE__ = 'NeuroBench - Forum';</script>
 
-
-
-    <meta name="description" content="Ôîðóì ñîîáùåñòâà NeuroBench — îáñóæäåíèå ÈÈ, ãåíåðàöèè è áåí÷ìàðêîâ.">
-
-
-
-
-
-
+    <meta name="description" content="Ð¤Ð¾Ñ€ÑƒÐ¼ ÑÐ¾Ð¾Ð±Ñ‰ÐµÑÑ‚Ð²Ð° NeuroBench â€” Ð¾Ð±ÑÑƒÐ¶Ð´ÐµÐ½Ð¸Ðµ Ð˜Ð˜, Ð³ÐµÐ½ÐµÑ€Ð°Ñ†Ð¸Ð¸ Ð¸ Ð±ÐµÐ½Ñ‡Ð¼Ð°Ñ€ÐºÐ¾Ð².">
 
     <script src="assets/vendor/tailwind/tailwindcss-3.4.17-cdn.js"></script>
 
-
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
-
 
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-
 
     <script src="assets/vendor/supabase/supabase-js-2.49.4.min.js"></script>
 
-
-
     <script src="assets/vendor/dompurify/purify-3.2.5.min.js"></script>
-
-
-
-
-
-
 
     <script>
 
-
-
         tailwind.config = {
-
-
 
             theme: {
 
-
-
                 extend: {
-
-
 
                     colors: {
 
-
-
                         black: '#050505',
-
-
 
                         surface: '#0c0c0c',
 
-
-
                         border: '#161616',
 
-
-
                     },
-
-
 
                     fontFamily: {
 
-
-
                         sans: ['Inter', 'sans-serif'],
-
-
 
                         mono: ['"Geist Mono"', 'monospace'],
 
-
-
                         title: ['Inter', 'sans-serif'],
-
-
 
                     },
 
-
-
                 }
-
-
 
             }
 
-
-
         }
-
-
 
     </script>
 
-
-
-
-
-
-
     <link rel="icon" type="image/png" href="logo2.png">
-
-
 
     <link rel="stylesheet" href="css/style.css?v=82">
 
-
-
     <script src="js/title-scramble.js?v=8" data-title="NeuroBench - Forum" defer></script>
-
-
 
 </head>
 
-
-
 <body class="antialiased min-h-screen flex flex-col">
-
-
-
-
-
-
 
     <canvas id="ascii-canvas"></canvas>
 
-
-
-
-
-
-
     <div id="navbar-placeholder"></div>
-
-
 
     <script src="js/navbar.js?v=16"></script>
 
-
-
-
-
-
-
     <main id="forum-main" class="max-w-6xl mx-auto px-4 md:px-6 pt-32 pb-20 relative z-10">
 
-
-
-        <div class="forum-loading">Çàãðóçêà...</div>
-
-
+        <div class="forum-loading">Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ°...</div>
 
     </main>
 
-
-
-
-
-
-
     <div id="forum-modal-overlay" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center">
-
-
 
         <div id="forum-modal" class="w-full max-w-lg mx-4 matte-card p-8 custom-scrollbar max-h-[85vh] overflow-y-auto"></div>
 
-
-
     </div>
-
-
-
-
-
-
 
     <script src="js/config.js?v=5"></script>
 
-
-
     <script src="js/api.js?v=8"></script>
-
-
 
     <script src="js/main.js?v=6"></script>
 
-
-
     <script src="js/forum.js?v=10"></script>
-
-
 
     <script src="js/ascii-bg.js?v=2"></script>
 
-
-
 </body>
-
-
 
 </html>
