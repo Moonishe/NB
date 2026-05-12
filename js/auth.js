@@ -911,6 +911,7 @@ const AuthApp = (() => {
 
     function onTurnstile(token) {
         turnstileToken = token;
+        clearTurnstileTimeout();
     }
 
     function onTurnstileExpired() {
@@ -928,6 +929,14 @@ const AuthApp = (() => {
         }
     }
 
+    function showTurnstile() {
+        const wrap = document.getElementById('turnstile-wrap');
+        if (!wrap) return;
+        wrap.classList.remove('hidden');
+        if (window._renderTurnstile) window._renderTurnstile(true);
+        initTurnstileWithTimeout();
+    }
+
     async function handleTelegramAuth(user) {
         if (isProcessing) return;
         clearTimeout(_tgActiveTimer);
@@ -940,11 +949,20 @@ const AuthApp = (() => {
                 if (inviteSection) inviteSection.classList.add('ring-1', 'ring-red-400/50');
                 return;
             }
+            if (code.length < 8) {
+                showError('auth-error', 'Инвайт-код должен содержать 8 символов');
+                const inviteSection = document.getElementById('invite-section');
+                if (inviteSection) inviteSection.classList.add('ring-1', 'ring-red-400/50');
+                return;
+            }
         }
 
         if (!turnstileToken && window.TURNSTILE_SITE_KEY) {
-            showError('auth-error', 'Пройдите проверку капчи');
-            return;
+            const wrap = document.getElementById('turnstile-wrap');
+            if (wrap && !wrap.classList.contains('hidden')) {
+                showError('auth-error', 'Пройдите проверку капчи');
+                return;
+            }
         }
         isProcessing = true;
 
@@ -969,7 +987,15 @@ const AuthApp = (() => {
 
         try {
 
-            const result = await Api.telegramAuth(user, code || null, turnstileToken);
+            clearTurnstileTimeout();
+            const controller = new AbortController();
+            const authTimeout = setTimeout(() => controller.abort(), 30000);
+            let result;
+            try {
+                result = await Api.telegramAuth(user, code || null, turnstileToken, controller.signal);
+            } finally {
+                clearTimeout(authTimeout);
+            }
             const containerAfter = document.getElementById('tg-widget-container');
             if (containerAfter) containerAfter.classList.remove('tg-auth-active');
             await Api.setSession(result.access_token, result.refresh_token);
@@ -1023,9 +1049,16 @@ const AuthApp = (() => {
 
             }
 
-            if (err.needsInvite) {
+            if (err.name === 'AbortError') {
+                showError('auth-error', 'Превышено время ожидания. Попробуйте снова.');
+                showTelegramRefreshButton();
+            } else if (/captcha|капч/i.test(err.message || '')) {
+                showTurnstile();
+                showError('auth-error', err.message);
+                showTelegramRefreshButton();
+            } else if (err.needsInvite) {
 
-                showError('auth-error', err.message || 'Для регистрации нужен инвайт-код. Введите код выше и попробуйте снова 🤨');
+                showError('auth-error', err.message || 'Для регистрации нужен инвайт-код. Введите код выше и попробуйте снова');
 
                 const inviteSection = document.getElementById('invite-section');
 
@@ -1093,6 +1126,12 @@ const AuthApp = (() => {
                     if (inviteSection) inviteSection.classList.add('ring-1', 'ring-red-400/50');
                     return;
                 }
+                if (code.length < 8) {
+                    showError('auth-error', 'Инвайт-код должен содержать 8 символов');
+                    const inviteSection = document.getElementById('invite-section');
+                    if (inviteSection) inviteSection.classList.add('ring-1', 'ring-red-400/50');
+                    return;
+                }
             }
             hideError('auth-error');
             container.classList.add('tg-auth-active');
@@ -1130,13 +1169,19 @@ const AuthApp = (() => {
         container.appendChild(s);
 
         if (telegramWidgetTimer) window.clearInterval(telegramWidgetTimer);
-        let checksLeft = 25;
+        let checksLeft = 40;
         telegramWidgetTimer = window.setInterval(() => {
             const iframe = container.querySelector('iframe');
-            if (iframe && iframe._ready) {
+            const iframeReady = iframe && (iframe._ready || iframe.contentDocument !== null || iframe.offsetHeight > 10);
+            if (iframe && iframeReady) {
                 if (customBtn) {
                     customBtn.classList.remove('tg-btn-loading');
                 }
+                container.classList.add('tg-widget-ready');
+                window.clearInterval(telegramWidgetTimer);
+                telegramWidgetTimer = null;
+            } else if (iframe) {
+                if (customBtn) customBtn.classList.remove('tg-btn-loading');
                 container.classList.add('tg-widget-ready');
                 window.clearInterval(telegramWidgetTimer);
                 telegramWidgetTimer = null;
@@ -1211,6 +1256,39 @@ const AuthApp = (() => {
         wireTelegramReset(container);
         wireCustomButtonClick(container);
         createTelegramScript(container);
+    }
+
+    let _turnstileTimeout = 0;
+    let _turnstileScriptLoading = false;
+    function ensureTurnstileScript() {
+        if (!window.TURNSTILE_SITE_KEY) return false;
+        if (window.turnstile) return true;
+        if (_turnstileScriptLoading || document.querySelector('script[data-turnstile-api]')) return false;
+        _turnstileScriptLoading = true;
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad';
+        script.async = true;
+        script.defer = true;
+        script.dataset.turnstileApi = 'true';
+        script.onerror = () => {
+            _turnstileScriptLoading = false;
+            console.warn('[auth] Turnstile script failed to load');
+        };
+        document.head.appendChild(script);
+        return false;
+    }
+
+    function initTurnstileWithTimeout() {
+        _turnstileTimeout = setTimeout(() => {
+            if (!turnstileToken && window.TURNSTILE_SITE_KEY) {
+                console.warn('[auth] Turnstile timed out — proceeding without captcha');
+                const wrap = document.getElementById('turnstile-wrap');
+                if (wrap) wrap.classList.add('hidden');
+            }
+        }, 15000);
+    }
+    function clearTurnstileTimeout() {
+        if (_turnstileTimeout) { clearTimeout(_turnstileTimeout); _turnstileTimeout = 0; }
     }
 
 
@@ -1392,6 +1470,13 @@ const AuthApp = (() => {
 
     function fillAccountFromCache(info) {
 
+        hideEl('account-unverified');
+        hideEl('account-username');
+        hideEl('account-photo');
+        showEl('account-photo-placeholder');
+        hideEl('new-user-badge');
+        resetInviteState();
+
         const nameEl = document.getElementById('account-name');
 
         if (nameEl) {
@@ -1408,6 +1493,18 @@ const AuthApp = (() => {
 
             usernameEl.classList.remove('hidden');
 
+        }
+
+        if (info.telegram_photo_url) {
+            const url = sanitizeTelegramPhotoUrl(info.telegram_photo_url);
+            if (url) {
+                const photoEl = document.getElementById('account-photo');
+                if (photoEl) {
+                    photoEl.src = url;
+                    photoEl.classList.remove('hidden');
+                }
+                hideEl('account-photo-placeholder');
+            }
         }
 
         if (info.is_verified) {
@@ -1518,11 +1615,10 @@ const AuthApp = (() => {
 window.onTelegramAuth = handleTelegramAuth;
 initTelegramWidget();
 
-function renderTurnstile() {
+function renderTurnstile(keepVisible = false) {
     try {
         const wrap = document.getElementById('turnstile-wrap');
-        if (wrap && window.TURNSTILE_SITE_KEY && window.turnstile) {
-            wrap.classList.remove('hidden');
+        if (wrap && ensureTurnstileScript()) {
             const container = wrap.querySelector('.cf-turnstile');
             if (container && !container.hasChildNodes()) {
                 turnstileWidgetId = turnstile.render(container, {
@@ -1533,11 +1629,11 @@ function renderTurnstile() {
                     size: 'compact',
                 });
             }
+            if (!turnstileToken && !keepVisible) wrap.classList.add('hidden');
         }
     } catch (e) { console.warn('Turnstile render error:', e.message); }
 }
 window._renderTurnstile = renderTurnstile;
-if (window._turnstileReady) renderTurnstile();
 
 const devBtn = document.getElementById('dev-login-btn');
 

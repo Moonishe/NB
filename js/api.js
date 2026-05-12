@@ -428,17 +428,18 @@ const Api = (() => {
 
     function getTelegramAuthErrorMessage(result, status) {
         const raw = result && result.error ? String(result.error) : '';
-        if (result && result.needs_invite) return 'Для регистрации нужен инвайт-код. Введите код выше и попробуйте снова 🤨';
-        if (/инвайт|invite/i.test(raw)) return 'Инвайт-код недействителен или уже использован 🤨';
+        if (result && result.needs_invite) return 'Для регистрации нужен инвайт-код. Введите код выше и попробуйте снова';
+        if (/инвайт|invite/i.test(raw)) return 'Инвайт-код недействителен или уже использован';
         if (/captcha/i.test(raw)) return 'Проверка капчи не пройдена. Обновите капчу и попробуйте снова';
         if (/too many/i.test(raw) || status === 429) return 'Слишком много попыток. Подождите пару минут и попробуйте снова';
         if (/invalid telegram authentication/i.test(raw) || status === 401) return 'Telegram-подтверждение устарело. Откройте виджет ещё раз';
         if (/forbidden origin/i.test(raw) || status === 403) return 'Домен не разрешён для Telegram-регистрации';
-        if (status >= 500) return 'Сервер регистрации временно не ответил. Попробуйте ещё раз через минуту 🤨';
+        if (/blacklist|banned/i.test(raw)) return 'Аккаунт заблокирован';
+        if (status >= 500) return 'Сервер регистрации временно не ответил. Попробуйте ещё раз через минуту';
         return raw || 'Ошибка аутентификации';
     }
 
-    async function telegramAuth(authData, inviteCode, turnstileToken) {
+    async function telegramAuth(authData, inviteCode, turnstileToken, abortSignal) {
         const supabaseUrl = window.SUPABASE_URL;
         const anonKey = window.SUPABASE_ANON_KEY;
         if (!supabaseUrl || !anonKey) throw new Error('Supabase not configured');
@@ -456,9 +457,11 @@ const Api = (() => {
                     'apikey': anonKey,
                     'Authorization': `Bearer ${anonKey}`,
                 },
-                body: JSON.stringify(body)
+                body: JSON.stringify(body),
+                signal: abortSignal || undefined
             });
         } catch (e) {
+            if (e.name === 'AbortError') throw e;
             throw new Error('Не удалось подключиться к серверу аутентификации. Проверьте что Edge Function telegram-auth задеплоена в Supabase Dashboard.');
         }
 

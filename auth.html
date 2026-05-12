@@ -6,7 +6,7 @@
 
     <meta charset="UTF-8">
 
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://rwtogupudmlgkqtbhgup.supabase.co https://api.github.com https://challenges.cloudflare.com; frame-src https://oauth.telegram.org https://telegram.org https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://rwtogupudmlgkqtbhgup.supabase.co https://challenges.cloudflare.com; frame-src https://oauth.telegram.org https://telegram.org https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -26,8 +26,7 @@
 
     <script src="assets/vendor/supabase/supabase-js-2.49.4.min.js"></script>
     <script src="assets/vendor/dompurify/purify-3.2.5.min.js"></script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" async defer></script>
-    <script>window._turnstileReady=false;window.onTurnstileLoad=function(){window._turnstileReady=true;if(window._renderTurnstile)window._renderTurnstile();}</script>
+    <script>window._turnstileReady=false;window.onTurnstileLoad=function(){window._turnstileReady=true;var w=document.getElementById('turnstile-wrap');if(window._renderTurnstile&&w&&!w.classList.contains('hidden'))window._renderTurnstile(true);}</script>
 
 
 
@@ -607,7 +606,7 @@
 
                     <span class="invite-input-prefix">&gt;</span>
 
-                    <input id="invite-code" type="text" placeholder="XXXXXXXX" maxlength="8"
+                    <input id="invite-code" type="text" placeholder="XXXXXXXX" minlength="8" maxlength="8"
 
                         class="invite-input-terminal">
 
@@ -681,7 +680,7 @@
 
                 <span style="color:rgba(100,200,100,0.6)">Статус Аккаунта:</span>
 
-                <span id="account-status-label" style="color:rgba(100,200,100,0.7)">verified</span>
+                <span id="account-status-label" style="color:rgba(255,255,255,0.3)">...</span>
 
             </div>
 
@@ -725,7 +724,7 @@
 
 
 
-            <a href="forum"
+            <a id="account-forum-link" href="./forum.html"
 
                 class="btn-terminal block text-center">
 
@@ -733,7 +732,7 @@
 
             </a>
 
-            <a id="account-profile-link" href="profile"
+            <a id="account-profile-link" href="./profile.html"
 
                 class="btn-terminal btn-terminal-primary block text-center mt-3">
 
