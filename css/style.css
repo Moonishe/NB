@@ -8582,8 +8582,7 @@ canvas#ascii-canvas {
     padding: 10px 12px;
 }
 
-#turnstile-wrap.hidden,
-.hidden {
+#turnstile-wrap.hidden {
     display: none !important;
 }
 
