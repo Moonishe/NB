@@ -8767,6 +8767,17 @@ canvas#ascii-canvas {
     background: rgba(246, 212, 177, 0.035);
 }
 
+.btn-terminal-danger {
+    border-color: rgba(248,113,113,0.22);
+    color: rgba(248,113,113,0.62);
+}
+
+.btn-terminal-danger:hover {
+    border-color: rgba(248,113,113,0.42);
+    color: rgba(248,113,113,0.88);
+    background: rgba(248,113,113,0.06);
+}
+
 .divider-dashed {
     border: none;
     border-top: 1px dashed rgba(255,255,255,0.08);
