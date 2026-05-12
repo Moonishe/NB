@@ -8474,52 +8474,102 @@ canvas#ascii-canvas {
     padding: 4px;
     border: 1px solid rgba(255,255,255,0.08);
     background: rgba(255,255,255,0.025);
+    position: relative;
+}
+
+.auth-mode-switch::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: var(--switch-border-left, 4px);
+    width: var(--switch-border-width, calc(50% - 8px));
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 0 12px rgba(255,255,255,0.04);
+    pointer-events: none;
+    transition: left 0.35s cubic-bezier(0.32, 0.72, 0, 1),
+                width 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 0;
 }
 
 .auth-mode-btn {
+    position: relative;
+    z-index: 1;
     border: 1px solid transparent;
     background: transparent;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.4);
     padding: 10px 12px;
-    font: 600 12px/1 'Geist Mono', monospace;
+    font: 500 10px/1 'Geist Mono', monospace;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     text-align: center;
     cursor: pointer;
-    transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+    transition: color 0.28s ease, transform 0.2s ease;
 }
 
 .auth-mode-btn:hover {
-    color: rgba(255,255,255,0.82);
+    color: rgba(255,255,255,0.72);
     border-color: rgba(255,255,255,0.1);
     background: rgba(255,255,255,0.035);
 }
 
 .auth-mode-btn.active {
     color: #ffffff;
-    border-color: rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.08);
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+}
+
+#invite-section {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+    transition: grid-template-rows 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.35s ease,
+                margin-bottom 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#invite-section.invite-visible {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-bottom: 16px;
+}
+
+#invite-section > * {
+    min-height: 0;
+    overflow: hidden;
 }
 
 .auth-ascii-line {
     width: 100%;
     margin-bottom: 12px;
-    overflow: hidden;
-    color: rgba(255,255,255,0.82);
-    font: 700 16px/1.45 'Geist Mono', monospace;
-    letter-spacing: -0.03em;
+    overflow: visible;
+    color: rgba(255,255,255,0.18);
+    font: 400 9px/1.45 'Geist Mono', monospace;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.auth-mode-body {
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
+}
+
+.auth-mode-body.auth-switching {
+    transform: translateX(-8px);
+    opacity: 0.55;
+}
+
+.auth-mode-body.auth-switching-reverse {
+    transform: translateX(8px);
+    opacity: 0.55;
 }
 
 .auth-ascii-line span {
-    display: block;
-}
-
-#invite-section {
-    display: none;
-    margin-bottom: 16px;
-    overflow: hidden;
-}
-
-#invite-section.invite-visible {
     display: block;
 }
 
@@ -8528,9 +8578,10 @@ canvas#ascii-canvas {
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
-    color: rgba(255,255,255,0.9);
-    font: 700 15px/1.2 'Geist Mono', monospace;
-    letter-spacing: -0.02em;
+    color: rgba(255,255,255,0.5);
+    font: 500 10px/1.2 'Geist Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
 }
 
 .invite-input-wrap {
@@ -8542,8 +8593,8 @@ canvas#ascii-canvas {
 }
 
 .invite-input-prefix {
-    color: rgba(255,255,255,0.9);
-    font: 700 16px/1 'Geist Mono', monospace;
+    color: rgba(255,255,255,0.5);
+    font: 500 12px/1 'Geist Mono', monospace;
 }
 
 .invite-input-terminal {
@@ -8551,25 +8602,33 @@ canvas#ascii-canvas {
     min-width: 0;
     border: 0;
     outline: none;
-    background: rgba(255,255,255,0.92);
-    color: rgba(5,5,5,0.78);
-    font: 700 16px/1 'Geist Mono', monospace;
-    letter-spacing: 0.03em;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.88);
+    font: 500 12px/1 'Geist Mono', monospace;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 2px 4px;
-    caret-color: #050505;
+    padding: 8px 10px;
+    caret-color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.invite-input-terminal:focus {
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.06);
 }
 
 .invite-input-terminal::placeholder {
-    color: rgba(5,5,5,0.35);
+    color: rgba(255,255,255,0.2);
 }
 
 .invite-input-terminal.decoding {
-    color: rgba(5,5,5,0.48);
+    color: rgba(255,255,255,0.4);
 }
 
 .invite-input-terminal.decoded {
     box-shadow: 0 0 0 2px rgba(100,200,100,0.24);
+    border-color: rgba(100,200,100,0.3);
 }
 
 .invite-cursor-line {
@@ -8641,11 +8700,11 @@ canvas#ascii-canvas {
     }
 
     .auth-ascii-line {
-        font-size: 14px;
+        font-size: 8px;
     }
 
     .invite-access-label {
-        font-size: 13px;
+        font-size: 9px;
         flex-wrap: wrap;
     }
 }
@@ -8789,6 +8848,7 @@ canvas#ascii-canvas {
     border-radius: 12px;
     box-shadow: none;
     transition: border-color 0.18s ease, transform 0.18s ease;
+    overflow: hidden;
 }
 
 .register-shell .matte-card::before {

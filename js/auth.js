@@ -473,14 +473,14 @@ const AuthApp = (() => {
 
         // FIX: только визуальный шум (блоки) для скрамбла — если анимация оборвётся на полпути,
         // не останется артефактов типа "ПРОФИЛ4", "ТЯ", "ВЫЙFU" (замены букв на буквы/цифры)
-        const chars = '░▒▓█▀▄▌▐';
+        const chars = 'qwertyuiop[]asdfghjkl;zxcvbnm,./!@#$%^&*QWERTYUIOPASDFGHJKLZXCVBNM<>?+=';
 
         // FIX: добавлена кириллица в keep — иначе кирилл. буквы скрамблились в случайные символы
         const keep = /[\s.\-:,/@()\u0400-\u04FF]/;
 
         const t0 = performance.now();
 
-        const duration = Math.min(520, Math.max(320, target.length * 18)); // FIX: было 808-1108мс — слишком долго, вызывало лаг при одновременном запуске 12+ анимаций
+        const duration = Math.min(600, Math.max(360, target.length * 22));
 
         function rg() { return chars[Math.floor(Math.random() * chars.length)]; }
 
@@ -581,16 +581,16 @@ const AuthApp = (() => {
         const selectors = [
             '.register-shell > .text-center a span',
             '[data-view="auth"] .auth-terminal-header span',
-            '#auth-title',
-            '#auth-subtitle',
+            '#auth-title-main',
+            '#auth-subtitle-main',
+            '#auth-subtitle-telegram',
             '[data-auth-mode]',
             '.auth-ascii-line span',
             '.invite-access-label span',
             '#invite-section p',
             '#dev-login-section p',
             '#dev-login-btn',
-            '#tg-custom-btn-text',
-            '.tg-custom-btn span:last-child'
+            '#tg-custom-btn-text'
         ];
         requestAnimationFrame(() => {
             selectors.forEach((sel, i) => {
@@ -657,7 +657,7 @@ const AuthApp = (() => {
 
         }
 
-        const chars = 'ABCDEFGHKNOPRSTUVXYZ023456789░▒▓█';
+        const chars = 'qwertyuiop[]asdfghjkl;zxcvbnm,./!@#$%^&*QWERTYUIOPASDFGHJKLZXCVBNM<>?+=';
 
         const t0 = performance.now();
 
@@ -710,77 +710,91 @@ const AuthApp = (() => {
 
 
     function setAuthMode(mode, animate = true) {
-
+        const prevMode = authMode;
         authMode = mode === 'register' ? 'register' : 'login';
-
         const isRegister = authMode === 'register';
 
+        // Animate sliding border on mode switch
         const switchEl = document.getElementById('auth-mode-switch');
-
-        if (switchEl) switchEl.dataset.mode = authMode;
+        if (switchEl) {
+            switchEl.dataset.mode = authMode;
+            requestAnimationFrame(() => {
+                const activeBtn = switchEl.querySelector(`[data-auth-mode="${authMode}"]`);
+                if (activeBtn) {
+                    switchEl.style.setProperty('--switch-border-left', activeBtn.offsetLeft + 'px');
+                    switchEl.style.setProperty('--switch-border-width', activeBtn.offsetWidth + 'px');
+                }
+            });
+        }
 
         document.querySelectorAll('[data-auth-mode]').forEach(btn => {
-
             const active = btn.dataset.authMode === authMode;
-
             btn.classList.toggle('active', active);
-
             btn.setAttribute('aria-selected', active ? 'true' : 'false');
-
         });
 
+        // Content slide transition
+        const bodyEl = document.querySelector('.auth-mode-body');
+        if (bodyEl && animate) {
+            const reverse = prevMode === 'register' && authMode === 'login';
+            bodyEl.classList.add(reverse ? 'auth-switching-reverse' : 'auth-switching');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    bodyEl.classList.remove('auth-switching', 'auth-switching-reverse');
+                });
+            });
+        }
+
         const inviteSection = document.getElementById('invite-section');
-
         if (inviteSection) {
-
             inviteSection.classList.toggle('invite-visible', isRegister);
-
             inviteSection.setAttribute('aria-hidden', isRegister ? 'false' : 'true');
-
         }
 
-        const title = isRegister ? 'Регистрация через Telegram' : 'Вход через Telegram';
+        const titleMain = isRegister ? 'Регистрация' : 'Вход';
+        const subtitleMain = isRegister
+            ? 'Введите инвайт и подтвердите аккаунт'
+            : 'Войдите';
+        const subtitleSuffix = isRegister
+            ? ' через <span class="tg-glow-text">Telegram</span>'
+            : ' через ваш <span class="tg-glow-text">Telegram</span> аккаунт';
 
-        const subtitle = isRegister
+        const titleMainEl = document.getElementById('auth-title-main');
+        const subtitleMainEl = document.getElementById('auth-subtitle-main');
+        const subtitleSuffixEl = document.querySelector('#auth-subtitle .auth-subtitle-suffix');
 
-            ? 'Введите инвайт и подтвердите аккаунт через Telegram'
-
-            : 'Войдите через ваш Telegram аккаунт';
-
-        const titleEl = document.getElementById('auth-title');
-
-        const subtitleEl = document.getElementById('auth-subtitle');
-
-        if (titleEl) {
-
-            titleEl.dataset.text = title;
-
-            if (animate) decodeText(titleEl, title);
-
-            else titleEl.textContent = title;
-
+        if (titleMainEl) {
+            titleMainEl.dataset.text = titleMain;
+            if (animate) decodeText(titleMainEl, titleMain);
+            else titleMainEl.textContent = titleMain;
         }
 
-        if (subtitleEl) {
+        if (subtitleMainEl) {
+            subtitleMainEl.dataset.decodeText = subtitleMain;
+            if (animate) decodeText(subtitleMainEl, subtitleMain);
+            else subtitleMainEl.textContent = subtitleMain;
+        }
 
-            subtitleEl.dataset.decodeText = subtitle;
+        if (subtitleSuffixEl) {
+            subtitleSuffixEl.innerHTML = subtitleSuffix;
+        }
 
-            if (animate) decodeText(subtitleEl, subtitle);
+        const subtitleTelegramEl = document.getElementById('auth-subtitle-telegram');
+        if (subtitleTelegramEl && animate) {
+            decodeText(subtitleTelegramEl, 'Telegram');
+        }
 
-            else subtitleEl.textContent = subtitle;
-
+        const titleContainer = document.getElementById('auth-title');
+        if (titleContainer && animate) {
+            titleContainer.classList.add('decode-bounce');
+            setTimeout(() => titleContainer.classList.remove('decode-bounce'), 360);
         }
 
         const btnTextEl = document.getElementById('tg-custom-btn-text');
-
         if (btnTextEl) {
-
             const btnLabel = isRegister ? 'Регистрация' : 'Войти';
-
             if (animate) decodeText(btnTextEl, btnLabel);
-
             else btnTextEl.textContent = btnLabel;
-
         }
 
         const tgContainer = document.getElementById('tg-widget-container');
@@ -788,17 +802,10 @@ const AuthApp = (() => {
         hideError('auth-error');
 
         if (!isRegister) {
-
             const inviteInput = document.getElementById('invite-code');
-
             if (inviteInput) inviteInput.value = '';
-
-            const inviteSection = document.getElementById('invite-section');
-
             if (inviteSection) inviteSection.classList.remove('ring-1', 'ring-red-400/50');
-
         }
-
     }
 
 
@@ -1688,6 +1695,18 @@ devBtn.addEventListener('click', activateDevLogin);
         });
 
         setAuthMode('login', false);
+
+        // Keep sliding border aligned on resize
+        window.addEventListener('resize', () => {
+            const switchEl = document.getElementById('auth-mode-switch');
+            if (switchEl) {
+                const activeBtn = switchEl.querySelector('.auth-mode-btn.active');
+                if (activeBtn) {
+                    switchEl.style.setProperty('--switch-border-left', activeBtn.offsetLeft + 'px');
+                    switchEl.style.setProperty('--switch-border-width', activeBtn.offsetWidth + 'px');
+                }
+            }
+        });
 
         runInitialDecode();
 
