@@ -1585,4 +1585,3 @@ BEGIN
     WHERE p.user_id = auth.uid();
 END;
 $$;
-

@@ -4058,4 +4058,3 @@ GRANT EXECUTE ON FUNCTION public.admin_set_result_param_values(INTEGER, INTEGER[
 COMMIT;
 
 NOTIFY pgrst, 'reload schema';
-

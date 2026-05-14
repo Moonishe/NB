@@ -1,0 +1,52 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate HTML
+        run: npx -y html-validate "**/*.html"
+
+      - name: Validate JSON
+        run: |
+          for f in $(find . -name "*.json" -not -path "./node_modules/*" -not -path "./.git/*"); do
+            npx -y jsonlint-cli "$f" || exit 1
+          done
+
+      - name: Validate JS syntax
+        run: |
+          for f in $(find . -name "*.js" -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./output/*"); do
+            node --check "$f" || exit 1
+          done
+
+      - name: Check file encodings (must be UTF-8)
+        run: |
+          python3 -c "
+          import sys, pathlib
+          bad = []
+          for p in pathlib.Path('.').rglob('*'):
+              if p.is_dir(): continue
+              if any(x in p.parts for x in {'.git','node_modules','output','assets'}): continue
+              if p.suffix not in {'.html','.js','.css','.ts','.sql','.json','.md','.yaml','.yml','.toml'}: continue
+              try:
+                  p.read_bytes().decode('utf-8')
+              except UnicodeDecodeError:
+                  bad.append(str(p))
+          if bad:
+              print(f'NON-UTF8 FILES: {bad}')
+              sys.exit(1)
+          print('All files are UTF-8')
+          "

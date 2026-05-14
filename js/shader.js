@@ -16,13 +16,13 @@ const ShaderModule = (() => {
             vec2 uv = gl_FragCoord.xy / u_resolution.xy;
             vec2 st = uv;
             st.x *= u_resolution.x / u_resolution.y;
-            
+
             vec2 mouse = u_mouse.xy / u_resolution.xy;
             mouse.x *= u_resolution.x / u_resolution.y;
 
             vec2 center = vec2(0.5 * (u_resolution.x / u_resolution.y), 0.5);
             float distToMouse = distance(st, mouse);
-            
+
             vec2 warpedSt = st;
             float warpRadius = 0.6;
             if(distToMouse < warpRadius) {
@@ -30,17 +30,17 @@ const ShaderModule = (() => {
                 vec2 dir = normalize(st - mouse);
                 warpedSt -= dir * influence * 0.15 * sin(distToMouse * 40.0 - u_time * 3.0);
             }
-            
+
             float r = distance(warpedSt, center);
             float angle = atan(warpedSt.y - center.y, warpedSt.x - center.x);
-            
+
             float rosette = sin(r * 250.0 - u_time * 2.0 + sin(angle * 12.0) * 4.0);
             float wavyLines = cos(warpedSt.x * 200.0 + sin(warpedSt.y * 15.0 + u_time * 1.5) * 4.0);
             float moire = rosette * wavyLines;
             float lines = smoothstep(0.01, 0.05, moire) - smoothstep(0.05, 0.09, moire);
             float vignette = 1.0 - smoothstep(0.2, 1.5, distance(uv, vec2(0.5)));
             vec3 color = vec3(lines * vignette * 0.85);
-            
+
             gl_FragColor = vec4(color, 1.0);
         }
     `;

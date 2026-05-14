@@ -1,0 +1,27 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-json
+      - id: check-yaml
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+
+  - repo: local
+    hooks:
+      - id: forbid-non-utf8
+        name: forbid non-UTF-8 files
+        entry: python -c "import sys; data=open(sys.argv[1],'rb').read(); data.decode('utf-8'); sys.exit(0)"
+        language: system
+        files: \.(html|js|css|ts|sql|json|md|yaml|yml|toml|txt)$
+        types: [file]
+
+      - id: forbid-service-role
+        name: forbid supabase service_role key
+        entry: python -c "import sys,os; bad=[]; [bad.append(f) for f in sys.argv[1:] if os.path.isfile(f) and (open(f,'r',encoding='utf-8',errors='replace').read().find('service_role')!=-1)]; sys.exit(1) if bad else sys.exit(0)"
+        language: system
+        files: \.(js|ts)$
+        types: [file]

@@ -1852,4 +1852,3 @@ $$;
 
 -- Backfill: set role = 'member' for any existing profiles with NULL role
 UPDATE profiles SET role = 'member' WHERE role IS NULL;
-
