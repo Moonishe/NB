@@ -44,13 +44,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
+        const cached = sessionStorage.getItem('nb_gh_sha');
+        if (cached) {
+            const shaEl = document.getElementById('commit-sha');
+            if (shaEl) shaEl.textContent = cached;
+        }
         const resp = await fetch('https://api.github.com/repos/Moonishe/NB/commits?per_page=1');
-        // FIX: добавлена проверка resp.ok — без неё при rate limit (403) resp.json() возвращал объект с message вместо массива
         if (!resp.ok) throw new Error('GitHub API ' + resp.status);
         const data = await resp.json();
         if (data && data[0] && data[0].sha) {
+            const sha = data[0].sha.slice(0, 7);
+            sessionStorage.setItem('nb_gh_sha', sha);
             const shaEl = document.getElementById('commit-sha');
-            if (shaEl) shaEl.textContent = data[0].sha.slice(0, 7);
+            if (shaEl) shaEl.textContent = sha;
         }
     } catch {}
 

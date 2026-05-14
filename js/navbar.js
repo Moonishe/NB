@@ -1,59 +1,13 @@
 (function() {
 
-    window.safeDisplayName = window.safeDisplayName || function(info) {
-
-        if (!info) return 'User';
-
-        const _DANGEROUS_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g;
-
-        const raw = [info.telegram_first_name, info.telegram_last_name].filter(Boolean).join(' ').trim();
-
-        if (raw) {
-
-            const clean = raw.replace(_DANGEROUS_RE, '').replace(/\s+/g, ' ').trim();
-
-            if (clean.length > 0) return clean;
-
-        }
-
-        if (info.telegram_username) return info.telegram_username;
-
-        if (info.display_name) {
-
-            const cleanDn = info.display_name.replace(_DANGEROUS_RE, '').replace(/\s+/g, ' ').trim();
-
-            if (cleanDn.length > 0) return cleanDn;
-
-        }
-
-        return 'User';
-
-    };
+    // safeDisplayName provided by profile-utils.js
 
 
-    function getProfileBasePath() {
-        const parts = window.location.pathname.split('/').filter(Boolean);
-        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
-        return '';
-    }
+    // getProfileBasePath provided by profile-utils.js
 
-    function getProfileHref(uid, userId) {
-        if (uid !== undefined && uid !== null && String(uid) !== '') return getProfileBasePath() + '/profile/uid-' + encodeURIComponent(uid);
-        if (userId) return getProfileBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
-        return '#';
-    }
+    // getProfileHref provided by profile-utils.js
 
-    function sanitizeTelegramPhotoUrl(value) {
-        if (!value) return '';
-        if (value.startsWith('/')) return value.startsWith('/i/userpic/') ? 'https://t.me' + value : '';
-        try {
-            const url = new URL(value);
-            const hostname = url.hostname.toLowerCase();
-            if (url.protocol !== 'https:') return '';
-            if (hostname === 't.me' || hostname.endsWith('.t.me') || hostname === 'telegram.org' || hostname.endsWith('.telegram.org')) return url.toString();
-        } catch (_) {}
-        return '';
-    }
+    // sanitizeTelegramPhotoUrl provided by profile-utils.js
 
     const page = location.pathname.split('/').pop() || 'index.html';
     const isIndex = page === 'index.html' || page === '' || page === '/';
@@ -61,7 +15,7 @@
     const aboutHref = isIndex ? '#about' : './#about';
     const forumHref = 'forum';
     const logoHref = isIndex ? '#' : './';
-    const isLocal = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+    const isLocal = window.isLocalhost ? window.isLocalhost() : false;
 
     function getSupabaseAuthStorageKey() {
         const url = window.SUPABASE_URL || '';
@@ -288,7 +242,7 @@
     function createDropdown() {
         // FIX: info не существует в этом scope — берём uid из dataset кнопки
         const uid = (userBtn && userBtn.dataset.uid) ? userBtn.dataset.uid : '';
-        const profileHref = uid ? getProfileHref(uid) : 'auth';
+        const profileHref = uid ? window.getProfileHref(uid) : 'auth';
         const el = document.createElement('div');
         el.id = 'nav-user-dropdown';
         el.className = 'nav-user-dropdown-float';
@@ -347,7 +301,7 @@
         // при первом создании uid мог ещё не быть загружен из API
         const profileLink = dropdownEl.querySelector('#nav-dropdown-profile');
         if (profileLink && userBtn && userBtn.dataset.uid) {
-            profileLink.href = getProfileHref(userBtn.dataset.uid);
+            profileLink.href = window.getProfileHref(userBtn.dataset.uid);
         }
 
         const anchor = document.getElementById('nav-actions') || userBtn;
@@ -434,7 +388,7 @@
             if (devRaw) {
                 try {
                     const dev = JSON.parse(devRaw);
-                    const name = safeDisplayName(dev) || 'Dev';
+                    const name = window.safeDisplayName(dev) || 'Dev';
                     showUserMenu(name, dev.role, dev.uid);
                     return;
                 } catch {}
@@ -447,7 +401,7 @@
             if (!session) return;
             const info = await Api.getUserDisplayName();
             if (!info) return;
-            const name = safeDisplayName(info) || 'User';
+            const name = window.safeDisplayName(info) || 'User';
             // FIX: передаём uid чтобы createDropdown мог построить ссылку на профиль
             showUserMenu(name, info.role, info.uid);
 
@@ -455,7 +409,7 @@
                 const photoEl = document.getElementById('nav-user-photo');
                 const iconEl = document.getElementById('nav-user-icon');
                 if (photoEl) {
-                    const url = sanitizeTelegramPhotoUrl(info.telegram_photo_url);
+                    const url = window.sanitizeTelegramPhotoUrl(info.telegram_photo_url);
                     if (url) {
                         photoEl.src = url;
                         photoEl.classList.remove('hidden');

@@ -6,6 +6,30 @@ const CORS_BASE_HEADERS = {
   'Vary': 'Origin',
 }
 
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
+const RATE_LIMIT_MAX = 30;
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+  entry.count++;
+  return true;
+}
+
+// Periodic cleanup
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitStore) {
+    if (now > entry.resetAt) rateLimitStore.delete(key);
+  }
+}, 60000);
+
 function getRequiredEnv(name: string): string {
   const value = Deno.env.get(name)
   if (!value) {
@@ -66,6 +90,12 @@ Deno.serve(async (req: Request) => {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return jsonResponse({ error: 'Unauthorized' }, 401)
+    }
+
+    // Rate limit by IP
+    const clientIp = req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(clientIp)) {
+      return jsonResponse({ error: 'Too many requests' }, 429);
     }
 
     const supabaseUrl = getRequiredEnv('SUPABASE_URL')

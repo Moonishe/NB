@@ -3,17 +3,9 @@ const AuthApp = (() => {
     let inviteCode = '';
 
 
-    function getProfileBasePath() {
-        const parts = window.location.pathname.split('/').filter(Boolean);
-        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
-        return '';
-    }
+    // getProfileBasePath provided by profile-utils.js
 
-    function getProfileHref(uid, userId) {
-        if (uid !== undefined && uid !== null && String(uid) !== '') return getProfileBasePath() + '/profile/uid-' + encodeURIComponent(uid);
-        if (userId) return getProfileBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
-        return '#';
-    }
+    // getProfileHref provided by profile-utils.js
 
 
     let isProcessing = false;
@@ -25,47 +17,9 @@ const AuthApp = (() => {
 
     const _DANGEROUS_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g;
 
-    function safeDisplayName(info) {
+    // safeDisplayName provided by profile-utils.js
 
-        if (!info) return 'User';
-
-        const raw = [info.telegram_first_name, info.telegram_last_name].filter(Boolean).join(' ').trim();
-
-        if (raw) {
-
-            const clean = raw.replace(_DANGEROUS_RE, '').replace(/\s+/g, ' ').trim();
-
-            if (clean.length > 0) return clean;
-
-        }
-
-        if (info.telegram_username) return info.telegram_username;
-
-        if (info.display_name) {
-
-            const cleanDn = info.display_name.replace(_DANGEROUS_RE, '').replace(/\s+/g, ' ').trim();
-
-            if (cleanDn.length > 0) return cleanDn;
-
-        }
-
-        return 'User';
-
-    }
-
-    function sanitizeTelegramPhotoUrl(value) {
-        if (!value) return '';
-        if (value.startsWith('/')) return value.startsWith('/i/userpic/') ? 'https://t.me' + value : '';
-        try {
-            const url = new URL(value);
-            const hostname = url.hostname.toLowerCase();
-            if (url.protocol !== 'https:') return '';
-            if (hostname === 't.me' || hostname.endsWith('.t.me') || hostname === 'telegram.org' || hostname.endsWith('.telegram.org')) {
-                return url.toString();
-            }
-        } catch (_) {}
-        return '';
-    }
+    // sanitizeTelegramPhotoUrl provided by profile-utils.js
 
 
 
@@ -150,81 +104,7 @@ const AuthApp = (() => {
 
     // ASCII block font for invite codes (5 rows, 5 cols per char)
 
-    const _GLYPH = {
-
-        'A':[' ███ ','█   █','█████','█   █','█   █'],
-
-        'B':['████ ','█   █','████ ','█   █','████ '],
-
-        'C':[' ████','█    ','█    ','█    ',' ████'],
-
-        'D':['████ ','█   █','█   █','█   █','████ '],
-
-        'E':['█████','█    ','████ ','█    ','█████'],
-
-        'F':['█████','█    ','████ ','█    ','█    '],
-
-        'G':[' ████','█    ','█  ██','█   █',' ████'],
-
-        'H':['█   █','█   █','█████','█   █','█   █'],
-
-        'I':['█████','  █  ','  █  ','  █  ','█████'],
-
-        'J':['█████','    █','    █','█   █',' ███ '],
-
-        'K':['█   █','█  █ ','███  ','█  █ ','█   █'],
-
-        'L':['█    ','█    ','█    ','█    ','█████'],
-
-        'M':['█   █','██ ██','█ █ █','█   █','█   █'],
-
-        'N':['█   █','██  █','█ █ █','█  ██','█   █'],
-
-        'O':[' ███ ','█   █','█   █','█   █',' ███ '],
-
-        'P':['████ ','█   █','████ ','█    ','█    '],
-
-        'Q':[' ███ ','█   █','█ █ █','█  ██',' ████'],
-
-        'R':['████ ','█   █','████ ','█  █ ','█   █'],
-
-        'S':[' ████','█    ',' ███ ','    █','████ '],
-
-        'T':['█████','  █  ','  █  ','  █  ','  █  '],
-
-        'U':['█   █','█   █','█   █','█   █',' ███ '],
-
-        'V':['█   █','█   █','█   █',' █ █ ','  █  '],
-
-        'W':['█   █','█   █','█ █ █','██ ██','█   █'],
-
-        'X':['█   █',' █ █ ','  █  ',' █ █ ','█   █'],
-
-        'Y':['█   █',' █ █ ','  █  ','  █  ','  █  '],
-
-        'Z':['█████','   █ ','  █  ',' █   ','█████'],
-
-        '0':[' ███ ','█  ██','█ █ █','██  █',' ███ '],
-
-        '1':['  █  ',' ██  ','  █  ','  █  ','█████'],
-
-        '2':[' ███ ','█   █','  ██ ',' █   ','█████'],
-
-        '3':['████ ','    █',' ███ ','    █','████ '],
-
-        '4':['█   █','█   █','█████','    █','    █'],
-
-        '5':['█████','█    ','████ ','    █','████ '],
-
-        '6':[' ███ ','█    ','████ ','█   █',' ███ '],
-
-        '7':['█████','    █','   █ ','  █  ','  █  '],
-
-        '8':[' ███ ','█   █',' ███ ','█   █',' ███ '],
-
-        '9':[' ███ ','█   █',' ████','    █',' ███ '],
-
-    };
+    const _GLYPH = window.NB_GLYPH; // provided by glyph-data.js
 
 
 
@@ -629,7 +509,7 @@ const AuthApp = (() => {
 
     function decodeInviteInput(input, target) {
 
-        target = target.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+        target = target.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
 
         if (!target) return;
 
@@ -1358,7 +1238,7 @@ const AuthApp = (() => {
 
                 if (nameEl) {
 
-                    nameEl.textContent = safeDisplayName(info);
+                    nameEl.textContent = window.safeDisplayName(info);
 
                 }
 
@@ -1372,7 +1252,7 @@ const AuthApp = (() => {
 
                 if (photoEl && info.telegram_photo_url) {
 
-                    const url = sanitizeTelegramPhotoUrl(info.telegram_photo_url);
+                    const url = window.sanitizeTelegramPhotoUrl(info.telegram_photo_url);
 
                     if (!url) {
                         photoEl.classList.add('hidden');
@@ -1405,7 +1285,7 @@ const AuthApp = (() => {
                 }
 
                 const profileLink = document.getElementById('account-profile-link');
-                if (profileLink && info.uid) profileLink.href = getProfileHref(info.uid);
+                if (profileLink && info.uid) profileLink.href = window.getProfileHref(info.uid);
 
                 runAccountDecode();
 
@@ -1451,7 +1331,7 @@ const AuthApp = (() => {
 
                     const nameEl = document.getElementById('account-name');
 
-                    if (nameEl) nameEl.textContent = safeDisplayName(devInfo);
+                    if (nameEl) nameEl.textContent = window.safeDisplayName(devInfo);
 
                     const usernameEl = document.getElementById('account-username');
 
@@ -1522,7 +1402,7 @@ const AuthApp = (() => {
 
         if (nameEl) {
 
-            nameEl.textContent = safeDisplayName(info);
+            nameEl.textContent = window.safeDisplayName(info);
 
         }
 
@@ -1537,7 +1417,7 @@ const AuthApp = (() => {
         }
 
         if (info.telegram_photo_url) {
-            const url = sanitizeTelegramPhotoUrl(info.telegram_photo_url);
+            const url = window.sanitizeTelegramPhotoUrl(info.telegram_photo_url);
             if (url) {
                 const photoEl = document.getElementById('account-photo');
                 if (photoEl) {
@@ -1561,7 +1441,7 @@ const AuthApp = (() => {
         }
 
         const profileLink = document.getElementById('account-profile-link');
-        if (profileLink && info.uid) profileLink.href = getProfileHref(info.uid);
+        if (profileLink && info.uid) profileLink.href = window.getProfileHref(info.uid);
 
         runAccountDecode();
     }
@@ -1612,7 +1492,7 @@ const AuthApp = (() => {
 
         const nameEl = document.getElementById('account-name');
 
-        if (nameEl) nameEl.textContent = safeDisplayName(devInfo);
+        if (nameEl) nameEl.textContent = window.safeDisplayName(devInfo);
 
         const usernameEl = document.getElementById('account-username');
 

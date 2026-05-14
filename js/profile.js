@@ -68,89 +68,11 @@ const ProfileModule = (() => {
 
 
 
-    function getProfileHref(uid, userId) {
-        if (uid !== undefined && uid !== null && String(uid) !== '') return getBasePath() + '/profile/uid-' + encodeURIComponent(uid);
-        if (userId) return getBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
-        return '#';
-    }
+    // getProfileHref provided by profile-utils.js
 
-    function getBasePath() {
-        const parts = window.location.pathname.split('/').filter(Boolean);
-        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
-        return '';
-    }
+    // getBasePath provided by profile-utils.js (window.getProfileBasePath)
 
-    const _GLYPH = {
-
-        'A':[' ███ ','█   █','█████','█   █','█   █'],
-
-        'B':['████ ','█   █','████ ','█   █','████ '],
-
-        'C':[' ████','█    ','█    ','█    ',' ████'],
-
-        'D':['████ ','█   █','█   █','█   █','████ '],
-
-        'E':['█████','█    ','████ ','█    ','█████'],
-
-        'F':['█████','█    ','████ ','█    ','█    '],
-
-        'G':[' ████','█    ','█  ██','█   █',' ████'],
-
-        'H':['█   █','█   █','█████','█   █','█   █'],
-
-        'I':['█████','  █  ','  █  ','  █  ','█████'],
-
-        'J':['█████','    █','    █','█   █',' ███ '],
-
-        'K':['█   █','█  █ ','███  ','█  █ ','█   █'],
-
-        'L':['█    ','█    ','█    ','█    ','█████'],
-
-        'M':['█   █','██ ██','█ █ █','█   █','█   █'],
-
-        'N':['█   █','██  █','█ █ █','█  ██','█   █'],
-
-        'O':[' ███ ','█   █','█   █','█   █',' ███ '],
-
-        'P':['████ ','█   █','████ ','█    ','█    '],
-
-        'R':['████ ','█   █','████ ','█  █ ','█   █'],
-
-        'S':[' ████','█    ',' ███ ','    █','████ '],
-
-        'T':['█████','  █  ','  █  ','  █  ','  █  '],
-
-        'U':['█   █','█   █','█   █','█   █',' ███ '],
-
-        'V':['█   █','█   █','█   █',' █ █ ',' █ █ '],
-
-        'X':['█   █',' █ █ ','  █  ',' █ █ ','█   █'],
-
-        'Y':['█   █',' █ █ ','  █  ','  █  ','  █  '],
-
-        'Z':['█████','   █ ','  █  ',' █   ','█████'],
-
-        '0':[' ███ ','█  ██','█ █ █','██  █',' ███ '],
-
-        '1':['  █  ',' ██  ','  █  ','  █  ','█████'],
-
-        '2':[' ███ ','█   █','  ██ ',' █   ','█████'],
-
-        '3':[' ███ ','█   █',' ████','    █',' ███ '],
-
-        '4':['█   █','█   █','█████','    █','    █'],
-
-        '5':['█████','█    ','████ ','    █','████ '],
-
-        '6':[' ███ ','█    ','████ ','█   █',' ███ '],
-
-        '7':['█████','    █','   █ ','  █  ','  █  '],
-
-        '8':[' ███ ','█   █',' ███ ','█   █',' ███ '],
-
-        '9':[' ███ ','█   █',' ████','    █',' ███ '],
-
-    };
+    const _GLYPH = window.NB_GLYPH; // provided by glyph-data.js
 
 
 
@@ -974,6 +896,8 @@ function decodeInviteAscii(code) {
 
 
         moderator_power: 'assets/achievements/moderator_power.png',
+        admin_endorsement: 'assets/achievements/admin_endorsement.png',
+        verified: 'assets/achievements/verified.png',
 
 
 
@@ -1015,17 +939,7 @@ function decodeInviteAscii(code) {
 
     }
 
-    function sanitizeTelegramPhotoUrl(value) {
-        if (!value) return '';
-        if (value.startsWith('/')) return value.startsWith('/i/userpic/') ? 'https://t.me' + value : '';
-        try {
-            const url = new URL(value);
-            const hostname = url.hostname.toLowerCase();
-            if (url.protocol !== 'https:') return '';
-            if (hostname === 't.me' || hostname.endsWith('.t.me') || hostname === 'telegram.org' || hostname.endsWith('.telegram.org')) return url.toString();
-        } catch (_) {}
-        return '';
-    }
+    // sanitizeTelegramPhotoUrl provided by profile-utils.js
 
 
 
@@ -2092,7 +2006,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const displayName = (typeof safeDisplayName === 'function') ? safeDisplayName(userInfo) : ([userInfo.telegram_first_name, userInfo.telegram_last_name].filter(Boolean).join(' ') || userInfo.telegram_username || userInfo.display_name);
+        const displayName = (typeof safeDisplayName === 'function') ? window.safeDisplayName(userInfo) : ([userInfo.telegram_first_name, userInfo.telegram_last_name].filter(Boolean).join(' ') || userInfo.telegram_username || userInfo.display_name);
 
 
 
@@ -2128,7 +2042,7 @@ function decodeInviteAscii(code) {
 
 
 
-                const url = sanitizeTelegramPhotoUrl(userInfo.telegram_photo_url);
+                const url = window.sanitizeTelegramPhotoUrl(userInfo.telegram_photo_url);
 
 
 
@@ -2719,7 +2633,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const rawName = (typeof safeDisplayName === 'function') ? safeDisplayName(profileData) : [cleanText(profileData.telegram_first_name, 50), cleanText(profileData.telegram_last_name, 50)].filter(Boolean).join(' ')
+        const rawName = (typeof safeDisplayName === 'function') ? window.safeDisplayName(profileData) : [cleanText(profileData.telegram_first_name, 50), cleanText(profileData.telegram_last_name, 50)].filter(Boolean).join(' ')
 
 
 
@@ -2731,7 +2645,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const photo = sanitizeTelegramPhotoUrl(profileData.telegram_photo_url);
+        const photo = window.sanitizeTelegramPhotoUrl(profileData.telegram_photo_url);
 
 
 
@@ -4630,13 +4544,13 @@ function decodeInviteAscii(code) {
 
                 const invitedUsername = invitedDisplayUname ? ('@' + escapeHtml(cleanText(invitedDisplayUname, 32))) : ('#' + escapeHtml(invited.uid || ''));
 
-                const invitedPhoto = sanitizeTelegramPhotoUrl(invited.telegram_photo_url);
+                const invitedPhoto = window.sanitizeTelegramPhotoUrl(invited.telegram_photo_url);
 
                 const joinedAt = invited.used_at ? formatDate(invited.used_at) : (invited.created_at ? formatDate(invited.created_at) : '');
 
 
 
-                html += `<a class="profile-activity-item" href="${getProfileHref(invited.uid, invited.user_id)}">
+                html += `<a class="profile-activity-item" href="${window.getProfileHref(invited.uid, invited.user_id)}">
 
 
 
@@ -5567,7 +5481,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const displayNameRaw = (typeof safeDisplayName === 'function') ? safeDisplayName(profileData) : [cleanText(profileData.telegram_first_name, 50), cleanText(profileData.telegram_last_name, 50)].filter(Boolean).join(' ');
+        const displayNameRaw = (typeof safeDisplayName === 'function') ? window.safeDisplayName(profileData) : [cleanText(profileData.telegram_first_name, 50), cleanText(profileData.telegram_last_name, 50)].filter(Boolean).join(' ');
         const displayName = displayNameRaw && displayNameRaw !== 'User' ? escapeHtml(cleanText(displayNameRaw, 50)) : '';
         const banExpires = profileData.ban_expires ? formatDate(profileData.ban_expires) : '';
         const bannedEmojis = ['🤣', '🤭', '🥳', '😂'];

@@ -73,17 +73,9 @@ const ForumModule = (() => {
     const usernameCache = new Map();
 
 
-    function getProfileBasePath() {
-        const parts = window.location.pathname.split('/').filter(Boolean);
-        if (window.location.hostname.endsWith('github.io') && parts.length > 0) return '/' + parts[0];
-        return '';
-    }
+    // getProfileBasePath provided by profile-utils.js
 
-    function getProfileHref(uid, userId) {
-        if (uid !== undefined && uid !== null && String(uid) !== '') return getProfileBasePath() + '/profile/uid-' + encodeURIComponent(uid);
-        if (userId) return getProfileBasePath() + '/profile.html?id=' + encodeURIComponent(userId);
-        return '#';
-    }
+    // getProfileHref provided by profile-utils.js
 
 
 
@@ -130,17 +122,7 @@ const ForumModule = (() => {
 
     }
 
-    function sanitizeTelegramPhotoUrl(value) {
-        if (!value) return '';
-        if (value.startsWith('/')) return value.startsWith('/i/userpic/') ? 'https://t.me' + value : '';
-        try {
-            const url = new URL(value);
-            const hostname = url.hostname.toLowerCase();
-            if (url.protocol !== 'https:') return '';
-            if (hostname === 't.me' || hostname.endsWith('.t.me') || hostname === 'telegram.org' || hostname.endsWith('.telegram.org')) return url.toString();
-        } catch (_) {}
-        return '';
-    }
+    // sanitizeTelegramPhotoUrl provided by profile-utils.js
 
 
 
@@ -228,7 +210,7 @@ const ForumModule = (() => {
 
 
 
-            if (uid) return `<a href="${getProfileHref(uid)}" class="forum-mention">@${username}</a>`;
+            if (uid) return `<a href="${window.getProfileHref(uid)}" class="forum-mention">@${username}</a>`;
 
 
 
@@ -408,7 +390,7 @@ const ForumModule = (() => {
 
 
 
-        const photo = sanitizeTelegramPhotoUrl(info.author_photo_url);
+        const photo = window.sanitizeTelegramPhotoUrl(info.author_photo_url);
 
 
 
@@ -424,7 +406,7 @@ const ForumModule = (() => {
 
 
 
-        const href = getProfileHref(info.author_uid, info.author_id);
+        const href = window.getProfileHref(info.author_uid, info.author_id);
 
 
 
@@ -1319,9 +1301,9 @@ const ForumModule = (() => {
             // FIX: убран лишний getPublicProfile запрос — данные автора уже есть в объекте thread
             // (author_username, author_first_name, author_photo_url возвращаются из get_forum_threads RPC)
             const authorHref = thread.author_id
-                ? getProfileHref(thread.author_uid, thread.author_id)
+                ? window.getProfileHref(thread.author_uid, thread.author_id)
                 : '#';
-            const authorPhoto = sanitizeTelegramPhotoUrl(thread.author_photo_url);
+            const authorPhoto = window.sanitizeTelegramPhotoUrl(thread.author_photo_url);
             const authorName = cleanText(
                 [thread.author_first_name, thread.author_last_name].filter(Boolean).join(' ') || thread.author_username || '',
                 50
@@ -2650,11 +2632,11 @@ const ForumModule = (() => {
 
 
 
-        const name = (typeof safeDisplayName === 'function') ? safeDisplayName(profile) : ([profile.telegram_first_name, profile.telegram_last_name].filter(Boolean).join(' ') || profile.telegram_username || 'Аноним');
+        const name = (typeof safeDisplayName === 'function') ? window.safeDisplayName(profile) : ([profile.telegram_first_name, profile.telegram_last_name].filter(Boolean).join(' ') || profile.telegram_username || 'Аноним');
 
 
 
-        const photo = sanitizeTelegramPhotoUrl(profile.telegram_photo_url);
+        const photo = window.sanitizeTelegramPhotoUrl(profile.telegram_photo_url);
 
 
 
@@ -2730,7 +2712,7 @@ const ForumModule = (() => {
 
 
 
-            <a href="${getProfileHref(profile.uid, userId)}" class="forum-popover-link">Открыть профиль</a>
+            <a href="${window.getProfileHref(profile.uid, userId)}" class="forum-popover-link">Открыть профиль</a>
 
 
 

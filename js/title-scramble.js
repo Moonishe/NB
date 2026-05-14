@@ -57,7 +57,7 @@
         decode();
         window.addEventListener('focus', () => decode(target));
         window.__NB_DECODE_TITLE__ = (t) => decode(t);
-        const intervalId = setInterval(() => {
+        let intervalId = setInterval(() => {
             if (titles.length > 1) {
                 titleIndex = (titleIndex + 1) % titles.length;
                 decode(titles[titleIndex]);
@@ -65,7 +65,21 @@
                 decode(window.__NB_TITLE__ || target);
             }
         }, 7000);
-        window.addEventListener('beforeunload', () => clearInterval(intervalId));
+        // bfcache-safe cleanup
+        window.addEventListener('pagehide', () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } });
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted && !intervalId) {
+                intervalId = setInterval(() => {
+                    if (titles.length > 1) {
+                        titleIndex = (titleIndex + 1) % titles.length;
+                        decode(titles[titleIndex]);
+                    } else {
+                        decode(window.__NB_TITLE__ || target);
+                    }
+                }, 7000);
+            }
+        });
+        window.addEventListener('beforeunload', () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } });
     }
 
     if (document.readyState === 'loading') {
