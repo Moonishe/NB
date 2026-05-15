@@ -8560,22 +8560,20 @@ canvas#ascii-canvas {
 }
 
 .auth-mode-body {
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
 }
 
 .auth-mode-body.auth-switching {
-    transform: translateX(-8px);
-    opacity: 0.55;
+    transform: translateX(-6px);
+    opacity: 0.7;
 }
 
 .auth-mode-body.auth-switching-reverse {
-    transform: translateX(8px);
-    opacity: 0.55;
+    transform: translateX(6px);
+    opacity: 0.7;
 }
 
-.auth-ascii-line span {
-    display: block;
-}
+/* .auth-ascii-line span styles moved to end of file (ASCII marquee section) */
 
 .invite-access-label {
     display: flex;
@@ -8893,15 +8891,19 @@ canvas#ascii-canvas {
     letter-spacing: 0.12em;
 }
 
-/* ASCII marquee */
+/* ASCII marquee — smooth infinite scroll */
 .auth-ascii-line span {
     display: inline-block;
     min-width: 200%;
-    animation: auth-ascii-flow 28s linear infinite;
+    animation: auth-ascii-flow 32s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 @keyframes auth-ascii-flow {
-    to { transform: translateX(-50%); }
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-50%, 0, 0); }
 }
 
 @media (prefers-reduced-motion: reduce) {

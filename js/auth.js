@@ -1222,7 +1222,11 @@ const AuthApp = (() => {
             telegramWidgetTimer = null;
         }
         container.classList.remove('tg-widget-ready', 'tg-auth-active');
-        container.innerHTML = `
+        // Smooth fade out before replacing content
+        container.style.opacity = '0';
+        container.style.transition = 'opacity 0.15s ease';
+        setTimeout(() => {
+            container.innerHTML = `
             <div class="tg-custom-btn" aria-hidden="true">
                 <span class="tg-plane-wrap">
                     <span class="tg-plane-trail" aria-hidden="true"></span>
@@ -1239,15 +1243,23 @@ const AuthApp = (() => {
                 </button>
             </div>
         `;
-        wireTelegramReset(container);
-        wireCustomButtonClick(container);
+            wireTelegramReset(container);
+            wireCustomButtonClick(container);
+            // Fade back in
+            requestAnimationFrame(() => {
+                container.style.opacity = '1';
+            });
+        }, 150); // Wait for fade out
         return container;
     }
 
     function reloadTelegramWidget() {
         const container = resetTelegramWidgetContainer();
         if (!container) return;
-        createTelegramScript(container);
+        // Delay createTelegramScript to allow fade transition
+        setTimeout(() => {
+            createTelegramScript(container);
+        }, 160);
     }
 
     function showTelegramRefreshButton() {
