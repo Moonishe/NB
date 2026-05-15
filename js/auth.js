@@ -21,7 +21,42 @@ const AuthApp = (() => {
 
     // sanitizeTelegramPhotoUrl provided by profile-utils.js
 
+    // === Plane loop animation (мёртвая петля) ===
+    let planeLoopTimer = null;
 
+    function triggerPlaneLoop() {
+        const plane = document.querySelector('.tg-plane-svg');
+        if (!plane || plane.classList.contains('tg-looping') || plane.classList.contains('tg-fly-away')) return;
+
+        // Respect reduced motion preference
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        plane.classList.add('tg-looping');
+
+        // Remove class after animation completes (3s)
+        setTimeout(() => {
+            plane.classList.remove('tg-looping');
+        }, 3050);
+    }
+
+    function startPlaneLoopTimer() {
+        if (planeLoopTimer) return;
+
+        // Random interval between 15-20 seconds
+        function scheduleNext() {
+            const delay = 15000 + Math.random() * 5000; // 15-20 sec
+            planeLoopTimer = setTimeout(() => {
+                triggerPlaneLoop();
+                scheduleNext();
+            }, delay);
+        }
+
+        // First loop after 8-12 seconds (so user sees it sooner on first visit)
+        planeLoopTimer = setTimeout(() => {
+            triggerPlaneLoop();
+            scheduleNext();
+        }, 8000 + Math.random() * 4000);
+    }
 
     function showError(id, msg) {
 
@@ -1708,7 +1743,8 @@ devBtn.addEventListener('click', activateDevLogin);
 
         runInitialDecode();
 
-
+        // Start plane loop animation timer
+        startPlaneLoopTimer();
 
         const logoutBtn = document.getElementById('account-logout');
 
