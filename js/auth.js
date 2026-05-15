@@ -302,22 +302,6 @@ const AuthApp = (() => {
 
 
 
-    function finishDecodeAnimation() {
-
-        if (_decodeRafId) { cancelAnimationFrame(_decodeRafId); _decodeRafId = 0; }
-
-        const ascii = document.getElementById('account-invite-ascii');
-
-        const raw = document.getElementById('account-invite-code');
-
-        if (ascii && raw && raw.textContent) {
-
-            ascii.innerHTML = renderInviteAscii(raw.textContent.trim());
-
-        }
-
-    }
-
 
 
     function decodeText(el, target) {
@@ -331,7 +315,7 @@ const AuthApp = (() => {
         if (!target.trim()) return;
 
         // FIX: если текст уже совпадает с target и не анимируется — не запускать повторно
-        // Это предотвращает ситуацию когда runAccountDecode вызывается 2-3 раза подряд
+        // Это предотвращает ситуацию когда resetAccountDecodeState вызывается 2-3 раза подряд
         // (из cache → из session), перебивая анимацию и оставляя шум
         if (el._decodeFinal === target && !el._decodeRunning && el.textContent === target) return;
 
@@ -345,28 +329,49 @@ const AuthApp = (() => {
 
         el._decodeRunning = true;
 
+        // Маркерный класс — никаких display/min-width хаков (см. CSS).
+        // Стабильность горизонтальной ширины строки обеспечивается узким charset'ом
+        // ниже: широкие глифы (@#$%& и т.д.) исключены, и шум по ширине ≈ финальному тексту.
+        el.classList.add('is-decoding');
+
         const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        if (reduceMotion) { el.textContent = target; el._decodeRunning = false; return; }
+        if (reduceMotion) { el.textContent = target; el._decodeRunning = false; el.classList.remove('is-decoding'); return; }
 
         // Don't lock dimensions — it causes layout jumps when chars change width
 
-        // FIX: только визуальный шум (блоки) для скрамбла — если анимация оборвётся на полпути,
-        // не останется артефактов типа "ПРОФИЛ4", "ТЯ", "ВЫЙFU" (замены букв на буквы/цифры)
-        const chars = 'qwertyuiop[]asdfghjkl;zxcvbnm,./!@#$%^&*QWERTYUIOPASDFGHJKLZXCVBNM<>?+=';
+        // Hackerdecode: латиница + узкие символы. Широкие глифы (@ # $ % & M W m w ^ ~ №)
+        // выкинуты — на пропорциональном Inter они дают разную ширину строки и карточка прыгает.
+        // Остались только символы примерно равной ширины + цифры.
+        const chars = 'abcdefghijklnopqrstuvxyzABCDEFGHIJKLNOPQRSTUVXYZ0123456789!;:?*()[]<>+=-_/\\|.,';
 
-        // FIX: добавлена кириллица в keep — иначе кирилл. буквы скрамблились в случайные символы
-        const keep = /[\s.\-:,/@()\u0400-\u04FF]/;
+        // Сохраняем только пробелы и пунктуацию-разделители; буквы скремблятся
+        const keep = /[\s.\-:,/@()]/;
 
         const t0 = performance.now();
 
-        const duration = Math.min(600, Math.max(360, target.length * 22));
+        // Длиннее, плавнее — больше «дыхания» на коротких словах, не растягивается на длинных
+        const duration = Math.min(1300, Math.max(720, target.length * 48));
 
         function rg() { return chars[Math.floor(Math.random() * chars.length)]; }
 
+        // FIX: per-slot буфер — каждый символ-шум обновляется не чаще раз в ~SLOT_PERIOD мс,
+        // а не каждый кадр (60fps). Это убирает мерцание/strob — символы становятся читаемыми
+        // вместо мельтешения. Для разных слотов разный jitter, чтобы не было синхронного «дыхания».
+        const SLOT_PERIOD = 110; // мс
+        const slotChars = new Array(target.length);
+        const slotNext = new Array(target.length);
+        for (let i = 0; i < target.length; i++) {
+            slotChars[i] = keep.test(target[i]) ? target[i] : rg();
+            slotNext[i] = t0 + Math.random() * SLOT_PERIOD;
+        }
+
         function frame(t, now) {
 
-            const sweep = Math.pow(t, 1.35) * (target.length + 2);
+            // Ease-out с инерцией: символы быстро декодятся в начале, заметно замедляются к концу.
+            // 1 - (1-t)^2.6 даёт сильный deceleration в финале.
+            const eased = 1 - Math.pow(1 - t, 2.6);
+            const sweep = eased * (target.length + 2);
 
             let out = '';
 
@@ -374,12 +379,25 @@ const AuthApp = (() => {
 
                 const ch = target[i];
 
-                if (keep.test(ch) || i < sweep - 1 || t >= 1) out += ch;
+                if (keep.test(ch) || i < sweep - 1 || t >= 1) {
+                    out += ch;
+                    continue;
+                }
 
-                else if (i < sweep + 2 && Math.random() < t * 0.25) out += ch;
+                // Settle zone — у границы sweep символы залипают на финальном чаще,
+                // дальше остаются скрамблеными
+                if (i < sweep + 2 && Math.random() < eased * 0.3) {
+                    slotChars[i] = ch;
+                    out += ch;
+                    continue;
+                }
 
-                else out += rg(now);
-
+                // Перерисовываем шум только если истёк период этого слота
+                if (now >= slotNext[i]) {
+                    slotChars[i] = rg();
+                    slotNext[i] = now + SLOT_PERIOD + Math.random() * 60;
+                }
+                out += slotChars[i];
             }
 
             el.textContent = out;
@@ -411,6 +429,8 @@ const AuthApp = (() => {
 
                 el._decodeRunning = false;
 
+                el.classList.remove('is-decoding');
+
             }
 
         }
@@ -427,6 +447,8 @@ const AuthApp = (() => {
                 el.textContent = target;
 
                 el._decodeRunning = false;
+
+                el.classList.remove('is-decoding');
 
             }
 
@@ -456,21 +478,67 @@ const AuthApp = (() => {
 
 
 
+    // Pre-scramble all decode targets synchronously BEFORE first paint —
+    // иначе на reload пользователь успевает увидеть финальный текст до анимации.
+    function prescrambleAll() {
+        const noiseChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!";%:?*()[]{}<>+=-_/\\@#$&^~';
+        const keep = /[\s.\-:,/@()]/;
+        const rg = () => noiseChars[Math.floor(Math.random() * noiseChars.length)];
+        const selectors = [
+            '.register-shell > .text-center a span',
+            '[data-view="auth"] .auth-terminal-header span',
+            '#auth-title-main',
+            '#auth-sub-pre',
+            '#auth-sub-mid',
+            '#auth-subtitle-telegram',
+            '#auth-sub-post',
+            '.auth-ascii-line span',
+            '.invite-access-label span',
+            '#invite-section p',
+            '#dev-login-section p',
+            '#dev-login-btn',
+            '#tg-custom-btn-text',
+            '.tg-btn-suffix'
+        ];
+        const seen = new Set();
+        selectors.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+                if (seen.has(el) || el.children.length) return;
+                seen.add(el);
+                const original = el.dataset.text != null ? el.dataset.text
+                                : el.dataset.decodeText != null ? el.dataset.decodeText
+                                : el.textContent;
+                if (!original || !original.trim()) return;
+                if (el.dataset.text == null && el.dataset.decodeText == null) {
+                    el.dataset.decodeText = original;
+                }
+                el.classList.add('is-decoding');
+                let out = '';
+                for (let i = 0; i < original.length; i++) {
+                    out += keep.test(original[i]) ? original[i] : rg();
+                }
+                el.textContent = out;
+            });
+        });
+    }
+
     function runInitialDecode() {
         // FIX: добавлен stagger (60мс между элементами) чтобы не запускать 12+ RAF-анимаций одновременно
         const selectors = [
             '.register-shell > .text-center a span',
             '[data-view="auth"] .auth-terminal-header span',
             '#auth-title-main',
-            '#auth-subtitle-main',
+            '#auth-sub-pre',
+            '#auth-sub-mid',
             '#auth-subtitle-telegram',
-            '[data-auth-mode]',
+            '#auth-sub-post',
             '.auth-ascii-line span',
             '.invite-access-label span',
             '#invite-section p',
             '#dev-login-section p',
             '#dev-login-btn',
-            '#tg-custom-btn-text'
+            '#tg-custom-btn-text',
+            '.tg-btn-suffix'
         ];
         requestAnimationFrame(() => {
             selectors.forEach((sel, i) => {
@@ -478,16 +546,22 @@ const AuthApp = (() => {
                     const scope = document;
                     scope.querySelectorAll(sel).forEach(el => {
                         if (el.closest('.hidden')) return;
-                        decodeText(el, el.dataset.text || el.dataset.decodeText || el.textContent.trim());
+                        // FIX: keep leading/trailing spaces intact when data-decode-text/data-text is set,
+                        // only fallback uses .trim() to strip surrounding whitespace from textContent
+                        const explicit = el.dataset.text != null ? el.dataset.text
+                                        : el.dataset.decodeText != null ? el.dataset.decodeText
+                                        : null;
+                        const target = explicit !== null ? explicit : el.textContent.trim();
+                        decodeText(el, target);
                     });
-                }, i * 60);
+                }, i * 25);
             });
         });
     }
 
 
 
-    function runAccountDecode() {
+    function resetAccountDecodeState() {
         // FIX: анимация скрамблит текст только визуальным шумом (блоки),
         // cyrillic в keep-regex не трогает, fallback в decodeText гарантирует финальный текст
         requestAnimationFrame(() => {
@@ -611,11 +685,9 @@ const AuthApp = (() => {
             const active = btn.dataset.authMode === authMode;
             btn.classList.toggle('active', active);
             btn.setAttribute('aria-selected', active ? 'true' : 'false');
-            // Hackerdecode animation on tab button text
             if (animate) {
                 btn.classList.add('decoding-active');
                 setTimeout(() => btn.classList.remove('decoding-active'), 400);
-                decodeText(btn, btn.textContent.trim());
             }
         });
 
@@ -645,67 +717,46 @@ const AuthApp = (() => {
             }
         }
 
-        const titleMain = isRegister ? 'Регистрация' : 'Вход';
-        const subtitleMain = isRegister
-            ? 'Введите инвайт и подтвердите аккаунт'
-            : 'Войдите';
-        const subtitleSuffix = isRegister
-            ? ' через <span class="tg-glow-text">Telegram</span>'
-            : ' через ваш <span class="tg-glow-text">Telegram</span> аккаунт';
+        // FIX: каждая часть подзаголовка/кнопки — отдельный slot с собственным data-decode-text.
+        // Никаких innerHTML-перезаписей с trim() — пробелы сохраняются дословно.
+        const slots = isRegister ? {
+            '#auth-title-main':       'Регистрация',
+            '#auth-sub-pre':          'Введите инвайт и подтвердите аккаунт',
+            '#auth-sub-mid':          ' через ',
+            '#auth-subtitle-telegram':'Telegram',
+            '#auth-sub-post':         '',
+            '#tg-custom-btn-text':    'Регистрация',
+            '.tg-btn-suffix':         ' через Telegram'
+        } : {
+            '#auth-title-main':       'Вход',
+            '#auth-sub-pre':          'Войдите',
+            '#auth-sub-mid':          ' через ваш ',
+            '#auth-subtitle-telegram':'Telegram',
+            '#auth-sub-post':         ' аккаунт',
+            '#tg-custom-btn-text':    'Войти',
+            '.tg-btn-suffix':         ' через Telegram'
+        };
 
-        const titleMainEl = document.getElementById('auth-title-main');
-        const subtitleMainEl = document.getElementById('auth-subtitle-main');
-        const subtitleSuffixEl = document.querySelector('#auth-subtitle .auth-subtitle-suffix');
-
-        if (titleMainEl) {
-            titleMainEl.dataset.text = titleMain;
-            if (animate) decodeText(titleMainEl, titleMain);
-            else titleMainEl.textContent = titleMain;
-        }
-
-        if (subtitleMainEl) {
-            subtitleMainEl.dataset.decodeText = subtitleMain;
-            if (animate) decodeText(subtitleMainEl, subtitleMain);
-            else subtitleMainEl.textContent = subtitleMain;
-        }
-
-        if (subtitleSuffixEl) {
-            subtitleSuffixEl.innerHTML = subtitleSuffix;
-            // Hackerdecode on the suffix text
-            if (animate) {
-                const suffixTextNode = subtitleSuffixEl.firstChild;
-                if (suffixTextNode && suffixTextNode.nodeType === 3) {
-                    // Create a span wrapper for the non-Telegram part to animate
-                    const wrapper = document.createElement('span');
-                    wrapper.textContent = suffixTextNode.textContent;
-                    suffixTextNode.replaceWith(wrapper);
-                    decodeText(wrapper, wrapper.textContent.trim());
-                }
+        Object.entries(slots).forEach(([sel, txt]) => {
+            const el = document.querySelector(sel);
+            if (!el) return;
+            if (sel === '#auth-title-main') el.dataset.text = txt;
+            else el.dataset.decodeText = txt;
+            if (animate && txt.trim()) {
+                decodeText(el, txt);
+            } else {
+                // Снимаем устаревший width-lock от предыдущего режима, иначе пустой/короткий
+                // текст сохранит ширину предыдущего слова → визуальный «призрак».
+                el.classList.remove('is-decoding');
+                el.style.minWidth = '';
+                el.textContent = txt;
             }
-        }
-
-        const subtitleTelegramEl = document.getElementById('auth-subtitle-telegram');
-        if (subtitleTelegramEl && animate) {
-            decodeText(subtitleTelegramEl, 'Telegram');
-        }
+        });
 
         const titleContainer = document.getElementById('auth-title');
         if (titleContainer && animate) {
             titleContainer.classList.add('decode-bounce');
             setTimeout(() => titleContainer.classList.remove('decode-bounce'), 360);
-        }
-
-        const btnTextEl = document.getElementById('tg-custom-btn-text');
-        if (btnTextEl) {
-            const btnLabel = isRegister ? 'Регистрация' : 'Войти';
-            if (animate) decodeText(btnTextEl, btnLabel);
-            else btnTextEl.textContent = btnLabel;
-        }
-
-        // Decode the button suffix text
-        const btnSuffix = document.querySelector('.tg-btn-suffix');
-        if (btnSuffix && animate) {
-            decodeText(btnSuffix, ' через Telegram');
         }
 
         const tgContainer = document.getElementById('tg-widget-container');
@@ -721,15 +772,17 @@ const AuthApp = (() => {
 
 
 
-    function makeDevInviteCode() {
-
-        return Math.random().toString(36).replace(/[^a-z0-9]/gi, '').slice(2, 10).toUpperCase().padEnd(8, 'X');
-
-    }
-
 
 
     function showView(view) {
+
+        // Reset plane / fly classes so re-entering auth view restores card overflow
+        if (view === 'auth') {
+            const authCard = document.querySelector('[data-view="auth"]');
+            if (authCard) authCard.classList.remove('tg-flying');
+            document.querySelectorAll('#tg-widget-container .tg-plane-wrap, #tg-widget-container .tg-custom-btn')
+                .forEach(el => el.classList.remove('tg-fly-away', 'tg-flying', 'tg-crash'));
+        }
 
         const views = document.querySelectorAll('[data-view]');
 
@@ -776,22 +829,6 @@ const AuthApp = (() => {
     }
 
 
-
-    function resetInviteState() {
-
-        const noInvite = document.getElementById('account-no-invite');
-
-        const deletedInvite = document.getElementById('account-invite-deleted');
-
-        const hasInvite = document.getElementById('account-has-invite');
-
-        if (noInvite) noInvite.classList.add('hidden');
-
-        if (deletedInvite) deletedInvite.classList.add('hidden');
-
-        if (hasInvite) hasInvite.classList.add('hidden');
-
-    }
 
 
 
@@ -855,6 +892,18 @@ const AuthApp = (() => {
         initTurnstileWithTimeout();
     }
 
+    function triggerPlaneCrash() {
+        // Reusable crash animation — used on invite validation errors and auth errors.
+        const wrap = document.querySelector('#tg-widget-container .tg-plane-wrap');
+        if (!wrap) return;
+        wrap.classList.remove('tg-crash');
+        // force reflow so re-adding the class restarts the animation
+        // eslint-disable-next-line no-unused-expressions
+        void wrap.offsetWidth;
+        wrap.classList.add('tg-crash');
+        setTimeout(() => wrap.classList.remove('tg-crash'), 1300);
+    }
+
     async function handleTelegramAuth(user) {
         if (isProcessing) return;
         clearTimeout(_tgActiveTimer);
@@ -865,12 +914,14 @@ const AuthApp = (() => {
                 showError('auth-error', 'Введите инвайт-код для регистрации');
                 const inviteSection = document.getElementById('invite-section');
                 if (inviteSection) inviteSection.classList.add('ring-1', 'ring-red-400/50');
+                triggerPlaneCrash();
                 return;
             }
             if (code.length < 8) {
                 showError('auth-error', 'Инвайт-код должен содержать 8 символов');
                 const inviteSection = document.getElementById('invite-section');
                 if (inviteSection) inviteSection.classList.add('ring-1', 'ring-red-400/50');
+                triggerPlaneCrash();
                 return;
             }
         }
@@ -918,9 +969,13 @@ const AuthApp = (() => {
             if (containerAfter) containerAfter.classList.remove('tg-auth-active');
             await Api.setSession(result.access_token, result.refresh_token);
 
-            const tgSvg = tgBtn ? tgBtn.querySelector('.tg-custom-btn svg') : null;
-
-            if (tgSvg) tgSvg.classList.add('tg-fly-away');
+            const tgWrap = tgBtn ? tgBtn.querySelector('.tg-plane-wrap') : null;
+            const customBtnEl = tgBtn ? tgBtn.querySelector('.tg-custom-btn') : null;
+            const authCard = document.querySelector('[data-view="auth"]');
+            // FIX: enable overflow:visible on ancestors so plane can fly past button/card edges
+            if (authCard) authCard.classList.add('tg-flying');
+            if (customBtnEl) customBtnEl.classList.add('tg-flying');
+            if (tgWrap) tgWrap.classList.add('tg-fly-away');
 
             const info = await showAccountView();
 
@@ -957,13 +1012,13 @@ const AuthApp = (() => {
             if (container) container.classList.remove('tg-auth-active');
             resetTurnstile();
 
-            const tgSvgErr = tgBtn ? tgBtn.querySelector('.tg-custom-btn svg') : null;
+            const tgWrapErr = tgBtn ? tgBtn.querySelector('.tg-plane-wrap') : null;
 
-            if (tgSvgErr) {
+            if (tgWrapErr) {
 
-                tgSvgErr.classList.add('tg-crash');
+                tgWrapErr.classList.add('tg-crash');
 
-                setTimeout(() => tgSvgErr.classList.remove('tg-crash'), 1000);
+                setTimeout(() => tgWrapErr.classList.remove('tg-crash'), 1300);
 
             }
 
@@ -1023,10 +1078,17 @@ const AuthApp = (() => {
     function wireTelegramReset(container) {
         const resetBtn = container ? container.querySelector('[data-tg-reset]') : null;
         if (!resetBtn) return;
-        resetBtn.addEventListener('click', () => {
-            // Trigger fly-away-and-return animation on the plane icon
+        resetBtn.addEventListener('click', (e) => {
+            // Reset-box is inside .tg-custom-btn — stop propagation so clicking it
+            // does not also trigger the main Telegram-auth click handler.
+            e.stopPropagation();
+            e.preventDefault();
+            resetBtn.classList.remove('tg-resetting');
+            // force reflow so animation restarts on repeated clicks
+            // eslint-disable-next-line no-unused-expressions
+            void resetBtn.offsetWidth;
             resetBtn.classList.add('tg-resetting');
-            setTimeout(() => resetBtn.classList.remove('tg-resetting'), 800);
+            setTimeout(() => resetBtn.classList.remove('tg-resetting'), 1000);
             hideError('auth-error');
             resetTurnstile();
             reloadTelegramWidget();
@@ -1127,10 +1189,20 @@ const AuthApp = (() => {
         container.classList.remove('tg-widget-ready', 'tg-auth-active');
         container.innerHTML = `
             <div class="tg-custom-btn" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
-                <span id="tg-custom-btn-text">${authMode === 'register' ? 'Регистрация' : 'Войти'}</span><span> через Telegram</span>
+                <span class="tg-plane-wrap">
+                    <span class="tg-plane-trail" aria-hidden="true"></span>
+                    <svg class="tg-plane-svg" viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
+                </span>
+                <span class="tg-btn-label"><span id="tg-custom-btn-text">${authMode === 'register' ? 'Регистрация' : 'Войти'}</span><span class="tg-btn-suffix"> через Telegram</span></span>
+                <button type="button" class="tg-reset-box" data-tg-reset title="Сбросить Telegram" aria-label="Сбросить Telegram">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3 12a9 9 0 0 1 15.5-6.3L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 3v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 21v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
             </div>
-            <button type="button" class="tg-widget-reset" data-tg-reset><span class="tg-reset-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/></svg></span>Сбросить Telegram</button>
         `;
         wireTelegramReset(container);
         wireCustomButtonClick(container);
@@ -1147,9 +1219,21 @@ const AuthApp = (() => {
         const container = document.getElementById('tg-widget-container');
         if (!container) return;
         container.innerHTML = `
-            <button type="button" class="tg-custom-btn" id="tg-refresh-auth-btn">
-                <span>↻</span><span>Попробовать снова</span>
-            </button>
+            <div class="tg-custom-btn" aria-hidden="true" id="tg-refresh-auth-btn">
+                <span class="tg-plane-wrap">
+                    <span class="tg-plane-trail" aria-hidden="true"></span>
+                    <svg class="tg-plane-svg" viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
+                </span>
+                <span class="tg-btn-label"><span id="tg-custom-btn-text">Попробовать снова</span></span>
+                <button type="button" class="tg-reset-box" data-tg-reset title="Сбросить Telegram" aria-label="Сбросить Telegram">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3 12a9 9 0 0 1 15.5-6.3L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 3v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 21v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
         `;
         const refreshBtn = document.getElementById('tg-refresh-auth-btn');
         if (refreshBtn) {
@@ -1157,8 +1241,9 @@ const AuthApp = (() => {
                 hideError('auth-error');
                 resetTurnstile();
                 reloadTelegramWidget();
-            }, { once: true });
+            });
         }
+        wireTelegramReset(container);
     }
 
     function initTelegramWidget() {
@@ -1287,7 +1372,7 @@ const AuthApp = (() => {
                 const profileLink = document.getElementById('account-profile-link');
                 if (profileLink && info.uid) profileLink.href = window.getProfileHref(info.uid);
 
-                runAccountDecode();
+                resetAccountDecodeState();
 
             }
 
@@ -1339,7 +1424,7 @@ const AuthApp = (() => {
 
                     setStatusLabel(true);
 
-                    runAccountDecode();
+                    resetAccountDecodeState();
 
                     return;
 
@@ -1371,8 +1456,6 @@ const AuthApp = (() => {
 
             localStorage.removeItem('nb_auth_cache');
 
-            sessionStorage.removeItem('nb_auth_cache');
-
         }
 
     }
@@ -1396,7 +1479,6 @@ const AuthApp = (() => {
         hideEl('account-photo');
         showEl('account-photo-placeholder');
         hideEl('new-user-badge');
-        resetInviteState();
 
         const nameEl = document.getElementById('account-name');
 
@@ -1443,7 +1525,7 @@ const AuthApp = (() => {
         const profileLink = document.getElementById('account-profile-link');
         if (profileLink && info.uid) profileLink.href = window.getProfileHref(info.uid);
 
-        runAccountDecode();
+        resetAccountDecodeState();
     }
 
     function activateDevLogin() {
@@ -1502,7 +1584,7 @@ const AuthApp = (() => {
 
         showSuccessBadge();
 
-        runAccountDecode();
+        resetAccountDecodeState();
 
         // Delay success-glow so card-entrance animation plays first
 
@@ -1522,9 +1604,31 @@ const AuthApp = (() => {
 
     }
 
-
+    function renderTurnstile(keepVisible = false) {
+        try {
+            const wrap = document.getElementById('turnstile-wrap');
+            if (wrap && ensureTurnstileScript()) {
+                const container = wrap.querySelector('.cf-turnstile');
+                if (container && !container.hasChildNodes()) {
+                    turnstileWidgetId = turnstile.render(container, {
+                        sitekey: window.TURNSTILE_SITE_KEY,
+                        callback: onTurnstile,
+                        'expired-callback': onTurnstileExpired,
+                        theme: 'dark',
+                        size: 'compact',
+                    });
+                }
+                if (!turnstileToken && !keepVisible) wrap.classList.add('hidden');
+            }
+        } catch (e) { console.warn('Turnstile render error:', e.message); }
+    }
+    window._renderTurnstile = renderTurnstile;
 
     function init() {
+
+        // CRITICAL: scramble all decode targets BEFORE first paint so user sees
+        // the hackerdecode animation play, not plain text first.
+        prescrambleAll();
 
         window.SUPABASE_URL = window.SUPABASE_URL || '';
 
@@ -1535,26 +1639,6 @@ const AuthApp = (() => {
 
 window.onTelegramAuth = handleTelegramAuth;
 initTelegramWidget();
-
-function renderTurnstile(keepVisible = false) {
-    try {
-        const wrap = document.getElementById('turnstile-wrap');
-        if (wrap && ensureTurnstileScript()) {
-            const container = wrap.querySelector('.cf-turnstile');
-            if (container && !container.hasChildNodes()) {
-                turnstileWidgetId = turnstile.render(container, {
-                    sitekey: window.TURNSTILE_SITE_KEY,
-                    callback: onTurnstile,
-                    'expired-callback': onTurnstileExpired,
-                    theme: 'dark',
-                    size: 'compact',
-                });
-            }
-            if (!turnstileToken && !keepVisible) wrap.classList.add('hidden');
-        }
-    } catch (e) { console.warn('Turnstile render error:', e.message); }
-}
-window._renderTurnstile = renderTurnstile;
 
 const devBtn = document.getElementById('dev-login-btn');
 
@@ -1633,7 +1717,6 @@ devBtn.addEventListener('click', activateDevLogin);
             localStorage.removeItem('nb_dev_session');
 
             localStorage.removeItem('nb_auth_cache');
-            sessionStorage.removeItem('nb_auth_cache');
 
             const tgContainer = document.getElementById('tg-widget-container');
             if (tgContainer) tgContainer.classList.remove('tg-auth-active');
@@ -1654,8 +1737,6 @@ devBtn.addEventListener('click', activateDevLogin);
 
             showView('auth');
 
-            hideEl('account-verified');
-
             hideEl('account-unverified');
 
             hideEl('account-username');
@@ -1665,8 +1746,6 @@ devBtn.addEventListener('click', activateDevLogin);
             showEl('account-photo-placeholder');
 
             hideEl('new-user-badge');
-
-            resetInviteState();
 
             const nameEl = document.getElementById('account-name');
 
@@ -1688,12 +1767,8 @@ devBtn.addEventListener('click', activateDevLogin);
 
 
 
-    return { init, safeDisplayName, onTurnstile, onTurnstileExpired };
+    return { init, onTurnstile, onTurnstileExpired };
 
 })();
-
-window.safeDisplayName = AuthApp.safeDisplayName;
-
-
 
 document.addEventListener('DOMContentLoaded', AuthApp.init);
