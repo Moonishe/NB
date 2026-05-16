@@ -14,9 +14,46 @@ const AdminApp = (() => {
     let currentResultModelFilter = 'all';
     let modelSearchQuery = '';
 
+    // --- ASCII decode animation (shared with navbar.js style) ---
+    const asciiGlyphs = '░▒▓█▀▄▌▐│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬';
+    function asciiDecode(el, target, duration) {
+        const len = target.length;
+        const t0 = performance.now();
+        const dur = duration || 400;
+        const frozen = new Uint8Array(len);
+        function step(now) {
+            const t = Math.min((now - t0) / dur, 1);
+            const reveal = Math.floor(t * len);
+            let out = '';
+            for (let i = 0; i < len; i++) {
+                if (i < reveal || frozen[i]) {
+                    frozen[i] = 1;
+                    out += target[i];
+                } else {
+                    out += asciiGlyphs[Math.floor(Math.random() * asciiGlyphs.length)];
+                }
+            }
+            el.textContent = out;
+            if (t < 1) requestAnimationFrame(step);
+            else el.textContent = target;
+        }
+        requestAnimationFrame(step);
+    }
+
     function showModal(html) {
         document.getElementById('modal-content').innerHTML = html;
-        document.getElementById('modal-overlay').classList.remove('hidden');
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.remove('hidden');
+        overlay.style.animation = 'none';
+        overlay.offsetHeight;
+        overlay.style.animation = '';
+        // Scramble modal title
+        const title = document.getElementById('modal-content').querySelector('h3');
+        if (title) {
+            const text = title.textContent;
+            title.textContent = '';
+            asciiDecode(title, text, 350);
+        }
     }
 
     function hideModal() {
@@ -83,9 +120,15 @@ const AdminApp = (() => {
     function toast(msg, type) {
         const el = document.createElement('div');
         el.className = 'admin-toast ' + (type || '');
-        el.textContent = msg;
+        el.textContent = '';
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 3000);
+        asciiDecode(el, msg, 250);
+        setTimeout(() => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(8px)';
+            el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            setTimeout(() => el.remove(), 300);
+        }, 2700);
     }
 
     function switchSection(name) {
@@ -96,6 +139,13 @@ const AdminApp = (() => {
         document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
         const sec = document.getElementById('section-' + name);
         if (sec) sec.classList.remove('hidden');
+        // Scramble section title
+        const title = document.getElementById('title-' + name);
+        if (title) {
+            const text = title.textContent;
+            title.textContent = '';
+            asciiDecode(title, text, 400);
+        }
     }
 
     function showAdmin(email) {
@@ -1768,6 +1818,18 @@ const AdminApp = (() => {
                 currentSection = btn.getAttribute('data-section');
                 document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
                 document.getElementById('section-' + currentSection).classList.remove('hidden');
+                const title = document.getElementById('title-' + currentSection);
+                if (title) { const text = title.textContent; title.textContent = ''; asciiDecode(title, text, 400); }
+            });
+            // Scramble hover
+            const origText = btn.textContent;
+            let hoverTimer = null;
+            btn.addEventListener('mouseenter', () => {
+                hoverTimer = setTimeout(() => asciiDecode(btn, origText, 300), 150);
+            });
+            btn.addEventListener('mouseleave', () => {
+                clearTimeout(hoverTimer);
+                btn.textContent = origText;
             });
         });
 

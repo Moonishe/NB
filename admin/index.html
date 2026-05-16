@@ -6,6 +6,9 @@
     <link rel="icon" type="image/png" href="../logo2.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeuroBench | Admin Panel</title>
+    <script>window.__NB_TITLE__ = 'NeuroBench | Admin';</script>
+
+    <script src="../js/title-scramble.js?v=9" data-title="NeuroBench | Admin" defer></script>
 
     <script src="../assets/vendor/tailwind/tailwindcss-3.4.17-cdn.js"></script>
 
@@ -37,11 +40,14 @@
         }
     </script>
 
-    <link rel="stylesheet" href="css/admin.css?v=2">
+    <link rel="stylesheet" href="../css/style.css?v=82">
+    <link rel="stylesheet" href="css/admin.css?v=3">
 </head>
 <body class="bg-black text-white antialiased min-h-screen font-mono">
 
-    <div id="auth-screen" class="min-h-screen flex items-center justify-center">
+    <canvas id="ascii-canvas"></canvas>
+
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center relative z-10">
         <div class="w-full max-w-sm p-8 matte-card">
             <h1 class="font-title text-2xl uppercase tracking-widest text-center mb-8 text-shiny">NeuroBench Admin</h1>
             <form id="login-form" class="flex flex-col gap-4">
@@ -61,30 +67,35 @@
         </div>
     </div>
 
-    <div id="admin-screen" class="hidden min-h-screen">
-        <nav class="border-b border-border px-6 py-4 flex justify-between items-center bg-surface">
-            <h1 class="font-title text-lg uppercase tracking-widest text-shiny flex items-center gap-3">
-                <img src="../logo.png" alt="NeuroBench" class="w-7 h-7 rounded-lg object-contain">
-                NeuroBench Admin
-            </h1>
-            <div class="flex items-center gap-4">
-                <span id="admin-email" class="text-xs opacity-30"></span>
-                <button id="logout-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">Выйти</button>
+    <div id="admin-screen" class="hidden min-h-screen relative z-10">
+        <!-- Fixed topbar in nav-pill style -->
+        <nav class="admin-topbar fixed top-0 w-full z-[100] px-4 md:px-6 font-sans">
+            <div class="max-w-7xl mx-auto nav-pill flex justify-between items-center p-2 mt-4">
+                <a href="../" class="flex items-center gap-3 pl-4" style="text-decoration:none;color:inherit;">
+                    <img src="../logo.png" alt="NeuroBench" class="w-8 h-8 rounded-lg object-contain">
+                    <span class="font-bold tracking-tighter text-lg uppercase">NeuroBench</span>
+                </a>
+                <div class="flex items-center gap-4 pr-2">
+                    <span id="admin-email" class="text-[10px] opacity-30 uppercase tracking-wider"></span>
+                    <button id="logout-btn" class="text-[10px] uppercase tracking-widest border border-border px-5 py-2 rounded-full hover:bg-white/10 transition-colors">Выйти</button>
+                </div>
             </div>
         </nav>
 
-        <div class="flex">
-            <aside class="w-56 min-h-[calc(100vh-56px)] border-r border-border p-4 flex flex-col gap-2">
+        <div class="flex pt-24">
+            <!-- Sidebar in matte-card style -->
+            <aside class="admin-sidebar w-56 p-4 flex flex-col gap-1.5 ml-4">
+                <p class="text-[8px] uppercase tracking-[0.2em] opacity-20 mb-1 px-3">Навигация</p>
                 <button class="admin-nav-btn active" data-section="dashboard">Dashboard</button>
                 <button class="admin-nav-btn" data-section="live-logs">Live-логи</button>
-                <div class="border-t border-border my-2"></div>
+                <div class="border-t border-border my-2 mx-2 opacity-30"></div>
                 <button class="admin-nav-btn" data-section="moderation">Модерация</button>
                 <button class="admin-nav-btn" data-section="bans">Бан-хаммер</button>
                 <button class="admin-nav-btn" data-section="announcements">Анонсы</button>
-                <div class="border-t border-border my-2"></div>
+                <div class="border-t border-border my-2 mx-2 opacity-30"></div>
                 <button class="admin-nav-btn" data-section="achievements">Ачивки</button>
                 <button class="admin-nav-btn" data-section="prompts">Промпты</button>
-                <button class="admin-nav-btn" data-section="models">Настройки моделей</button>
+                <button class="admin-nav-btn" data-section="models">Модели</button>
                 <button class="admin-nav-btn" data-section="results">Результаты</button>
                 <button class="admin-nav-btn" data-section="stats">Статистика</button>
                 <button class="admin-nav-btn" data-section="invites">Инвайты</button>
@@ -97,7 +108,7 @@
 
                 <!-- ========== DASHBOARD ========== -->
                 <section id="section-dashboard" class="admin-section">
-                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">Dashboard</h2>
+                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6" id="title-dashboard">Dashboard</h2>
                     <div id="dashboard-metrics" class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8"></div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="matte-card p-6">
@@ -120,7 +131,7 @@
                 <!-- ========== LIVE LOGS ========== -->
                 <section id="section-live-logs" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny flex items-center gap-3">Live-логи <span id="live-indicator" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span></h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny flex items-center gap-3" id="title-live-logs">Live-логи <span id="live-indicator" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span></h2>
                         <div class="flex gap-2">
                             <button class="admin-log-filter active" data-log-filter="all">Все</button>
                             <button class="admin-log-filter" data-log-filter="auth">Входы</button>
@@ -135,7 +146,7 @@
 
                 <!-- ========== MODERATION ========== -->
                 <section id="section-moderation" class="admin-section hidden">
-                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">Модерация форума</h2>
+                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6" id="title-moderation">Модерация форума</h2>
                     <div class="flex gap-2 mb-4">
                         <button class="admin-mod-filter active" data-mod-filter="threads">Треды</button>
                         <button class="admin-mod-filter" data-mod-filter="posts">Посты</button>
@@ -147,7 +158,7 @@
                 <!-- ========== BAN HAMMER ========== -->
                 <section id="section-bans" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny flex items-center gap-3">Бан-хаммер 🔨</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny flex items-center gap-3" id="title-bans">Бан-хаммер 🔨</h2>
                         <button id="add-ban-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Забанить</button>
                     </div>
                     <div id="bans-list" class="flex flex-col gap-3"></div>
@@ -156,7 +167,7 @@
                 <!-- ========== ANNOUNCEMENTS ========== -->
                 <section id="section-announcements" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Анонсы</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-announcements">Анонсы</h2>
                         <button id="add-announcement-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Новый анонс</button>
                     </div>
                     <div id="announcements-list" class="flex flex-col gap-3"></div>
@@ -165,7 +176,7 @@
                 <!-- ========== ACHIEVEMENTS ========== -->
                 <section id="section-achievements" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Управление ачивками</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-achievements">Управление ачивками</h2>
                         <button id="add-achievement-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Новая ачивка</button>
                     </div>
                     <div id="achievements-list" class="flex flex-col gap-3"></div>
@@ -173,7 +184,7 @@
 
                 <section id="section-prompts" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Промпты</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-prompts">Промпты</h2>
                         <button id="add-prompt-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Добавить</button>
                     </div>
                     <div class="flex gap-2 mb-4">
@@ -186,7 +197,7 @@
 
                 <section id="section-models" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Настройки моделей</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-models">Настройки моделей</h2>
                         <div class="flex gap-3 items-center">
                             <input id="model-settings-search" type="text" placeholder="Поиск модели..." class="bg-surface border border-border px-4 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-white/50 rounded-xl">
                             <button id="add-model-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Новая модель</button>
@@ -198,7 +209,7 @@
 
                 <section id="section-results" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Результаты</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-results">Результаты</h2>
                         <button id="add-result-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Добавить</button>
                     </div>
                     <div class="flex gap-4 mb-4 flex-wrap">
@@ -215,7 +226,7 @@
                 </section>
 
                 <section id="section-stats" class="admin-section hidden">
-                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6">Статистика</h2>
+                    <h2 class="font-title text-xl uppercase tracking-widest text-shiny mb-6" id="title-stats">Статистика</h2>
                     <div id="stats-grid" class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8"></div>
                     <div class="matte-card p-6">
                         <h3 class="text-xs uppercase tracking-widest opacity-30 mb-4">Просмотры за 30 дней</h3>
@@ -225,7 +236,7 @@
 
                 <section id="section-invites" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Инвайт-коды</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-invites">Инвайт-коды</h2>
                         <button id="add-invite-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">+ Сгенерировать</button>
                     </div>
                     <div class="flex gap-2 mb-4">
@@ -239,7 +250,7 @@
 
                 <section id="section-users" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Пользователи</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-users">Пользователи</h2>
                         <button id="reset-all-limits-btn" class="text-[10px] uppercase tracking-widest border border-border px-6 py-2.5 rounded-full hover:bg-white/10 transition-colors">Сбросить лимиты всем</button>
                     </div>
                     <div id="users-list" class="flex flex-col gap-3"></div>
@@ -247,7 +258,7 @@
 
                 <section id="section-profiles" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Управление профилями</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-profiles">Управление профилями</h2>
                         <div class="flex gap-3 items-center">
                             <input id="profiles-search" type="text" placeholder="Поиск по имени/username..." class="bg-surface border border-border px-4 py-2 text-xs text-white placeholder-gray-500 outline-none focus:border-white/50 rounded-xl">
                         </div>
@@ -258,7 +269,7 @@
 
                 <section id="section-moderators" class="admin-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny">Модераторы</h2>
+                        <h2 class="font-title text-xl uppercase tracking-widest text-shiny" id="title-moderators">Модераторы</h2>
                     </div>
                     <p class="text-xs text-gray-500 mb-6">Модераторы привязаны к Telegram. Они могут: закреплять/блокировать/удалять треды и посты, заглушать и блокировать пользователей (кроме других модераторов и админов).</p>
                     <div id="moderators-list" class="flex flex-col gap-3 mb-8"></div>
@@ -270,14 +281,17 @@
             </main>
         </div>
 
-        <div id="modal-overlay" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center">
-            <div id="modal-content" class="w-full max-w-2xl max-h-[85vh] overflow-y-auto matte-card p-8 custom-scrollbar">
+        <!-- Modal with animation -->
+        <div id="modal-overlay" class="admin-modal-overlay fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center">
+            <div id="modal-content" class="admin-modal-content w-full max-w-2xl max-h-[85vh] overflow-y-auto matte-card p-8 custom-scrollbar">
             </div>
         </div>
     </div>
 
-    <script src="../js/config.js"></script>
+    <script src="../js/config.js?v=5"></script>
     <script src="../js/api.js?v=12"></script>
-    <script src="js/admin.js?v=2"></script>
+    <script src="../js/profile-utils.js?v=1"></script>
+    <script src="js/admin.js?v=3"></script>
+    <script src="../js/ascii-bg.js?v=3"></script>
 </body>
 </html>

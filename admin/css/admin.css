@@ -1,3 +1,19 @@
+/* ========== TOPBAR ========== */
+.admin-topbar { pointer-events: none; }
+.admin-topbar > div { pointer-events: auto; }
+
+/* ========== SIDEBAR ========== */
+.admin-sidebar {
+    background: #0c0c0c;
+    border: 1px solid #161616;
+    border-radius: 20px;
+    position: sticky;
+    top: 96px;
+    max-height: calc(100vh - 112px);
+    overflow-y: auto;
+}
+
+/* ========== NAV BUTTONS ========== */
 .admin-nav-btn {
     padding: 8px 16px;
     font-family: 'Geist Mono', monospace;
@@ -13,15 +29,18 @@
     border-radius: 12px;
 }
 .admin-nav-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 .admin-nav-btn.active {
-    background: #0c0c0c;
+    background: rgba(255, 255, 255, 0.06);
     color: #fff;
-    border-color: #161616;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 
+/* ========== DIFFICULTY BUTTONS ========== */
 .admin-difficulty-btn {
     padding: 6px 16px;
     font-family: 'Geist Mono', monospace;
@@ -45,6 +64,7 @@
     border-color: rgba(255, 255, 255, 0.4);
 }
 
+/* ========== PROMPT CARD ========== */
 .admin-prompt-card {
     border: 1px solid #161616;
     background: #0c0c0c;
@@ -63,37 +83,7 @@
     color: rgba(255,255,255,0.8);
 }
 
-select option {
-    background: #0c0c0c;
-    color: #ffffff;
-}
-
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
-
-.matte-card {
-    background: #0c0c0c;
-    border: 1px solid #161616;
-    border-radius: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.5s ease;
-}
-
-.text-shiny {
-    background: linear-gradient(90deg, #444 0%, #fff 50%, #444 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shine 8s linear infinite;
-}
-
-@keyframes shine {
-    to { background-position: 200% center; }
-}
-
+/* ========== INVITE FILTERS ========== */
 .invite-filter-btn {
     padding: 6px 16px;
     font-family: 'Geist Mono', monospace;
@@ -117,6 +107,7 @@ select option {
     border-color: rgba(255, 255, 255, 0.4);
 }
 
+/* ========== MOD BADGE ========== */
 .admin-mod-badge {
     display: inline-block;
     font-family: 'Geist Mono', monospace;
@@ -132,6 +123,7 @@ select option {
     margin-left: 4px;
 }
 
+/* ========== ACH CHIP ========== */
 .admin-ach-chip {
     display: inline-flex;
     align-items: center;
@@ -170,7 +162,7 @@ select option {
     color: #fff;
 }
 
-/* ========== DASHBOARD ========== */
+/* ========== DASHBOARD METRICS ========== */
 .admin-metric-card {
     background: #0c0c0c;
     border: 1px solid #161616;
@@ -195,6 +187,8 @@ select option {
     color: rgba(255,255,255,0.3);
     margin-top: 4px;
 }
+
+/* ========== QUICK ACTIONS ========== */
 .admin-quick-action {
     display: block;
     width: 100%;
@@ -245,9 +239,7 @@ select option {
     border-bottom: 1px solid rgba(255,255,255,0.03);
     line-height: 1.6;
 }
-.log-time {
-    color: rgba(255,255,255,0.2);
-}
+.log-time { color: rgba(255,255,255,0.2); }
 .log-type-auth { color: #60a5fa; }
 .log-type-forum { color: #fbbf24; }
 .log-type-achievement { color: #a78bfa; }
@@ -363,26 +355,40 @@ select option {
 .ach-rarity-limited { color: #a78bfa; }
 .ach-rarity-secret { color: #f87171; }
 
-/* ========== TOAST ========== */
+/* ========== TOAST (restyled as matte-card) ========== */
 .admin-toast {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    background: #0c0c0c;
-    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(12, 12, 12, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.12);
     color: #fff;
     padding: 12px 24px;
-    border-radius: 12px;
+    border-radius: 16px;
     font-family: 'Geist Mono', monospace;
     font-size: 11px;
+    letter-spacing: 0.05em;
     z-index: 9999;
-    animation: toast-in 0.3s ease, toast-out 0.3s ease 2.7s;
+    animation: admin-toast-in 0.35s cubic-bezier(0.16, 1, 0.3, 1), admin-toast-out 0.3s ease 2.7s;
     pointer-events: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
-.admin-toast.success { border-color: rgba(60,255,60,0.3); }
-.admin-toast.error { border-color: rgba(255,60,60,0.3); }
-@keyframes toast-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes toast-out { from { opacity: 1; } to { opacity: 0; } }
+.admin-toast.success { border-color: rgba(60,255,60,0.25); }
+.admin-toast.error { border-color: rgba(255,60,60,0.25); }
+@keyframes admin-toast-in { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes admin-toast-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* ========== MODAL ========== */
+.admin-modal-overlay {
+    animation: admin-modal-fade-in 0.25s ease;
+}
+.admin-modal-content {
+    animation: admin-modal-scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes admin-modal-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes admin-modal-scale-in { from { opacity: 0; transform: scale(0.94) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
 /* ========== SKELETON ========== */
 .skeleton {
@@ -395,4 +401,30 @@ select option {
 @keyframes skeleton-pulse {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 767px) {
+    .admin-sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+        margin: 0 16px 16px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+        border-radius: 16px;
+        padding: 8px;
+    }
+    .admin-sidebar .admin-nav-btn {
+        font-size: 9px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .admin-topbar > div {
+        border-radius: 18px;
+        padding: 1px 4px;
+    }
+    .admin-topbar .font-bold { font-size: 14px; }
 }
