@@ -198,10 +198,7 @@
             30%  { transform: scale(1.0); opacity: 1; }
             100% { transform: scale(1.85); opacity: 0; border-color: rgba(74,222,128,0); }
         }
-        /* Plane svg colour shift only when hovering main button, not the reset-box */
-        .tg-custom-btn:hover:not(:has(.tg-reset-box:hover)) .tg-plane-svg {
-            color: #7ec4ff;
-        }
+        /* (hover-цвет самолёта убран — иконка остаётся #54a9eb при hover) */
         .tg-plane-wrap {
             position: relative;
             display: inline-flex;
@@ -240,119 +237,48 @@
             50% { transform: translate(0, -2.5px) rotate(0deg); filter: drop-shadow(0 0 10px rgba(84,169,235,0.58)) drop-shadow(0 0 3px rgba(84,169,235,0.35)); }
             75% { transform: translate(-0.5px, -1.5px) rotate(2deg); }
         }
+        /* Loading — агрессивный двойной пульс (heartbeat движка):
+           удар → УДАР (сильнее) → отдача (recoil) → покой.
+           Самолёт рвётся вперёд, glow вспыхивает на главном ударе. */
         @keyframes tg-plane-jitter {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(2px, -0.5px) rotate(3deg); }
-            40% { transform: translate(-1px, 0.5px) rotate(-2deg); }
-            60% { transform: translate(2.5px, 0) rotate(4deg); }
-            80% { transform: translate(-0.5px, 0.5px) rotate(-1deg); }
+            0%, 100% { transform: translate(0, 0) rotate(-2deg) scale(1);
+                       filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
+            /* Первый удар — резкий */
+            20%      { transform: translate(2px, -2px) rotate(-10deg) scale(1.07);
+                       filter: drop-shadow(0 0 10px rgba(84,169,235,0.7)); }
+            /* Быстрый откат */
+            34%      { transform: translate(0, 0) rotate(-2deg) scale(1.0);
+                       filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
+            /* ГЛАВНЫЙ удар — мощный рывок вперёд */
+            50%      { transform: translate(3px, -3.5px) rotate(-14deg) scale(1.12);
+                       filter: drop-shadow(0 0 18px rgba(84,169,235,0.9)); }
+            /* Отдача — лёгкий overshoot назад */
+            65%      { transform: translate(-1px, 0.5px) rotate(2deg) scale(0.98);
+                       filter: drop-shadow(0 0 4px rgba(84,169,235,0.35)); }
+            /* Возврат в покой */
+            82%      { transform: translate(0, 0) rotate(-1deg) scale(1.0);
+                       filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
         }
-        /* Мёртвая петля — ультра плавная, 100 кадров, круговая траектория */
+        /* Мёртвая петля — агрессивная круговая траектория, радиус 12px.
+           Быстрый вход, яркий glow на вершине, snappy timing.
+           1.3s — резко, не заторможенно. */
         @keyframes tg-plane-loop {
-            0%   { transform: translate(0px, 0px) rotate(0deg) scale(1); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            1%   { transform: translate(0.15px, -0.25px) rotate(-3.6deg) scale(1.002); filter: drop-shadow(0 0 3px rgba(84,169,235,0.32)); }
-            2%   { transform: translate(0.35px, -0.6px) rotate(-7.2deg) scale(1.005); filter: drop-shadow(0 0 4px rgba(84,169,235,0.34)); }
-            3%   { transform: translate(0.6px, -1.1px) rotate(-10.8deg) scale(1.008); filter: drop-shadow(0 0 4px rgba(84,169,235,0.36)); }
-            4%   { transform: translate(0.9px, -1.7px) rotate(-14.4deg) scale(1.012); filter: drop-shadow(0 0 5px rgba(84,169,235,0.38)); }
-            5%   { transform: translate(1.2px, -2.4px) rotate(-18deg) scale(1.016); filter: drop-shadow(0 0 5px rgba(84,169,235,0.4)); }
-            6%   { transform: translate(1.5px, -3.2px) rotate(-21.6deg) scale(1.02); filter: drop-shadow(0 0 6px rgba(84,169,235,0.42)); }
-            7%   { transform: translate(1.85px, -4.1px) rotate(-25.2deg) scale(1.024); filter: drop-shadow(0 0 6px rgba(84,169,235,0.44)); }
-            8%   { transform: translate(2.2px, -5px) rotate(-28.8deg) scale(1.028); filter: drop-shadow(0 0 7px rgba(84,169,235,0.46)); }
-            9%   { transform: translate(2.5px, -6px) rotate(-32.4deg) scale(1.032); filter: drop-shadow(0 0 7px rgba(84,169,235,0.48)); }
-            10%  { transform: translate(2.8px, -7px) rotate(-36deg) scale(1.036); filter: drop-shadow(0 0 8px rgba(84,169,235,0.5)); }
-            11%  { transform: translate(3.05px, -8px) rotate(-39.6deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(84,169,235,0.52)); }
-            12%  { transform: translate(3.25px, -9px) rotate(-43.2deg) scale(1.044); filter: drop-shadow(0 0 9px rgba(84,169,235,0.54)); }
-            13%  { transform: translate(3.4px, -10px) rotate(-46.8deg) scale(1.048); filter: drop-shadow(0 0 9px rgba(84,169,235,0.56)); }
-            14%  { transform: translate(3.5px, -11px) rotate(-50.4deg) scale(1.052); filter: drop-shadow(0 0 10px rgba(84,169,235,0.58)); }
-            15%  { transform: translate(3.55px, -12px) rotate(-54deg) scale(1.055); filter: drop-shadow(0 0 10px rgba(84,169,235,0.6)); }
-            16%  { transform: translate(3.55px, -12.9px) rotate(-57.6deg) scale(1.058); filter: drop-shadow(0 0 11px rgba(84,169,235,0.62)); }
-            17%  { transform: translate(3.5px, -13.8px) rotate(-61.2deg) scale(1.061); filter: drop-shadow(0 0 11px rgba(84,169,235,0.64)); }
-            18%  { transform: translate(3.4px, -14.6px) rotate(-64.8deg) scale(1.064); filter: drop-shadow(0 0 12px rgba(84,169,235,0.66)); }
-            19%  { transform: translate(3.25px, -15.3px) rotate(-68.4deg) scale(1.067); filter: drop-shadow(0 0 12px rgba(84,169,235,0.68)); }
-            20%  { transform: translate(3.05px, -16px) rotate(-72deg) scale(1.07); filter: drop-shadow(0 0 13px rgba(84,169,235,0.7)); }
-            21%  { transform: translate(2.8px, -16.6px) rotate(-75.6deg) scale(1.072); filter: drop-shadow(0 0 13px rgba(84,169,235,0.72)); }
-            22%  { transform: translate(2.5px, -17.1px) rotate(-79.2deg) scale(1.074); filter: drop-shadow(0 0 14px rgba(84,169,235,0.74)); }
-            23%  { transform: translate(2.15px, -17.5px) rotate(-82.8deg) scale(1.076); filter: drop-shadow(0 0 14px rgba(84,169,235,0.76)); }
-            24%  { transform: translate(1.75px, -17.8px) rotate(-86.4deg) scale(1.078); filter: drop-shadow(0 0 15px rgba(84,169,235,0.78)); }
-            25%  { transform: translate(1.3px, -18px) rotate(-90deg) scale(1.08); filter: drop-shadow(0 0 15px rgba(84,169,235,0.8)); }
-            26%  { transform: translate(0.85px, -18.1px) rotate(-93.6deg) scale(1.08); filter: drop-shadow(0 0 15px rgba(84,169,235,0.8)); }
-            27%  { transform: translate(0.35px, -18.1px) rotate(-97.2deg) scale(1.08); filter: drop-shadow(0 0 15px rgba(84,169,235,0.8)); }
-            28%  { transform: translate(-0.15px, -18px) rotate(-100.8deg) scale(1.079); filter: drop-shadow(0 0 15px rgba(84,169,235,0.79)); }
-            29%  { transform: translate(-0.65px, -17.8px) rotate(-104.4deg) scale(1.078); filter: drop-shadow(0 0 15px rgba(84,169,235,0.78)); }
-            30%  { transform: translate(-1.15px, -17.5px) rotate(-108deg) scale(1.076); filter: drop-shadow(0 0 14px rgba(84,169,235,0.77)); }
-            31%  { transform: translate(-1.65px, -17.1px) rotate(-111.6deg) scale(1.074); filter: drop-shadow(0 0 14px rgba(84,169,235,0.76)); }
-            32%  { transform: translate(-2.1px, -16.6px) rotate(-115.2deg) scale(1.072); filter: drop-shadow(0 0 14px rgba(84,169,235,0.75)); }
-            33%  { transform: translate(-2.55px, -16px) rotate(-118.8deg) scale(1.07); filter: drop-shadow(0 0 13px rgba(84,169,235,0.74)); }
-            34%  { transform: translate(-2.95px, -15.3px) rotate(-122.4deg) scale(1.068); filter: drop-shadow(0 0 13px rgba(84,169,235,0.73)); }
-            35%  { transform: translate(-3.3px, -14.6px) rotate(-126deg) scale(1.066); filter: drop-shadow(0 0 13px rgba(84,169,235,0.72)); }
-            36%  { transform: translate(-3.6px, -13.8px) rotate(-129.6deg) scale(1.064); filter: drop-shadow(0 0 12px rgba(84,169,235,0.71)); }
-            37%  { transform: translate(-3.85px, -12.9px) rotate(-133.2deg) scale(1.062); filter: drop-shadow(0 0 12px rgba(84,169,235,0.7)); }
-            38%  { transform: translate(-4.05px, -12px) rotate(-136.8deg) scale(1.06); filter: drop-shadow(0 0 12px rgba(84,169,235,0.69)); }
-            39%  { transform: translate(-4.2px, -11px) rotate(-140.4deg) scale(1.058); filter: drop-shadow(0 0 11px rgba(84,169,235,0.68)); }
-            40%  { transform: translate(-4.3px, -10px) rotate(-144deg) scale(1.056); filter: drop-shadow(0 0 11px rgba(84,169,235,0.67)); }
-            41%  { transform: translate(-4.35px, -9px) rotate(-147.6deg) scale(1.054); filter: drop-shadow(0 0 11px rgba(84,169,235,0.66)); }
-            42%  { transform: translate(-4.35px, -8px) rotate(-151.2deg) scale(1.052); filter: drop-shadow(0 0 10px rgba(84,169,235,0.65)); }
-            43%  { transform: translate(-4.3px, -7px) rotate(-154.8deg) scale(1.05); filter: drop-shadow(0 0 10px rgba(84,169,235,0.64)); }
-            44%  { transform: translate(-4.2px, -6px) rotate(-158.4deg) scale(1.048); filter: drop-shadow(0 0 10px rgba(84,169,235,0.63)); }
-            45%  { transform: translate(-4.05px, -5px) rotate(-162deg) scale(1.046); filter: drop-shadow(0 0 9px rgba(84,169,235,0.62)); }
-            46%  { transform: translate(-3.85px, -4.1px) rotate(-165.6deg) scale(1.044); filter: drop-shadow(0 0 9px rgba(84,169,235,0.61)); }
-            47%  { transform: translate(-3.6px, -3.2px) rotate(-169.2deg) scale(1.042); filter: drop-shadow(0 0 9px rgba(84,169,235,0.6)); }
-            48%  { transform: translate(-3.3px, -2.4px) rotate(-172.8deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(84,169,235,0.59)); }
-            49%  { transform: translate(-2.95px, -1.7px) rotate(-176.4deg) scale(1.038); filter: drop-shadow(0 0 8px rgba(84,169,235,0.58)); }
-            50%  { transform: translate(-2.55px, -1.1px) rotate(-180deg) scale(1.036); filter: drop-shadow(0 0 8px rgba(84,169,235,0.57)); }
-            51%  { transform: translate(-2.1px, -0.6px) rotate(-183.6deg) scale(1.034); filter: drop-shadow(0 0 7px rgba(84,169,235,0.56)); }
-            52%  { transform: translate(-1.65px, -0.2px) rotate(-187.2deg) scale(1.032); filter: drop-shadow(0 0 7px rgba(84,169,235,0.55)); }
-            53%  { transform: translate(-1.15px, 0.1px) rotate(-190.8deg) scale(1.03); filter: drop-shadow(0 0 7px rgba(84,169,235,0.54)); }
-            54%  { transform: translate(-0.65px, 0.3px) rotate(-194.4deg) scale(1.028); filter: drop-shadow(0 0 6px rgba(84,169,235,0.53)); }
-            55%  { transform: translate(-0.15px, 0.4px) rotate(-198deg) scale(1.026); filter: drop-shadow(0 0 6px rgba(84,169,235,0.52)); }
-            56%  { transform: translate(0.35px, 0.45px) rotate(-201.6deg) scale(1.024); filter: drop-shadow(0 0 6px rgba(84,169,235,0.51)); }
-            57%  { transform: translate(0.85px, 0.45px) rotate(-205.2deg) scale(1.022); filter: drop-shadow(0 0 6px rgba(84,169,235,0.5)); }
-            58%  { transform: translate(1.3px, 0.4px) rotate(-208.8deg) scale(1.02); filter: drop-shadow(0 0 5px rgba(84,169,235,0.49)); }
-            59%  { transform: translate(1.75px, 0.3px) rotate(-212.4deg) scale(1.018); filter: drop-shadow(0 0 5px rgba(84,169,235,0.48)); }
-            60%  { transform: translate(2.15px, 0.15px) rotate(-216deg) scale(1.016); filter: drop-shadow(0 0 5px rgba(84,169,235,0.47)); }
-            61%  { transform: translate(2.5px, 0px) rotate(-219.6deg) scale(1.015); filter: drop-shadow(0 0 5px rgba(84,169,235,0.46)); }
-            62%  { transform: translate(2.8px, -0.2px) rotate(-223.2deg) scale(1.014); filter: drop-shadow(0 0 5px rgba(84,169,235,0.45)); }
-            63%  { transform: translate(3.05px, -0.4px) rotate(-226.8deg) scale(1.013); filter: drop-shadow(0 0 4px rgba(84,169,235,0.44)); }
-            64%  { transform: translate(3.25px, -0.65px) rotate(-230.4deg) scale(1.012); filter: drop-shadow(0 0 4px rgba(84,169,235,0.43)); }
-            65%  { transform: translate(3.4px, -0.9px) rotate(-234deg) scale(1.011); filter: drop-shadow(0 0 4px rgba(84,169,235,0.42)); }
-            66%  { transform: translate(3.5px, -1.2px) rotate(-237.6deg) scale(1.01); filter: drop-shadow(0 0 4px rgba(84,169,235,0.41)); }
-            67%  { transform: translate(3.55px, -1.5px) rotate(-241.2deg) scale(1.009); filter: drop-shadow(0 0 4px rgba(84,169,235,0.4)); }
-            68%  { transform: translate(3.55px, -1.8px) rotate(-244.8deg) scale(1.008); filter: drop-shadow(0 0 4px rgba(84,169,235,0.39)); }
-            69%  { transform: translate(3.5px, -2.1px) rotate(-248.4deg) scale(1.007); filter: drop-shadow(0 0 4px rgba(84,169,235,0.38)); }
-            70%  { transform: translate(3.4px, -2.4px) rotate(-252deg) scale(1.006); filter: drop-shadow(0 0 4px rgba(84,169,235,0.37)); }
-            71%  { transform: translate(3.25px, -2.65px) rotate(-255.6deg) scale(1.0055); filter: drop-shadow(0 0 3px rgba(84,169,235,0.36)); }
-            72%  { transform: translate(3.05px, -2.9px) rotate(-259.2deg) scale(1.005); filter: drop-shadow(0 0 3px rgba(84,169,235,0.35)); }
-            73%  { transform: translate(2.8px, -3.1px) rotate(-262.8deg) scale(1.0045); filter: drop-shadow(0 0 3px rgba(84,169,235,0.35)); }
-            74%  { transform: translate(2.5px, -3.25px) rotate(-266.4deg) scale(1.004); filter: drop-shadow(0 0 3px rgba(84,169,235,0.34)); }
-            75%  { transform: translate(2.15px, -3.35px) rotate(-270deg) scale(1.0035); filter: drop-shadow(0 0 3px rgba(84,169,235,0.34)); }
-            76%  { transform: translate(1.75px, -3.4px) rotate(-273.6deg) scale(1.003); filter: drop-shadow(0 0 3px rgba(84,169,235,0.33)); }
-            77%  { transform: translate(1.3px, -3.4px) rotate(-277.2deg) scale(1.0028); filter: drop-shadow(0 0 3px rgba(84,169,235,0.33)); }
-            78%  { transform: translate(0.85px, -3.35px) rotate(-280.8deg) scale(1.0025); filter: drop-shadow(0 0 3px rgba(84,169,235,0.32)); }
-            79%  { transform: translate(0.35px, -3.25px) rotate(-284.4deg) scale(1.0022); filter: drop-shadow(0 0 3px rgba(84,169,235,0.32)); }
-            80%  { transform: translate(-0.15px, -3.1px) rotate(-288deg) scale(1.002); filter: drop-shadow(0 0 3px rgba(84,169,235,0.32)); }
-            81%  { transform: translate(-0.6px, -2.9px) rotate(-291.6deg) scale(1.0018); filter: drop-shadow(0 0 3px rgba(84,169,235,0.31)); }
-            82%  { transform: translate(-1px, -2.65px) rotate(-295.2deg) scale(1.0016); filter: drop-shadow(0 0 3px rgba(84,169,235,0.31)); }
-            83%  { transform: translate(-1.35px, -2.4px) rotate(-298.8deg) scale(1.0014); filter: drop-shadow(0 0 3px rgba(84,169,235,0.31)); }
-            84%  { transform: translate(-1.65px, -2.1px) rotate(-302.4deg) scale(1.0012); filter: drop-shadow(0 0 3px rgba(84,169,235,0.31)); }
-            85%  { transform: translate(-1.9px, -1.8px) rotate(-306deg) scale(1.001); filter: drop-shadow(0 0 3px rgba(84,169,235,0.31)); }
-            86%  { transform: translate(-2.1px, -1.5px) rotate(-309.6deg) scale(1.0008); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            87%  { transform: translate(-2.2px, -1.2px) rotate(-313.2deg) scale(1.0007); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            88%  { transform: translate(-2.25px, -0.9px) rotate(-316.8deg) scale(1.0006); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            89%  { transform: translate(-2.2px, -0.65px) rotate(-320.4deg) scale(1.0005); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            90%  { transform: translate(-2.1px, -0.4px) rotate(-324deg) scale(1.0004); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            91%  { transform: translate(-1.9px, -0.2px) rotate(-327.6deg) scale(1.00035); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            92%  { transform: translate(-1.65px, -0.1px) rotate(-331.2deg) scale(1.0003); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            93%  { transform: translate(-1.35px, 0px) rotate(-334.8deg) scale(1.00025); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            94%  { transform: translate(-1px, 0px) rotate(-338.4deg) scale(1.0002); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            95%  { transform: translate(-0.6px, 0px) rotate(-342deg) scale(1.00015); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            96%  { transform: translate(-0.3px, 0px) rotate(-345.6deg) scale(1.0001); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            97%  { transform: translate(-0.1px, 0px) rotate(-349.2deg) scale(1.00005); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            98%  { transform: translate(-0.03px, 0px) rotate(-352.8deg) scale(1.00002); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            99%  { transform: translate(-0.01px, 0px) rotate(-356.4deg) scale(1.00001); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
-            100% { transform: translate(0px, 0px) rotate(-360deg) scale(1); filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
+            0%    { transform: translate(0px, 0px)     rotate(0deg)    scale(1);    filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
+            8.33% { transform: translate(6px, -1.6px)  rotate(-30deg)  scale(1.03); filter: drop-shadow(0 0 6px rgba(84,169,235,0.5)); }
+            16.67%{ transform: translate(10.4px,-6px)  rotate(-60deg)  scale(1.06); filter: drop-shadow(0 0 10px rgba(84,169,235,0.7)); }
+            25%   { transform: translate(12px, -12px)  rotate(-90deg)  scale(1.09); filter: drop-shadow(0 0 14px rgba(84,169,235,0.85)); }
+            33.33%{ transform: translate(10.4px,-18px) rotate(-120deg) scale(1.11); filter: drop-shadow(0 0 17px rgba(84,169,235,0.92)); }
+            41.67%{ transform: translate(6px, -22.4px) rotate(-150deg) scale(1.12); filter: drop-shadow(0 0 18px rgba(84,169,235,0.95)); }
+            50%   { transform: translate(0px, -24px)   rotate(-180deg) scale(1.12); filter: drop-shadow(0 0 18px rgba(84,169,235,0.95)); }
+            58.33%{ transform: translate(-6px,-22.4px) rotate(-210deg) scale(1.11); filter: drop-shadow(0 0 17px rgba(84,169,235,0.92)); }
+            66.67%{ transform: translate(-10.4px,-18px)rotate(-240deg) scale(1.09); filter: drop-shadow(0 0 14px rgba(84,169,235,0.85)); }
+            75%   { transform: translate(-12px, -12px) rotate(-270deg) scale(1.06); filter: drop-shadow(0 0 10px rgba(84,169,235,0.7)); }
+            83.33%{ transform: translate(-10.4px,-6px) rotate(-300deg) scale(1.03); filter: drop-shadow(0 0 6px rgba(84,169,235,0.5)); }
+            91.67%{ transform: translate(-6px, -1.6px) rotate(-330deg) scale(1.01); filter: drop-shadow(0 0 4px rgba(84,169,235,0.38)); }
+            100%  { transform: translate(0px, 0px)     rotate(-360deg) scale(1);    filter: drop-shadow(0 0 3px rgba(84,169,235,0.3)); }
         }
         .tg-plane-svg.tg-looping {
-            animation: tg-plane-loop 3s linear forwards !important;
+            animation: tg-plane-loop 1.3s cubic-bezier(0.35, 0, 0.15, 1) forwards !important;
             will-change: transform, filter;
         }
         .tg-btn-loading {
@@ -360,17 +286,20 @@
             background: rgba(84,169,235,0.025);
         }
         .tg-btn-loading .tg-plane-svg {
-            animation: tg-plane-jitter 0.55s ease-in-out infinite !important;
-            filter: drop-shadow(0 0 6px rgba(84,169,235,0.5)) !important;
+            animation: tg-plane-jitter 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
         }
         .tg-btn-loading .tg-plane-trail {
             opacity: 1;
-            transform: translateY(-50%) scaleX(1);
-            animation: tg-trail-pulse 0.7s ease-in-out infinite;
+            transform: translateY(-50%) scaleX(0.4);
+            animation: tg-trail-pulse 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
         @keyframes tg-trail-pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
+            0%, 100% { opacity: 0.15; transform: translateY(-50%) scaleX(0.4); }
+            20%      { opacity: 0.65; transform: translateY(-50%) scaleX(0.9); }
+            34%      { opacity: 0.15; transform: translateY(-50%) scaleX(0.4); }
+            50%      { opacity: 1;    transform: translateY(-50%) scaleX(1.4); }
+            65%      { opacity: 0.2;  transform: translateY(-50%) scaleX(0.5); }
+            82%      { opacity: 0.15; transform: translateY(-50%) scaleX(0.4); }
         }
         .tg-btn-loading .tg-btn-label {
             opacity: 0.42;
@@ -587,7 +516,7 @@
     <script src="js/profile-utils.js?v=1"></script>
     <script src="js/navbar.js?v=17"></script>
 
-    <main class="flex-1 flex items-center justify-center px-4 py-24 relative z-10">
+    <main class="flex-1 flex items-start justify-center px-4 py-24 relative z-10">
         <div class="register-shell w-full max-w-md">
 
             <div id="auth-view-stack" class="auth-view-stack">

@@ -23,6 +23,7 @@ const AuthApp = (() => {
 
     // === Plane loop animation (мёртвая петля) ===
     let planeLoopTimer = null;
+    const PLANE_LOOP_DURATION = 1300; // ms, must match CSS tg-plane-loop duration
 
     function triggerPlaneLoop() {
         const plane = document.querySelector('.tg-plane-svg');
@@ -33,10 +34,15 @@ const AuthApp = (() => {
 
         plane.classList.add('tg-looping');
 
-        // Remove class after animation completes (3s)
+        // After loop finishes, force-restart idle animation from phase 0%
+        // so it syncs with the loop's end state (translate(0,0) rotate(0))
         setTimeout(() => {
             plane.classList.remove('tg-looping');
-        }, 3050);
+            // Restart idle animation from the beginning to avoid mid-cycle snap
+            plane.style.animation = 'none';
+            void plane.offsetWidth; // force reflow
+            plane.style.animation = '';
+        }, PLANE_LOOP_DURATION + 50);
     }
 
     function startPlaneLoopTimer() {
@@ -726,17 +732,7 @@ const AuthApp = (() => {
             }
         });
 
-        // Content slide transition
-        const bodyEl = document.querySelector('.auth-mode-body');
-        if (bodyEl && animate) {
-            const reverse = prevMode === 'register' && authMode === 'login';
-            bodyEl.classList.add(reverse ? 'auth-switching-reverse' : 'auth-switching');
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    bodyEl.classList.remove('auth-switching', 'auth-switching-reverse');
-                });
-            });
-        }
+        // Content slide transition removed — caused visible jump/jitter on mode switch
 
         const inviteSection = document.getElementById('invite-section');
         if (inviteSection) {
@@ -787,12 +783,6 @@ const AuthApp = (() => {
                 el.textContent = txt;
             }
         });
-
-        const titleContainer = document.getElementById('auth-title');
-        if (titleContainer && animate) {
-            titleContainer.classList.add('decode-bounce');
-            setTimeout(() => titleContainer.classList.remove('decode-bounce'), 360);
-        }
 
         const tgContainer = document.getElementById('tg-widget-container');
         if (tgContainer) tgContainer.classList.remove('tg-auth-active');
@@ -1232,7 +1222,7 @@ const AuthApp = (() => {
                     <span class="tg-plane-trail" aria-hidden="true"></span>
                     <svg class="tg-plane-svg" viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
                 </span>
-                <span class="tg-btn-label"><span id="tg-custom-btn-text">${authMode === 'register' ? 'Регистрация' : 'Войти'}</span><span class="tg-btn-suffix"> через Telegram</span></span>
+                <span class="tg-btn-label"><span id="tg-custom-btn-text" data-decode-text="${authMode === 'register' ? 'Регистрация' : 'Войти'}">${authMode === 'register' ? 'Регистрация' : 'Войти'}</span><span class="tg-btn-suffix" data-decode-text=" через Telegram"> через Telegram</span></span>
                 <button type="button" class="tg-reset-box" data-tg-reset title="Сбросить Telegram" aria-label="Сбросить Telegram">
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M3 12a9 9 0 0 1 15.5-6.3L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1245,9 +1235,13 @@ const AuthApp = (() => {
         `;
             wireTelegramReset(container);
             wireCustomButtonClick(container);
-            // Fade back in
+            // Fade back in + hackerdecode on button text
             requestAnimationFrame(() => {
                 container.style.opacity = '1';
+                const btnText = container.querySelector('#tg-custom-btn-text');
+                const btnSuffix = container.querySelector('.tg-btn-suffix');
+                if (btnText) decodeText(btnText, btnText.dataset.decodeText);
+                if (btnSuffix) decodeText(btnSuffix, btnSuffix.dataset.decodeText);
             });
         }, 150); // Wait for fade out
         return container;
@@ -1271,7 +1265,7 @@ const AuthApp = (() => {
                     <span class="tg-plane-trail" aria-hidden="true"></span>
                     <svg class="tg-plane-svg" viewBox="0 0 24 24" fill="none"><path d="M20.66 3.72c-.45-.18-1.07-.1-1.88.18L3.72 9.37c-.9.31-1.4.7-1.49 1.15-.1.46.2.86.88 1.18l4.5 1.76 1.65 5.28c.18.56.42.87.72.93.3.06.63-.1.97-.47l2.28-2.28 4.47 3.38c.82.62 1.42.55 1.78-.22l3.38-14.05c.24-.97.07-1.62-.5-1.94a1.5 1.5 0 0 0-.7-.17z" fill="currentColor"/><path d="M8.98 13.64l-.62 3.37.2-3.56 9.2-8.34c.18-.16.2-.22.04-.18L8.98 13.64z" fill="rgba(0,0,0,0.25)"/></svg>
                 </span>
-                <span class="tg-btn-label"><span id="tg-custom-btn-text">Попробовать снова</span></span>
+                <span class="tg-btn-label"><span id="tg-custom-btn-text" data-decode-text="Попробовать снова">Попробовать снова</span></span>
                 <button type="button" class="tg-reset-box" data-tg-reset title="Сбросить Telegram" aria-label="Сбросить Telegram">
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M3 12a9 9 0 0 1 15.5-6.3L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1291,6 +1285,11 @@ const AuthApp = (() => {
             });
         }
         wireTelegramReset(container);
+        // Hackerdecode on refresh button text
+        requestAnimationFrame(() => {
+            const btnText = container.querySelector('#tg-custom-btn-text');
+            if (btnText) decodeText(btnText, btnText.dataset.decodeText);
+        });
     }
 
     function initTelegramWidget() {
