@@ -1768,7 +1768,11 @@ devBtn.addEventListener('click', activateDevLogin);
             const tgContainer = document.getElementById('tg-widget-container');
             if (tgContainer) tgContainer.classList.remove('tg-auth-active');
 
-            await Api.logout();
+            try {
+                await Api.logout();
+            } catch (e) {
+                console.error('Logout error:', e);
+            }
 
             // Reset decode flags so re-login re-triggers hackerDecode
 

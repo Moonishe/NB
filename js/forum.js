@@ -237,10 +237,6 @@ const ForumModule = (() => {
 
 
 
-        html = html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="forum-link">$1</a>');
-
-
-
         // @mentions — link to profile if resolved
 
 
@@ -262,6 +258,10 @@ const ForumModule = (() => {
 
 
         });
+
+
+
+        html = html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="forum-link">$1</a>');
 
 
 
@@ -949,6 +949,7 @@ const ForumModule = (() => {
             boardContainer.innerHTML = buildBoardHtml(threads, total);
             attachBoardHandlers();
         } catch (err) {
+            if (seq !== renderSeq) return;
             boardContainer.innerHTML = `<div class="forum-error">Ошибка загрузки: ${escapeHtml(err.message)}</div>`;
         }
     }
@@ -1049,6 +1050,7 @@ const ForumModule = (() => {
             if (msgEl) hackerDecodeNumber(msgEl, String(totalMessages), 1000);
 
         } catch (err) {
+            if (seq !== renderSeq) return;
 
             main.innerHTML = `<div class="forum-error">Ошибка загрузки: ${escapeHtml(err.message)}</div>`;
 
@@ -1729,6 +1731,7 @@ const ForumModule = (() => {
 
 
         } catch (err) {
+            if (seq !== renderSeq) return;
 
 
 
@@ -1993,43 +1996,59 @@ const ForumModule = (() => {
 
 
 
+                    replyTextarea.value = '';
+
+
+
+                    if (charCount) charCount.textContent = '0';
+
+
+
                     // Send mention notifications
 
 
 
-                    const mentionRegex = /@([A-Za-z0-9_]{2,32})/g;
+                    try {
 
 
 
-                    const mentions = [];
+                        const mentionRegex = /@([A-Za-z0-9_]{2,32})/g;
 
 
 
-                    let mm;
+                        const mentions = [];
 
 
 
-                    while ((mm = mentionRegex.exec(content)) !== null) mentions.push(mm[1].toLowerCase());
+                        let mm;
 
 
 
-                    if (mentions.length > 0) {
+                        while ((mm = mentionRegex.exec(content)) !== null) mentions.push(mm[1].toLowerCase());
 
 
 
-                        const resolved = await Api.resolveUsernames([...new Set(mentions)]);
+                        if (mentions.length > 0) {
 
 
 
-                        if (resolved && resolved.length) {
+                            const resolved = await Api.resolveUsernames([...new Set(mentions)]);
 
 
 
-                            const ids = resolved.map(r => r.user_id).filter(Boolean);
+                            if (resolved && resolved.length) {
 
 
 
-                            if (ids.length) await Api.createMentionNotifications(newPostId, currentThreadId, ids);
+                                const ids = resolved.map(r => r.user_id).filter(Boolean);
+
+
+
+                                if (ids.length) await Api.createMentionNotifications(newPostId, currentThreadId, ids);
+
+
+
+                            }
 
 
 
@@ -2037,15 +2056,15 @@ const ForumModule = (() => {
 
 
 
+                    } catch (mentionErr) {
+
+
+
+                        console.error('Mention notification failed:', mentionErr);
+
+
+
                     }
-
-
-
-                    replyTextarea.value = '';
-
-
-
-                    if (charCount) charCount.textContent = '0';
 
 
 

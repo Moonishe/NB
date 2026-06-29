@@ -370,13 +370,16 @@ $$;
 
 
 -- ==========================================
--- FIX 8 [MEDIUM]: admin_create_achievement — validate rarity and points
+-- FIX 8 [CRITICAL]: admin_create_achievement — missing category + validate rarity/points
 -- ==========================================
--- BUG: The function (010-admin-extensions.sql) accepted any string for
--- rarity and any integer for points, including negative values and
--- invalid rarity strings that don't match the achievements table CHECK.
+-- BUG: The function (010-admin-extensions.sql) INSERT omitted the `category`
+-- column, which is NOT NULL with no default (04-achievements.sql:23).
+-- The function ALWAYS failed with a NOT NULL constraint violation.
+-- Additionally, it accepted any string for rarity and negative points.
 --
--- FIX: Validate rarity IN ('common','rare','unique','limited') and points >= 0.
+-- FIX: Add category to the INSERT with COALESCE default 'starter' (valid per
+-- CHECK constraint). Validate rarity IN ('common','rare','unique','limited'),
+-- category IN ('starter','rare','unique','secret_limited'), and points >= 0.
 
 CREATE OR REPLACE FUNCTION public.admin_create_achievement(p_data JSONB)
 RETURNS TEXT
@@ -388,6 +391,7 @@ DECLARE
     v_id TEXT;
     v_rarity TEXT;
     v_points INTEGER;
+    v_category TEXT;
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()) THEN
         RETURN NULL;
@@ -406,12 +410,18 @@ BEGIN
         RETURN NULL;
     END IF;
 
-    INSERT INTO public.achievements (id, title, description, icon_emoji, rarity, points)
+    v_category := COALESCE(p_data->>'category', 'starter');
+    IF v_category NOT IN ('starter', 'rare', 'unique', 'secret_limited') THEN
+        RETURN NULL;
+    END IF;
+
+    INSERT INTO public.achievements (id, title, description, icon_emoji, category, rarity, points)
     VALUES (
         p_data->>'id',
         p_data->>'title',
         COALESCE(p_data->>'description', ''),
         COALESCE(p_data->>'icon_emoji', '🏆'),
+        v_category,
         v_rarity,
         v_points
     )

@@ -227,14 +227,14 @@ const LeaderboardModule = (() => {
         hideError();
         try {
             const fresh = await Api.getResultsByPrompt(currentPromptId);
-            if (seq !== loadSeq) return;
+            if (seq !== loadSeq) { hideLoading(); return; }
             resultsData = fresh;
             const resultIds = resultsData.map(r => r.id);
             const [stats, entries] = await Promise.all([
                 Api.getResultRatingStats(resultIds),
                 Api.getResultRatingEntries ? Api.getResultRatingEntries(resultIds, 8) : []
             ]);
-            if (seq !== loadSeq) return;
+            if (seq !== loadSeq) { hideLoading(); return; }
             ratingStats = new Map((stats || []).map(s => [Number(s.result_id), s]));
             ratingEntries = new Map();
             (entries || []).forEach(entry => {
@@ -268,7 +268,7 @@ const LeaderboardModule = (() => {
                 });
             }
         } catch (e) {
-            if (seq !== loadSeq) return;
+            if (seq !== loadSeq) { hideLoading(); return; }
             resultsData = [];
             ratingStats = new Map();
             ratingEntries = new Map();
@@ -276,7 +276,7 @@ const LeaderboardModule = (() => {
             showError('Не удалось загрузить результаты. Попробуйте позже.');
             return;
         }
-        if (seq !== loadSeq) return;
+        if (seq !== loadSeq) { hideLoading(); return; }
         hideLoading();
         renderBenchmarkList();
         hideEmptyState();

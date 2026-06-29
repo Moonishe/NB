@@ -333,10 +333,11 @@ Deno.serve(async (req: Request) => {
         if (byEmail.is_verified || byEmail.used_invite_code_id) {
           existingUserId = byEmail.user_id
           if (!byEmail.telegram_id) {
-            await adminClient
+            const { error: tgLinkError } = await adminClient
               .from('profiles')
               .update({ telegram_id: telegramId, ...tgProfile })
               .eq('user_id', existingUserId)
+            if (tgLinkError) console.error('telegram-auth profile telegram link failed', tgLinkError)
           }
         } else {
           pendingAuthUserId = byEmail.user_id
@@ -362,10 +363,11 @@ Deno.serve(async (req: Request) => {
           console.error('telegram-auth session retry failed', retry.error ?? 'No session returned')
           return jsonResponse({ error: 'Internal server error' }, 500)
         }
-        await adminClient
+        const { error: retryLinkError } = await adminClient
           .from('profiles')
           .update({ telegram_id: telegramId, ...tgProfile })
           .eq('user_id', existingUserId)
+        if (retryLinkError) console.error('telegram-auth profile telegram link failed', retryLinkError)
         return jsonResponse({
           access_token: retry.data.session.access_token,
           refresh_token: retry.data.session.refresh_token,
@@ -373,10 +375,11 @@ Deno.serve(async (req: Request) => {
         })
       }
 
-      await adminClient
+      const { error: sessionLinkError } = await adminClient
         .from('profiles')
         .update({ telegram_id: telegramId, ...tgProfile })
         .eq('user_id', existingUserId)
+      if (sessionLinkError) console.error('telegram-auth profile telegram link failed', sessionLinkError)
 
       return jsonResponse({
         access_token: sessionData.session.access_token,
@@ -490,21 +493,19 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Инвайт-код недействителен или уже использован' }, 400)
     }
 
-    try {
-      await adminClient
-        .from('profiles')
-        .upsert({
-          user_id: targetUserId,
-          email,
-          is_verified: false,
-          telegram_id: telegramId,
-          ...tgProfile,
-          used_invite_code_id: inviteId,
-          pending_invite_code: null,
-        }, { onConflict: 'user_id' })
-    } catch (profileUpsertErr) {
-      // Claim succeeded but profile update failed — return a clear error
-      // so the client knows the registration is incomplete.
+    const { error: profileUpsertErr } = await adminClient
+      .from('profiles')
+      .upsert({
+        user_id: targetUserId,
+        email,
+        is_verified: false,
+        telegram_id: telegramId,
+        ...tgProfile,
+        used_invite_code_id: inviteId,
+        pending_invite_code: null,
+      }, { onConflict: 'user_id' })
+
+    if (profileUpsertErr) {
       console.error('telegram-auth final profile upsert failed', profileUpsertErr)
       return jsonResponse({ error: 'Registration incomplete: profile update failed after invite claim' }, 500)
     }

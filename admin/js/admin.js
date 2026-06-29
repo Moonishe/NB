@@ -62,14 +62,19 @@ const AdminApp = (() => {
     }
 
     async function checkAuth() {
-        if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) { showAuth(); return; }
-        Api.reinitAdmin();
-        const session = await Api.getSession();
-        if (session) {
-            const admin = await Api.isAdmin();
-            if (admin) { showAdmin(session.user.email); }
-            else { await Api.logout(); showAuth('Нет прав администратора'); }
-        } else { showAuth(); }
+        try {
+            if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) { showAuth(); return; }
+            Api.reinitAdmin();
+            const session = await Api.getSession();
+            if (session) {
+                const admin = await Api.isAdmin();
+                if (admin) { showAdmin(session.user.email); }
+                else { await Api.logout(); showAuth('Нет прав администратора'); }
+            } else { showAuth(); }
+        } catch (e) {
+            console.error('Auth check failed:', e);
+            showAuth();
+        }
     }
 
     function renderTurnstile() {
@@ -809,6 +814,8 @@ const AdminApp = (() => {
                 return;
             }
             paramsSection.classList.remove('hidden');
+            const prevParamValues = {};
+            paramsSelects.querySelectorAll('select').forEach(sel => { prevParamValues[sel.name] = sel.value; });
             paramsSelects.innerHTML = params.map(p => {
                 const values = p.model_param_values || [];
                 const valueOptions = values.map(v => `<option value="${v.id}">${escapeHtml(v.value)}</option>`).join('');
@@ -822,6 +829,10 @@ const AdminApp = (() => {
                     </label>
                 `;
             }).join('');
+            Object.keys(prevParamValues).forEach(name => {
+                const sel = paramsSelects.querySelector(`select[name="${name}"]`);
+                if (sel) sel.value = prevParamValues[name];
+            });
         }
 
         if (modelSelect.value && modelSelect.value !== '__new__') {
@@ -1357,7 +1368,7 @@ const AdminApp = (() => {
         if (!sel || !sel.value) { alert('Выберите достижение'); return; }
         try {
             const r = await Api.adminGrantAchievement(userId, sel.value);
-            if (!r || !r.ok) { alert('Не удалось: ' + (r.reason || '')); return; }
+            if (!r || !r.ok) { alert('Не удалось: ' + (r && r.reason ? r.reason : '')); return; }
             await openProfileDetail(userId);
         } catch (err) { alert('Ошибка: ' + err.message); }
     }
@@ -1563,8 +1574,7 @@ const AdminApp = (() => {
 
     async function pinThread(id) {
         try {
-            if (Api.modPinThread) await Api.modPinThread(id);
-            toast('Тред закреплён', 'success');
+            if (Api.modPinThread) { await Api.modPinThread(id); toast('Тред закреплён', 'success'); }
             loadModeration();
         } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
     }
@@ -1572,8 +1582,7 @@ const AdminApp = (() => {
     async function deleteThread(id) {
         if (!confirm('Удалить тред?')) return;
         try {
-            if (Api.modDeleteThread) await Api.modDeleteThread(id);
-            toast('Тред удалён', 'success');
+            if (Api.modDeleteThread) { await Api.modDeleteThread(id); toast('Тред удалён', 'success'); }
             loadModeration();
         } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
     }
@@ -1635,8 +1644,7 @@ const AdminApp = (() => {
         const duration = document.getElementById('ban-duration').value;
         if (!uid) { toast('Укажите User ID', 'error'); return; }
         try {
-            if (Api.adminBanUser) await Api.adminBanUser(uid, reason, duration);
-            toast('Пользователь забанен 🔨', 'success');
+            if (Api.adminBanUser) { await Api.adminBanUser(uid, reason, duration); toast('Пользователь забанен 🔨', 'success'); }
             hideModal();
             loadBans();
         } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
@@ -1645,8 +1653,7 @@ const AdminApp = (() => {
     async function unban(uid) {
         if (!confirm('Разбанить пользователя?')) return;
         try {
-            if (Api.modUnbanUser) await Api.modUnbanUser(uid);
-            toast('Пользователь разбанен', 'success');
+            if (Api.modUnbanUser) { await Api.modUnbanUser(uid); toast('Пользователь разбанен', 'success'); }
             loadBans();
         } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
     }
@@ -1698,8 +1705,7 @@ const AdminApp = (() => {
         const body = document.getElementById('ann-body').value.trim();
         if (!title) { toast('Укажите заголовок', 'error'); return; }
         try {
-            if (Api.adminCreateAnnouncement) await Api.adminCreateAnnouncement(title, body);
-            toast('Анонс отправлен 📢', 'success');
+            if (Api.adminCreateAnnouncement) { await Api.adminCreateAnnouncement(title, body); toast('Анонс отправлен 📢', 'success'); }
             hideModal();
             loadAnnouncements();
         } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
@@ -1708,8 +1714,7 @@ const AdminApp = (() => {
     async function deleteAnnouncement(id) {
         if (!confirm('Удалить анонс?')) return;
         try {
-            if (Api.adminDeleteAnnouncement) await Api.adminDeleteAnnouncement(id);
-            toast('Анонс удалён', 'success');
+            if (Api.adminDeleteAnnouncement) { await Api.adminDeleteAnnouncement(id); toast('Анонс удалён', 'success'); }
             loadAnnouncements();
         } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
     }
@@ -1780,8 +1785,7 @@ const AdminApp = (() => {
         const points = parseInt(document.getElementById('ach-points').value) || 10;
         if (!id || !title) { toast('Заполните ID и название', 'error'); return; }
         try {
-            if (Api.adminCreateAchievement) await Api.adminCreateAchievement({ id, title, description, icon_emoji, rarity, points });
-            toast('Ачивка создана 🏆', 'success');
+            if (Api.adminCreateAchievement) { await Api.adminCreateAchievement({ id, title, description, icon_emoji, rarity, points }); toast('Ачивка создана 🏆', 'success'); }
             hideModal();
             loadAchievementsAdmin();
         } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
@@ -1791,8 +1795,7 @@ const AdminApp = (() => {
         const uid = prompt('Введите User ID для выдачи ачивки:');
         if (!uid) return;
         try {
-            if (Api.adminGrantAchievement) await Api.adminGrantAchievement(uid, achId);
-            toast('Ачивка выдана', 'success');
+            if (Api.adminGrantAchievement) { await Api.adminGrantAchievement(uid, achId); toast('Ачивка выдана', 'success'); }
         } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
     }
 
@@ -1823,7 +1826,7 @@ const AdminApp = (() => {
             } catch (err) { errEl.textContent = 'Ошибка входа: ' + err.message; errEl.classList.remove('hidden'); }
         });
 
-        document.getElementById('logout-btn').addEventListener('click', async () => { await Api.logout(); showAuth(); });
+        document.getElementById('logout-btn').addEventListener('click', async () => { stopLiveLogs(); await Api.logout(); showAuth(); });
 
         document.querySelectorAll('.admin-nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {

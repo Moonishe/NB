@@ -412,8 +412,11 @@ const Api = (() => {
 
     async function logout() {
         const client = getClient();
-        if (client) await client.auth.signOut();
-        clearStoredAuthSessions();
+        try {
+            if (client) await client.auth.signOut();
+        } finally {
+            clearStoredAuthSessions();
+        }
     }
 
     async function getSession() {

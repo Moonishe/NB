@@ -937,7 +937,7 @@ function decodeInviteAscii(code) {
 
 
 
-        return d.innerHTML.replace(/"/g, '&quot;');
+        return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 
 
@@ -1531,7 +1531,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const devRaw = localStorage.getItem('nb_dev_session');
+        const devRaw = isLocalhost() ? localStorage.getItem('nb_dev_session') : null;
 
 
 
@@ -2396,6 +2396,10 @@ function decodeInviteAscii(code) {
 
 
 
+        if (lockedAchIntervalId) clearInterval(lockedAchIntervalId);
+
+
+
         const els = Array.from(container.querySelectorAll('.ach-locked-title'));
 
 
@@ -2441,10 +2445,6 @@ function decodeInviteAscii(code) {
 
 
         tick();
-
-
-
-        if (lockedAchIntervalId) clearInterval(lockedAchIntervalId);
 
 
 
@@ -4304,6 +4304,10 @@ function decodeInviteAscii(code) {
 
 
 
+        if (lockedAchIntervalId) { clearInterval(lockedAchIntervalId); lockedAchIntervalId = null; }
+
+
+
         const container = document.getElementById('profile-tab-content');
 
 
@@ -4866,7 +4870,7 @@ function decodeInviteAscii(code) {
 
 
 
-                const rarityClass = `ach-rarity-${escapeHtml(a.rarity)}`;
+                const rarityClass = isSecret ? 'ach-rarity-secret' : `ach-rarity-${escapeHtml(a.rarity)}`;
 
 
 

@@ -243,4 +243,9 @@
     init();
     rafId = requestAnimationFrame(draw);
     window.addEventListener('beforeunload', function() { cancelAnimationFrame(rafId); });
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+            rafId = requestAnimationFrame(draw);
+        }
+    });
 })();

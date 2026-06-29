@@ -451,7 +451,7 @@
         if (!btn) return;
         localStorage.removeItem('nb_dev_session');
         if (typeof Api !== 'undefined' && Api.logout) {
-            Api.logout().then(() => { location.href = './'; });
+            Api.logout().then(() => { location.href = './'; }).catch(() => { location.href = './'; });
         } else {
             location.href = './';
         }
