@@ -237,31 +237,16 @@ const ForumModule = (() => {
 
 
 
-        // @mentions — link to profile if resolved
-
-
-
+        // @mentions — link to profile if resolved (skip inside <a>, <code>, <pre>)
         html = html.replace(/@([A-Za-z0-9_]{2,32})/g, (match, username) => {
-
-
-
+            if (match.includes('</a>') || match.includes('<code') || match.includes('<pre')) return match;
             const uid = usernameCache.get(username.toLowerCase());
-
-
-
             if (uid) return `<a href="${escapeHtml(window.getProfileHref(uid))}" class="forum-mention">@${username}</a>`;
-
-
-
             return `<span class="forum-mention">@${username}</span>`;
-
-
-
         });
 
-
-
-        html = html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="forum-link">$1</a>');
+        // Links — match URLs but stop at @ mentions already wrapped in spans/anchors
+        html = html.replace(/(https?:\/\/[^\s<@]+(?:@[^\s<]+)?)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="forum-link">$1</a>');
 
 
 

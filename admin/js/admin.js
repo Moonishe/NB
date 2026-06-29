@@ -1725,7 +1725,7 @@ const AdminApp = (() => {
         const list = document.getElementById('achievements-list');
         if (!list) return;
         try {
-            const achs = await Api.getAchievementsCatalog ? Api.getAchievementsCatalog().catch(() => []) : (achievementsCatalogData || []);
+            const achs = Api.getAchievementsCatalog ? await Api.getAchievementsCatalog().catch(() => []) : (achievementsCatalogData || []);
             if (achs.length === 0) {
                 list.innerHTML = '<p class="text-xs opacity-30 uppercase tracking-widest">Нет ачивок</p>';
                 return;
@@ -1826,7 +1826,7 @@ const AdminApp = (() => {
             } catch (err) { errEl.textContent = 'Ошибка входа: ' + err.message; errEl.classList.remove('hidden'); }
         });
 
-        document.getElementById('logout-btn').addEventListener('click', async () => { stopLiveLogs(); await Api.logout(); showAuth(); });
+        document.getElementById('logout-btn').addEventListener('click', async () => { stopLiveLogs(); try { await Api.logout(); } finally { showAuth(); } });
 
         document.querySelectorAll('.admin-nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {

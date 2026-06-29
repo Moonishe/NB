@@ -245,6 +245,7 @@
     window.addEventListener('beforeunload', function() { cancelAnimationFrame(rafId); });
     window.addEventListener('pageshow', function(e) {
         if (e.persisted) {
+            cancelAnimationFrame(rafId);
             rafId = requestAnimationFrame(draw);
         }
     });

@@ -1278,6 +1278,7 @@ const AuthApp = (() => {
         `;
         const refreshBtn = document.getElementById('tg-refresh-auth-btn');
         if (refreshBtn) {
+            refreshBtn.style.pointerEvents = 'auto';
             refreshBtn.addEventListener('click', () => {
                 hideError('auth-error');
                 resetTurnstile();
