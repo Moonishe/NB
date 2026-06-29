@@ -51,19 +51,11 @@
             width: 100% !important;
             height: 44px !important;
             opacity: 0 !important;
-            z-index: 3 !important;
+            z-index: 5 !important;
             cursor: pointer !important;
-            pointer-events: none !important;
+            pointer-events: auto !important;
             border: none !important;
             background: transparent !important;
-        }
-        .tg-widget-container.tg-auth-active iframe {
-            pointer-events: auto !important;
-            z-index: 5 !important;
-        }
-        .tg-widget-container.tg-auth-active .tg-custom-btn {
-            pointer-events: none;
-            opacity: 0.5;
         }
         .tg-custom-btn {
             position: relative;
@@ -116,7 +108,7 @@
             top: 50%;
             right: 8px;
             transform: translateY(-50%);
-            z-index: 6;
+            z-index: 10;
             display: inline-flex;
             align-items: center;
             justify-content: center;
