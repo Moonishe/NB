@@ -168,7 +168,7 @@ const AdminApp = (() => {
     function escapeHtml(str) {
         const d = document.createElement('div');
         d.textContent = str;
-        return d.innerHTML.replace(/"/g, '&quot;');
+        return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function escapeJs(str) {
@@ -1077,7 +1077,7 @@ const AdminApp = (() => {
             const displayName = name
                 ? [name.telegram_first_name, name.telegram_last_name].filter(Boolean).join(' ') || name.username || name.telegram_username || '—'
                 : '—';
-            const tgLabel = (m.telegram_username || (name && (name.username || name.telegram_username))) ? `@${escapeHtml(m.telegram_username || (name ? (name.username || name.telegram_username) : ''))}` : `ID: ${escapeHtml(m.telegram_id || '').slice(0, 10)}...`;
+            const tgLabel = (m.telegram_username || (name && (name.username || name.telegram_username))) ? `@${escapeHtml(m.telegram_username || (name ? (name.username || name.telegram_username) : ''))}` : `ID: ${escapeHtml((m.telegram_id || '').slice(0, 10))}...`;
             const assignedAt = m.created_at ? new Date(m.created_at).toLocaleDateString('ru') : '—';
             return `
                 <div class="admin-prompt-card flex justify-between items-start gap-4">
@@ -1468,10 +1468,14 @@ const AdminApp = (() => {
 
     function startLiveLogs() {
         if (liveLogsInterval) return;
-        const console = document.getElementById('live-logs-console');
-        if (!console) return;
-        console.innerHTML = '';
+        const logConsole = document.getElementById('live-logs-console');
+        if (!logConsole) return;
+        logConsole.innerHTML = '';
         addLogEntry('system', 'Подключение к логам...');
+
+        // Замыкание: lastSeenUserId сохраняется между тиками интервала
+        let lastSeenUserId = null;
+        let initialized = false;
 
         // Poll for recent activity every 5s
         liveLogsInterval = setInterval(async () => {
@@ -1479,8 +1483,18 @@ const AdminApp = (() => {
                 const profiles = await Api.adminGetProfiles().catch(() => []);
                 if (profiles.length > 0) {
                     const latest = profiles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+                    if (!latest) return;
+                    // Первый тик: инициализируем lastSeenUserId без записи в лог
+                    if (!initialized) {
+                        lastSeenUserId = latest.id;
+                        initialized = true;
+                        return;
+                    }
+                    // Пропускаем уже виденного пользователя — подавляем спам
+                    if (lastSeenUserId === latest.id) return;
                     const name = [latest.telegram_first_name, latest.telegram_last_name].filter(Boolean).join(' ') || latest.username || latest.telegram_username;
                     if (name) addLogEntry('auth', `${name} — новый пользователь`);
+                    lastSeenUserId = latest.id;
                 }
             } catch {}
         }, 5000);
@@ -1491,8 +1505,8 @@ const AdminApp = (() => {
     }
 
     function addLogEntry(type, text) {
-        const console = document.getElementById('live-logs-console');
-        if (!console) return;
+        const logConsole = document.getElementById('live-logs-console');
+        if (!logConsole) return;
         if (currentLogFilter !== 'all' && type !== currentLogFilter) return;
         const now = new Date();
         const time = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
@@ -1506,8 +1520,8 @@ const AdminApp = (() => {
         textEl.className = `log-type-${safeType}`;
         textEl.textContent = ` ${text}`;
         entry.append(timeEl, textEl);
-        console.appendChild(entry);
-        console.scrollTop = console.scrollHeight;
+        logConsole.appendChild(entry);
+        logConsole.scrollTop = logConsole.scrollHeight;
     }
 
     // ========== MODERATION ==========

@@ -59,6 +59,8 @@ const Api = (() => {
     }
 
     function hasStoredSupabaseSession() {
+        if (localStorage.getItem('neurobench-auth')) return true;
+        if (localStorage.getItem('neurobench-admin-auth')) return true;
         if (sessionStorage.getItem('neurobench-auth')) return true;
         if (sessionStorage.getItem('neurobench-admin-auth')) return true;
         return false;
@@ -68,7 +70,11 @@ const Api = (() => {
         const storageKey = getSupabaseAuthStorageKey();
         sessionStorage.removeItem('neurobench-auth');
         sessionStorage.removeItem('neurobench-admin-auth');
+        localStorage.removeItem('neurobench-auth');
         localStorage.removeItem('neurobench-admin-auth');
+        localStorage.removeItem('nb_auth_cache');
+        localStorage.removeItem('nb_dev_session');
+        sessionStorage.removeItem('nb_dev_session');
         if (storageKey) localStorage.removeItem(storageKey);
     }
 
@@ -718,8 +724,9 @@ const Api = (() => {
             result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Delete failed');
         } catch (e) {
-            if (e.message && !e.message.includes('подключиться')) throw e;
-            throw new Error('Не удалось подключиться к серверу. Проверьте что Edge Function admin-action задеплоена в Supabase Dashboard.');
+            if (e.name === 'AbortError') throw e;
+            if (e instanceof TypeError) throw new Error('Не удалось подключиться к серверу. Проверьте что Edge Function admin-action задеплоена в Supabase Dashboard.');
+            throw e;
         }
         return result;
     }
@@ -776,6 +783,17 @@ const Api = (() => {
         });
         if (error) throw error;
         return data || 0;
+    }
+
+    async function getForumTotalPostsCount() {
+        const client = getClient();
+        if (!client) return 0;
+        const { count, error } = await client
+            .from('forum_posts')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_deleted', false);
+        if (error) throw error;
+        return count || 0;
     }
 
     async function getForumThread(threadId) {
@@ -1246,7 +1264,7 @@ const Api = (() => {
         adminUpdateUserProfile, adminGenerateInviteForUser, adminGetUserDetail,
         requestUsernameChange, adminApproveUsername,
         getForumCategories, getForumThreads, getForumThreadsCount,
-        getForumThreadPosts, getForumThreadPostsCount, getForumThread,
+        getForumThreadPosts, getForumThreadPostsCount, getForumTotalPostsCount, getForumThread,
         createForumThread, createForumPost, updateForumPost, updateForumThread,
         modPinThread, modLockThread, modDeleteThread, modDeletePost,
         modBanUser, modMuteUser, modUnbanUser, modUnmuteUser,

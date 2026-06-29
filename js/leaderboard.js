@@ -9,6 +9,7 @@ const LeaderboardModule = (() => {
     let currentTop = 'all';
     let currentSort = 'score';
     let resultsData = [];
+    let loadSeq = 0;
     let allModelsCount = 0;
     let searchQuery = '';
     let barObserver = null;
@@ -178,6 +179,7 @@ const LeaderboardModule = (() => {
     }
 
     async function selectPrompt(promptId) {
+        const seq = ++loadSeq;
         currentPromptId = promptId;
         document.querySelectorAll('#prompt-filters .top-filter-btn').forEach(b => {
             const bid = isNaN(b.getAttribute('data-prompt-id')) ? b.getAttribute('data-prompt-id') : parseInt(b.getAttribute('data-prompt-id'));
@@ -200,8 +202,10 @@ const LeaderboardModule = (() => {
         }
         _autoRefreshTimer = setInterval(async () => {
             if (document.hidden || !currentPromptId) return;
+            const seq = ++loadSeq;
             try {
                 const fresh = await Api.getResultsByPrompt(currentPromptId);
+                if (seq !== loadSeq) return;
                 const prevIds = new Set(resultsData.map(r => r.id));
                 const hasNew = fresh.some(r => !prevIds.has(r.id));
                 const hasChanges = hasNew || fresh.some(r => {
@@ -218,15 +222,19 @@ const LeaderboardModule = (() => {
 
     async function loadResults() {
         if (!currentPromptId) { clearBenchmarkList(); showEmptyState(); return; }
+        const seq = ++loadSeq;
         showLoading();
         hideError();
         try {
-            resultsData = await Api.getResultsByPrompt(currentPromptId);
+            const fresh = await Api.getResultsByPrompt(currentPromptId);
+            if (seq !== loadSeq) return;
+            resultsData = fresh;
             const resultIds = resultsData.map(r => r.id);
             const [stats, entries] = await Promise.all([
                 Api.getResultRatingStats(resultIds),
                 Api.getResultRatingEntries ? Api.getResultRatingEntries(resultIds, 8) : []
             ]);
+            if (seq !== loadSeq) return;
             ratingStats = new Map((stats || []).map(s => [Number(s.result_id), s]));
             ratingEntries = new Map();
             (entries || []).forEach(entry => {
@@ -260,6 +268,7 @@ const LeaderboardModule = (() => {
                 });
             }
         } catch (e) {
+            if (seq !== loadSeq) return;
             resultsData = [];
             ratingStats = new Map();
             ratingEntries = new Map();
@@ -267,9 +276,11 @@ const LeaderboardModule = (() => {
             showError('Не удалось загрузить результаты. Попробуйте позже.');
             return;
         }
+        if (seq !== loadSeq) return;
         hideLoading();
         renderBenchmarkList();
         hideEmptyState();
+        startAutoRefresh();
     }
 
     function selectTop(count) {
@@ -350,7 +361,7 @@ const LeaderboardModule = (() => {
     function escapeHtml(str) {
         const d = document.createElement('div');
         d.textContent = str;
-        return d.innerHTML.replace(/"/g, '&quot;');
+        return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function formatScore(score) {
@@ -403,7 +414,7 @@ const LeaderboardModule = (() => {
                     <small>твоя</small>
                 </div>` : '';
         return `
-            <div class="benchmark-score-split" data-result-id="${result.id}">
+            <div class="benchmark-score-split" data-result-id="${escapeHtml(result.id)}">
                 <div class="benchmark-score-pill benchmark-score-admin">
                     <span class="score-pill-value" data-raw="${meta.adminScore}">0</span>
                     <small>admin</small>
@@ -422,7 +433,7 @@ const LeaderboardModule = (() => {
         const authClass = requiresAuth ? ' benchmark-rate-cta-auth' : '';
         return `
             <div class="benchmark-left-rating">
-                <button class="benchmark-rate-cta${authClass}" type="button" data-result-id="${resultId}" data-requires-auth="${requiresAuth ? 'true' : 'false'}">
+                <button class="benchmark-rate-cta${authClass}" type="button" data-result-id="${escapeHtml(resultId)}" data-requires-auth="${requiresAuth ? 'true' : 'false'}">
                     <span class="rate-cta-label" aria-label="${label}">
                         ${label.split('').map((ch, idx) => `<span class="rate-cta-char" data-char="${ch}" style="--i:${idx}">${ch}</span>`).join('')}
                     </span>
@@ -469,7 +480,7 @@ const LeaderboardModule = (() => {
                     <span class="rating-head-decode criteria-decode" data-name="${headLabel}">${headLabel}</span>
                     ${attemptsHtml}
                 </div>
-                <form class="benchmark-rate-form" data-result-id="${result.id}" data-update-count="${updateCount}" data-locked="${isLocked ? 'true' : 'false'}">
+                <form class="benchmark-rate-form" data-result-id="${escapeHtml(result.id)}" data-update-count="${updateCount}" data-locked="${isLocked ? 'true' : 'false'}">
                     <div class="benchmark-rate-row">${ratingRows}</div>
                     ${submitHtml}
                 </form>
@@ -894,7 +905,7 @@ const LeaderboardModule = (() => {
             const scoreMeta = getScoreMeta(result);
             const scoreSplitHtml = renderScoreSplit(result, scoreMeta);
             const ratingFormHtml = renderRatingForm(result, scoreMeta);
-            const formulaId = `formula-popover-${result.id}`;
+            const formulaId = `formula-popover-${escapeHtml(result.id)}`;
 
             const card = document.createElement('div');
             card.className = `matte-card p-4 sm:p-8 border border-border hover:border-white/50 transition-colors duration-300 flex flex-col bg-surface benchmark-card group${podiumCardClass}`;
@@ -1030,7 +1041,6 @@ const LeaderboardModule = (() => {
         }, { rootMargin: '200px 0px', threshold: 0.01 });
         document.querySelectorAll('.benchmark-card').forEach(card => barObserver.observe(card));
         attachRatingHandlers();
-        startAutoRefresh();
         document.querySelectorAll('.rating-entries-toggle').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();

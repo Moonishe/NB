@@ -355,11 +355,11 @@ Deno.serve(async (req: Request) => {
     if (existingUserId) {
       const { data: sessionData, error: sessionError } = await anonClient.auth.signInWithPassword({ email, password })
 
-      if (sessionError) {
+      if (sessionError || !sessionData?.session) {
         await adminClient.auth.admin.updateUserById(existingUserId, { password })
         const retry = await anonClient.auth.signInWithPassword({ email, password })
-        if (retry.error) {
-          console.error('telegram-auth session retry failed', retry.error)
+        if (retry.error || !retry.data?.session) {
+          console.error('telegram-auth session retry failed', retry.error ?? 'No session returned')
           return jsonResponse({ error: 'Internal server error' }, 500)
         }
         await adminClient
@@ -490,22 +490,29 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Инвайт-код недействителен или уже использован' }, 400)
     }
 
-    await adminClient
-      .from('profiles')
-      .upsert({
-        user_id: targetUserId,
-        email,
-        is_verified: false,
-        telegram_id: telegramId,
-        ...tgProfile,
-        used_invite_code_id: inviteId,
-        pending_invite_code: null,
-      }, { onConflict: 'user_id' })
+    try {
+      await adminClient
+        .from('profiles')
+        .upsert({
+          user_id: targetUserId,
+          email,
+          is_verified: false,
+          telegram_id: telegramId,
+          ...tgProfile,
+          used_invite_code_id: inviteId,
+          pending_invite_code: null,
+        }, { onConflict: 'user_id' })
+    } catch (profileUpsertErr) {
+      // Claim succeeded but profile update failed — return a clear error
+      // so the client knows the registration is incomplete.
+      console.error('telegram-auth final profile upsert failed', profileUpsertErr)
+      return jsonResponse({ error: 'Registration incomplete: profile update failed after invite claim' }, 500)
+    }
 
     const { data: sessionData, error: sessionError } = await anonClient.auth.signInWithPassword({ email, password })
 
-    if (sessionError || !sessionData) {
-      console.error('telegram-auth initial session creation failed', sessionError)
+    if (sessionError || !sessionData?.session) {
+      console.error('telegram-auth initial session creation failed', sessionError ?? 'No session returned')
       return jsonResponse({ error: 'Internal server error' }, 500)
     }
 

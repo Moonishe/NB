@@ -128,6 +128,12 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Missing action or user_id' }, 400)
     }
 
+    // Validate user_id is a proper UUID before using it in any query
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (typeof user_id !== 'string' || !UUID_RE.test(user_id)) {
+      return jsonResponse({ error: 'Invalid user_id format' }, 400)
+    }
+
     if (action === 'delete_user') {
       if (user_id === adminId) {
         return jsonResponse({ error: 'Cannot delete yourself' }, 400)
@@ -151,6 +157,18 @@ Deno.serve(async (req: Request) => {
 
       if (!profile) {
         return jsonResponse({ error: 'User not found' }, 404)
+      }
+
+      // Write audit log BEFORE deletion so the intent is recorded even
+      // if the delete call itself fails or the Edge Function crashes.
+      const { error: auditError } = await adminClient.from('admin_actions').insert({
+        actor_id: adminId,
+        action: 'delete_user',
+        target_id: user_id,
+        created_at: new Date().toISOString(),
+      })
+      if (auditError) {
+        console.error('admin-action audit log insert failed', { user_id, error: auditError })
       }
 
       const { error: deleteError } = await adminClient.auth.admin.deleteUser(user_id)
@@ -188,13 +206,6 @@ Deno.serve(async (req: Request) => {
           console.error('admin-action post-delete cleanup threw', { user_id, step: step.label, error })
         }
       }
-
-      await adminClient.from('admin_actions').insert({
-        actor_id: adminId,
-        action: 'delete_user',
-        target_id: user_id,
-        created_at: new Date().toISOString(),
-      })
 
       return jsonResponse({ success: true })
     }

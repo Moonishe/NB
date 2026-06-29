@@ -1,22 +1,25 @@
 async function trackVisit() {
     try {
+        const TTL = 60 * 60 * 1000; // 1 час
+        const cached = localStorage.getItem('nb_visit_tracked');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (parsed && parsed.ts && (Date.now() - parsed.ts < TTL)) return;
+            } catch {}
+        }
         const ua = navigator.userAgent || '';
         const screenInfo = screen.width + 'x' + screen.height;
         const raw = ua + screenInfo + navigator.language;
         const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const visitorHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
-        const stored = sessionStorage.getItem('nb_tracked');
-        if (stored) return;
         await Api.trackPageView(visitorHash, window.location.pathname, document.referrer || null);
-        sessionStorage.setItem('nb_tracked', '1');
+        localStorage.setItem('nb_visit_tracked', JSON.stringify({ ts: Date.now() }));
     } catch {}
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    if (typeof LeaderboardModule !== 'undefined') {
-        await LeaderboardModule.load();
-    }
     trackVisit();
 
     const searchInput = document.getElementById('model-search');
@@ -44,19 +47,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const cached = sessionStorage.getItem('nb_gh_sha');
-        if (cached) {
-            const shaEl = document.getElementById('commit-sha');
-            if (shaEl) shaEl.textContent = cached;
+        const TTL = 60 * 60 * 1000; // 1 час
+        let cachedSha = null;
+        const cachedRaw = localStorage.getItem('nb_github_sha');
+        if (cachedRaw) {
+            try {
+                const parsed = JSON.parse(cachedRaw);
+                if (parsed && parsed.sha && parsed.ts && (Date.now() - parsed.ts < TTL)) cachedSha = parsed.sha;
+            } catch {}
         }
-        const resp = await fetch('https://api.github.com/repos/Moonishe/NB/commits?per_page=1');
-        if (!resp.ok) throw new Error('GitHub API ' + resp.status);
-        const data = await resp.json();
-        if (data && data[0] && data[0].sha) {
-            const sha = data[0].sha.slice(0, 7);
-            sessionStorage.setItem('nb_gh_sha', sha);
+        if (cachedSha) {
             const shaEl = document.getElementById('commit-sha');
-            if (shaEl) shaEl.textContent = sha;
+            if (shaEl) shaEl.textContent = cachedSha;
+        } else {
+            const resp = await fetch('https://api.github.com/repos/Moonishe/NB/commits?per_page=1');
+            if (!resp.ok) throw new Error('GitHub API ' + resp.status);
+            const data = await resp.json();
+            if (data && data[0] && data[0].sha) {
+                const sha = data[0].sha.slice(0, 7);
+                localStorage.setItem('nb_github_sha', JSON.stringify({ sha, ts: Date.now() }));
+                const shaEl = document.getElementById('commit-sha');
+                if (shaEl) shaEl.textContent = sha;
+            }
         }
     } catch {}
 
@@ -69,4 +81,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll('.date-chevron.rotate-180').forEach(c => c.classList.remove('rotate-180'));
         }
     });
+
+    if (typeof LeaderboardModule !== 'undefined') {
+        LeaderboardModule.load();
+    }
 });

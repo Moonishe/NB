@@ -45,7 +45,7 @@
     }
 
     const supabaseAuthStorageKey = getSupabaseAuthStorageKey();
-    const hasSession = !!((isLocal && localStorage.getItem('nb_dev_session')) || (supabaseAuthStorageKey && localStorage.getItem(supabaseAuthStorageKey)));
+    const hasSession = !!((isLocal && localStorage.getItem('nb_dev_session')) || localStorage.getItem('neurobench-auth') || (supabaseAuthStorageKey && localStorage.getItem(supabaseAuthStorageKey)));
 
     const html = `
     <nav class="fixed top-8 w-full z-[100] px-4 md:px-6 font-sans" id="main-navbar">
@@ -221,6 +221,11 @@
                 mobileBtn.focus({ preventScroll: true });
             }
         });
+        document.addEventListener('click', function(e) {
+            if (mobileMenu.classList.contains('hidden')) return;
+            if (mobileBtn.contains(e.target) || mobileMenu.contains(e.target)) return;
+            toggleMobileMenu(false);
+        });
     }
 
     function toggleMobileMenu(shouldOpen) {
@@ -355,6 +360,10 @@
         });
     }
 
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && dropdownOpen) closeDropdown();
+    });
+
     // --- User menu init (works on all pages) ---
     const authLink = document.getElementById('nav-auth-link');
     const mobileAuthLink = document.getElementById('mobile-nav-auth-link');
@@ -382,6 +391,16 @@
         initNotifications();
     }
 
+    function hideUserMenu() {
+        if (userMenuWrap) userMenuWrap.classList.add('hidden');
+        const notifWrap = document.getElementById('nav-notif-wrap');
+        if (notifWrap) notifWrap.classList.add('hidden');
+        if (authLink) { authLink.classList.remove('hidden'); authLink.style.display = ''; }
+        if (mobileAuthLink) { mobileAuthLink.classList.remove('hidden'); mobileAuthLink.style.display = ''; }
+        const adminShortcut = document.getElementById('nav-admin-shortcut');
+        if (adminShortcut) adminShortcut.classList.add('hidden');
+    }
+
     async function initUser() {
         if (isLocal) {
             const devRaw = localStorage.getItem('nb_dev_session');
@@ -398,7 +417,7 @@
         if (typeof Api === 'undefined' || !Api.getSession) return;
         try {
             const session = await Api.getSession();
-            if (!session) return;
+            if (!session) { hideUserMenu(); return; }
             const info = await Api.getUserDisplayName();
             if (!info) return;
             const name = window.safeDisplayName(info) || 'User';
@@ -545,6 +564,10 @@
             closeNotifDrop();
         }
     }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && notifDropOpen) closeNotifDrop();
+    });
 
     const NOTIF_EMOJI_MAP = {
         like: '\uD83D\uDC4D', dislike: '\uD83D\uDC4E', fire: '\uD83D\uDD25',

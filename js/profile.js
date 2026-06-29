@@ -35,6 +35,10 @@ const ProfileModule = (() => {
 
 
 
+    let lockedAchIntervalId = null;
+
+
+
     let userAchievements = [];
 
 
@@ -921,7 +925,7 @@ function decodeInviteAscii(code) {
 
 
 
-        if (!str) return '';
+        if (str === null || str === undefined || str === '') return '';
 
 
 
@@ -1399,15 +1403,15 @@ function decodeInviteAscii(code) {
 
 
 
-        const day = String(d.getDate()).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
 
 
 
-        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
 
 
 
-        return `${day}.${month}.${d.getFullYear()}`;
+        return `${day}.${month}.${d.getUTCFullYear()}`;
 
 
 
@@ -2440,7 +2444,11 @@ function decodeInviteAscii(code) {
 
 
 
-        setInterval(tick, 140);
+        if (lockedAchIntervalId) clearInterval(lockedAchIntervalId);
+
+
+
+        lockedAchIntervalId = setInterval(tick, 140);
 
 
 
@@ -2696,7 +2704,7 @@ function decodeInviteAscii(code) {
 
 
 
-        const levelInfo = getLevelInfo(score);
+        const levelInfo = getLevelInfo(score + Number(profileData.achievement_points || 0));
 
 
 
@@ -2819,7 +2827,7 @@ function decodeInviteAscii(code) {
 
 
 
-                return `<div class="profile-showcase-item ${rarityClass}" data-title="${escapeHtml(a.title)}" data-rarity="${a.rarity}">
+                return `<div class="profile-showcase-item ${rarityClass}" data-title="${escapeHtml(a.title)}" data-rarity="${escapeHtml(a.rarity)}">
 
 
 
@@ -4822,19 +4830,19 @@ function decodeInviteAscii(code) {
 
 
 
-                const isSecret = isLocked;
+                const isSecret = isLocked && a.is_secret;
 
 
 
-                const displayTitle = isLocked ? getLockedAchievementTitle(a.id) : escapeHtml(a.title);
+                const displayTitle = isSecret ? getLockedAchievementTitle(a.id) : escapeHtml(a.title);
 
 
 
-                const displayDescription = isLocked ? '' : escapeHtml(a.description);
+                const displayDescription = isSecret ? '' : escapeHtml(a.description);
 
 
 
-                const displayRarity = isLocked ? '' : `<span class="ach-rarity-badge ach-rarity-${a.rarity}">${a.rarity}</span>`;
+                const displayRarity = isSecret ? '' : `<span class="ach-rarity-badge ach-rarity-${escapeHtml(a.rarity)}">${escapeHtml(a.rarity)}</span>`;
 
 
 
@@ -4858,7 +4866,7 @@ function decodeInviteAscii(code) {
 
 
 
-                const rarityClass = `ach-rarity-${a.rarity}`;
+                const rarityClass = `ach-rarity-${escapeHtml(a.rarity)}`;
 
 
 
@@ -4922,7 +4930,7 @@ function decodeInviteAscii(code) {
 
 
 
-                            <span class="ach-title ${isLocked ? 'ach-locked-title' : ''}" ${isLocked ? `data-locked-len="${displayTitle.length}"` : ''}>${displayTitle}</span>
+                            <span class="ach-title ${isSecret ? 'ach-locked-title' : ''}" ${isSecret ? `data-locked-len="${displayTitle.length}"` : ''}>${displayTitle}</span>
 
 
 
@@ -5254,7 +5262,7 @@ function decodeInviteAscii(code) {
 
 
 
-                else if (type === 'reaction') { icon = item.emoji || '👍'; actionText = 'Поставил реакцию'; href = `forum#thread/${item.thread_id}`; }
+                else if (type === 'reaction') { icon = escapeHtml(item.emoji || '👍'); actionText = 'Поставил реакцию'; href = `forum#thread/${item.thread_id}`; }
 
 
 
