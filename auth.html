@@ -79,7 +79,7 @@
             outline: none;
             overflow: hidden;
         }
-        .tg-widget-container:hover .tg-custom-btn:not(:has(.tg-reset-box:hover)) {
+        .tg-widget-container:hover:not(:has(.tg-reset-box:hover)) .tg-custom-btn {
             border-color: rgba(84,169,235,0.55);
             color: rgba(255,255,255,0.92);
             background: rgba(84,169,235,0.08);
@@ -110,6 +110,7 @@
             right: 8px;
             transform: translateY(-50%);
             z-index: 10;
+            pointer-events: auto;
             display: inline-flex;
             align-items: center;
             justify-content: center;
