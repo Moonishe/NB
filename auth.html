@@ -79,9 +79,7 @@
             outline: none;
             overflow: hidden;
         }
-        /* Главный hover-эффект кнопки — НЕ применяется когда ховер на reset-боксе внутри.
-           :has() поддерживается во всех современных браузерах (Chrome 105+, Safari 15.4+, FF 121+). */
-        .tg-custom-btn:hover:not(:has(.tg-reset-box:hover)) {
+        .tg-widget-container:hover .tg-custom-btn:not(:has(.tg-reset-box:hover)) {
             border-color: rgba(84,169,235,0.55);
             color: rgba(255,255,255,0.92);
             background: rgba(84,169,235,0.08);
@@ -89,7 +87,9 @@
             letter-spacing: 0.2em;
             transform: translateY(-1px);
         }
-        .tg-custom-btn:active:not(:has(.tg-reset-box:active)) {
+        /* Главный hover-эффект кнопки — НЕ применяется когда ховер на reset-боксе внутри.
+           :has() поддерживается во всех современных браузерах (Chrome 105+, Safari 15.4+, FF 121+). */
+        .tg-widget-container:active .tg-custom-btn:not(:has(.tg-reset-box:active)) {
             transform: scale(0.97) translateY(0);
             border-color: rgba(84,169,235,0.7);
             box-shadow: inset 0 0 0 1px rgba(84,169,235,0.12), 0 0 30px rgba(84,169,235,0.1);
