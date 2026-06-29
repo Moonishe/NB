@@ -1683,8 +1683,15 @@ const AuthApp = (() => {
         Api.reinit();
 
 
-window.onTelegramAuth = handleTelegramAuth;
-initTelegramWidget();
+        window.onTelegramAuth = handleTelegramAuth;
+        initTelegramWidget();
+
+        if (window.TURNSTILE_SITE_KEY) {
+            ensureTurnstileScript();
+            if (window._turnstileReady) {
+                renderTurnstile(false);
+            }
+        }
 
 const devBtn = document.getElementById('dev-login-btn');
 
