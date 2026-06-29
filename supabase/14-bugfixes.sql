@@ -343,7 +343,7 @@ BEGIN
         RETURN false;
     END IF;
 
-    -- Rate limiting: max 1 claim attempt per minute
+    -- Rate limiting: max 1 claim attempt per minute (check BEFORE attempt)
     IF EXISTS (
         SELECT 1
         FROM public.user_action_events
@@ -354,11 +354,13 @@ BEGIN
         RAISE EXCEPTION 'Rate limit: please wait before claiming another invite code';
     END IF;
 
+    -- Record attempt BEFORE calling claim — prevents brute-force even on failures
+    INSERT INTO public.user_action_events (user_id, action_type)
+    VALUES (v_user_id, 'invite_claim');
+
     v_result := public._claim_invite_code_for_user(p_code, v_user_id);
 
     IF v_result IS NOT NULL THEN
-        INSERT INTO public.user_action_events (user_id, action_type)
-        VALUES (v_user_id, 'invite_claim');
         RETURN true;
     END IF;
 

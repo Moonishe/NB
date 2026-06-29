@@ -1486,15 +1486,15 @@ const AdminApp = (() => {
                     if (!latest) return;
                     // Первый тик: инициализируем lastSeenUserId без записи в лог
                     if (!initialized) {
-                        lastSeenUserId = latest.id;
+                        lastSeenUserId = latest.user_id;
                         initialized = true;
                         return;
                     }
                     // Пропускаем уже виденного пользователя — подавляем спам
-                    if (lastSeenUserId === latest.id) return;
+                    if (lastSeenUserId === latest.user_id) return;
                     const name = [latest.telegram_first_name, latest.telegram_last_name].filter(Boolean).join(' ') || latest.username || latest.telegram_username;
                     if (name) addLogEntry('auth', `${name} — новый пользователь`);
-                    lastSeenUserId = latest.id;
+                    lastSeenUserId = latest.user_id;
                 }
             } catch {}
         }, 5000);

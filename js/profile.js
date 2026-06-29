@@ -2823,7 +2823,7 @@ function decodeInviteAscii(code) {
 
 
 
-                const rarityClass = `profile-showcase-item-${a.rarity}`;
+                const rarityClass = `profile-showcase-item-${escapeHtml(a.rarity)}`;
 
 
 

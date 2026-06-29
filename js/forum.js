@@ -68,6 +68,8 @@ const ForumModule = (() => {
 
     let renderSeq = 0;
 
+    let resizeHandler = null;
+
 
 
     const profileCache = new Map();
@@ -549,6 +551,7 @@ const ForumModule = (() => {
 
         stopStatsPoll();
 
+        if (resizeHandler) { window.removeEventListener('resize', resizeHandler); resizeHandler = null; }
         clearTimeout(popoverTimeout);
         if (popoverEl) { popoverEl.remove(); popoverEl = null; }
         const overlay = document.getElementById('forum-modal-overlay');
@@ -762,14 +765,16 @@ const ForumModule = (() => {
             const active = rail.querySelector('.forum-cat-btn.active');
             if (active) movePillTo(active, false);
         });
+        if (resizeHandler) window.removeEventListener('resize', resizeHandler);
         let resizeTimer = null;
-        window.addEventListener('resize', () => {
+        resizeHandler = () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 const active = rail.querySelector('.forum-cat-btn.active');
                 if (active) movePillTo(active, false);
             }, 150);
-        });
+        };
+        window.addEventListener('resize', resizeHandler);
     }
 
     function movePillTo(targetBtn, animate) {
@@ -1318,7 +1323,7 @@ const ForumModule = (() => {
 
             await resolvePostMentions([thread, ...posts]);
 
-
+            if (seq !== renderSeq) return;
 
 
 
